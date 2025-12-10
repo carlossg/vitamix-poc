@@ -87,12 +87,13 @@ body:has(.recommender-hero) {
 
 /* Form styles */
 .recommender-hero-form {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
 .recommender-hero-input-wrapper {
   display: flex;
+  flex-direction: column;
   gap: 0;
   background: #fff;
   border-radius: 4px;
@@ -100,17 +101,22 @@ body:has(.recommender-hero) {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-.recommender-hero input[type="text"] {
-  flex: 1;
-  padding: 18px 24px;
-  font-size: 18px;
+.recommender-hero textarea {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
   border: none;
   outline: none;
   background: transparent;
   color: #333;
+  resize: none;
+  min-height: 80px;
+  box-sizing: border-box;
 }
 
-.recommender-hero input[type="text"]::placeholder {
+.recommender-hero textarea::placeholder {
   color: #888;
 }
 
@@ -152,14 +158,10 @@ body:has(.recommender-hero) {
     padding: var(--spacing-lg);
   }
 
-  .recommender-hero-input-wrapper {
-    flex-direction: column;
-  }
-
-  .recommender-hero input[type="text"] {
-    padding: 16px 20px;
-    font-size: 16px;
-    text-align: center;
+  .recommender-hero textarea {
+    padding: 14px 16px;
+    font-size: 14px;
+    min-height: 100px;
   }
 
   .recommender-hero button[type="submit"] {

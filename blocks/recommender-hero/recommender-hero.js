@@ -22,12 +22,12 @@
 function handleSubmit(event, form) {
   event.preventDefault();
 
-  const input = form.querySelector('input[type="text"]');
+  const textarea = form.querySelector('textarea');
   const submitButton = form.querySelector('button[type="submit"]');
-  const query = input.value.trim();
+  const query = textarea.value.trim();
 
   if (!query) {
-    input.focus();
+    textarea.focus();
     return;
   }
 
@@ -114,13 +114,13 @@ export default function decorate(block) {
   form.className = 'recommender-hero-form';
   form.innerHTML = `
     <div class="recommender-hero-input-wrapper">
-      <input
-        type="text"
+      <textarea
         name="query"
         placeholder="${placeholder}"
         autocomplete="off"
         required
-      />
+        rows="3"
+      ></textarea>
       <button type="submit" class="button primary">
         ${buttonText}
       </button>
@@ -138,9 +138,9 @@ export default function decorate(block) {
   // Set up form submission
   form.addEventListener('submit', (event) => handleSubmit(event, form));
 
-  // Focus input after a short delay
+  // Focus textarea after a short delay
   setTimeout(() => {
-    const input = form.querySelector('input[type="text"]');
-    input.focus();
+    const textarea = form.querySelector('textarea');
+    textarea.focus();
   }, 100);
 }
