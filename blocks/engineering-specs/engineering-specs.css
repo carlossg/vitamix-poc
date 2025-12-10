@@ -1,0 +1,167 @@
+/* Engineering Specs Block Styles */
+
+.engineering-specs {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 2rem auto;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+}
+
+.engineering-specs-header {
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #1f2937;
+  padding-bottom: 1rem;
+}
+
+.engineering-specs-icon {
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.engineering-specs-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.engineering-specs-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  font-family: inherit;
+}
+
+.engineering-specs-subtitle {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0.5rem 0 0;
+  font-style: italic;
+}
+
+.engineering-specs-table {
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.spec-row {
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+}
+
+.spec-row:last-child {
+  border-bottom: none;
+}
+
+.spec-row:nth-child(even) {
+  background: #fff;
+}
+
+.spec-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.spec-value {
+  color: #1f2937;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.spec-notes {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.engineering-methodology {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.engineering-methodology h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.engineering-methodology ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.engineering-methodology li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.engineering-methodology li:last-child {
+  margin-bottom: 0;
+}
+
+.engineering-methodology strong {
+  color: #374151;
+}
+
+.engineering-download {
+  text-align: center;
+}
+
+.download-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid #2563eb;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.download-link:hover {
+  background: #2563eb;
+  color: white;
+}
+
+.download-link svg {
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .engineering-specs {
+    padding: 1rem;
+  }
+
+  .spec-row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .spec-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+
+  .spec-notes {
+    margin-top: 0.25rem;
+  }
+}

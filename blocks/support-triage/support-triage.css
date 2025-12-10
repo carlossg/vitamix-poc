@@ -1,0 +1,212 @@
+/* Support Triage Block Styles */
+
+.support-triage {
+  padding: 2rem;
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.support-triage-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #4a90d9;
+}
+
+.support-triage-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.support-triage-icon {
+  color: #4a90d9;
+  flex-shrink: 0;
+}
+
+.support-triage-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.support-triage-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.support-triage-empathy {
+  margin-bottom: 1.5rem;
+}
+
+.support-triage-issue {
+  display: inline-block;
+  background: #e8f2fc;
+  color: #2563eb;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  margin-bottom: 0.75rem;
+}
+
+.support-triage-message {
+  font-size: 1.1rem;
+  color: #444;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.support-triage-resolution {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.resolution-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #22c55e;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.support-triage-resolution span:last-child {
+  color: #166534;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.support-triage-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.support-triage-cta {
+  flex: 1;
+  min-width: 180px;
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.support-triage-cta.primary {
+  background: #4a90d9;
+  color: white;
+}
+
+.support-triage-cta.primary:hover {
+  background: #3b7dc4;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 217, 0.3);
+}
+
+.support-triage-cta.secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.support-triage-cta.secondary:hover {
+  background: #e2e8f0;
+}
+
+.support-triage-troubleshoot {
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.troubleshoot-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0.75rem 0;
+  font-size: 0.95rem;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.troubleshoot-toggle:hover {
+  color: #4a90d9;
+}
+
+.toggle-arrow {
+  transition: transform 0.2s ease;
+}
+
+.troubleshoot-content {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+}
+
+.troubleshoot-content ol,
+.troubleshoot-content ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.troubleshoot-content li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.troubleshoot-content li:last-child {
+  margin-bottom: 0;
+}
+
+.support-triage-note {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .support-triage {
+    padding: 1rem;
+  }
+
+  .support-triage-card {
+    padding: 1.5rem;
+  }
+
+  .support-triage-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .support-triage-actions {
+    flex-direction: column;
+  }
+
+  .support-triage-cta {
+    min-width: 100%;
+  }
+}

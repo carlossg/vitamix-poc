@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Noise Context Block</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/blocks/noise-context/noise-context.css">
+</head>
+<body>
+  <main>
+    <h1>Noise Context Block Test</h1>
+
+    <div class="noise-context block" data-block-name="noise-context">
+      <div>
+        <div>Real-World Noise Comparison</div>
+      </div>
+      <div>
+        <div>Normal conversation</div>
+        <div>60 dB</div>
+        <div>Easy to talk over, background noise</div>
+      </div>
+      <div>
+        <div>Dishwasher running</div>
+        <div>70 dB</div>
+        <div>Noticeable but you can hear TV</div>
+      </div>
+      <div>
+        <div>Vacuum cleaner</div>
+        <div>75 dB</div>
+        <div>Common household comparison</div>
+      </div>
+      <div>
+        <div>Vitamix at low speed</div>
+        <div>78 dB</div>
+        <div>Like a loud vacuum</div>
+      </div>
+      <div>
+        <div>Vitamix at medium</div>
+        <div>84 dB</div>
+        <div>Like city traffic</div>
+      </div>
+      <div>
+        <div>Vitamix at max speed</div>
+        <div>88 dB</div>
+        <div>Like a motorcycle at 25 feet</div>
+      </div>
+      <div>
+        <div>Vitamix ONE (quietest)</div>
+        <div>82 dB</div>
+        <div>Noticeably quieter than other models</div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import decorate from '/blocks/noise-context/noise-context.js';
+    const block = document.querySelector('.noise-context');
+    if (block) {
+      decorate(block);
+      console.log('noise-context block decorated successfully');
+    }
+  </script>
+</body>
+</html>

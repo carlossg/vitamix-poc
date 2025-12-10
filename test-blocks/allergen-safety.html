@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Allergen Safety Block</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/blocks/allergen-safety/allergen-safety.css">
+</head>
+<body>
+  <main>
+    <h1>Allergen Safety Block Test</h1>
+
+    <div class="allergen-safety block" data-block-name="allergen-safety">
+      <div>
+        <div>Allergen Safety Guide</div>
+      </div>
+      <div>
+        <div>
+          <ol>
+            <li>Disassemble blade assembly from container</li>
+            <li>Wash all parts with hot soapy water (140°F or higher)</li>
+            <li>Rinse thoroughly under clean running water</li>
+            <li>Sanitize: Soak in diluted bleach solution (1 tsp per gallon) for 2 minutes</li>
+            <li>Final rinse with clean water</li>
+            <li>Air dry completely on clean surface before reassembly</li>
+          </ol>
+        </div>
+      </div>
+      <div>
+        <div>
+          <p>Recommended dedicated container strategy for households with severe allergies:</p>
+          <ul>
+            <li><strong>Container 1 (marked GREEN):</strong> Allergen-free recipes only - never expose to allergens</li>
+            <li><strong>Container 2 (marked RED):</strong> Recipes that may contain allergens</li>
+            <li>Use color-coded tape or permanent markers to label clearly</li>
+            <li>Store containers separately to prevent cross-contact</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div>
+          <ul>
+            <li>All Vitamix containers are BPA-free and made from Tritan copolyester</li>
+            <li>Tritan plastic is non-porous, making it easier to sanitize than some materials</li>
+            <li>Stainless steel blades can withstand high-heat sanitization</li>
+            <li>Silicone gaskets should be inspected regularly for wear and replaced if damaged</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import decorate from '/blocks/allergen-safety/allergen-safety.js';
+    const block = document.querySelector('.allergen-safety');
+    if (block) {
+      decorate(block);
+      console.log('allergen-safety block decorated successfully');
+    }
+  </script>
+</body>
+</html>

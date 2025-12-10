@@ -59,9 +59,16 @@ type SSECallback = (event: SSEEvent) => void;
 
 const CLASSIFICATION_PROMPT = `Classify the user's intent for a Vitamix blender recommendation system.
 
+IMPORTANT: Check for special intent types FIRST:
+- "support": User has a problem, is frustrated, mentions warranty, broken, issue, return
+- "gift": User is buying for someone else (birthday, wedding, christmas, "for my mom")
+- "medical": User mentions health conditions (dysphagia, stroke, medical diet)
+- "accessibility": User mentions physical limitations (arthritis, grip, heavy, mobility)
+- "partnership": User asks about affiliate programs, B2B, bulk orders, commercial use
+
 Output JSON only:
 {
-  "intentType": "discovery|comparison|product-detail|use-case|specs|reviews|price|recommendation",
+  "intentType": "discovery|comparison|product-detail|use-case|specs|reviews|price|recommendation|support|gift|medical|accessibility|partnership",
   "confidence": 0.0-1.0,
   "entities": {
     "products": ["product names mentioned"],
@@ -69,7 +76,8 @@ Output JSON only:
     "features": ["self-cleaning", "preset programs", etc.],
     "priceRange": "budget|mid|premium|null"
   },
-  "journeyStage": "exploring|comparing|deciding"
+  "journeyStage": "exploring|comparing|deciding",
+  "userMode": "quick|research|gift|support|commercial"
 }`;
 
 async function classifyIntent(
@@ -448,6 +456,282 @@ First child is the image, second child is the content.
     <p><a href="#" class="button secondary">Secondary CTA</a></p>
   </div>
 </div>`,
+
+    'quick-answer': `
+## HTML Template (TL;DR for decisive users):
+Generate a quick, direct answer. Structure:
+- Row 1: Product name (just the name)
+- Row 2: One sentence reason why this is the best choice
+- Row 3: Price (e.g., "$449")
+- Row 4: Link to product page
+- Row 5 (optional): More details if they want to expand
+
+<div>
+  <div>Vitamix E320</div>
+</div>
+<div>
+  <div>It's reliable, affordable, and handles everything you described perfectly.</div>
+</div>
+<div>
+  <div>$449</div>
+</div>
+<div>
+  <div><a href="PRODUCT_URL_FROM_CONTEXT">View Product</a></div>
+</div>
+<div>
+  <div>The E320 has a 2.2 HP motor, 64oz container, and a simple dial control that makes it easy to operate.</div>
+</div>`,
+
+    'support-triage': `
+## HTML Template (help frustrated customers):
+Generate empathetic support content. Structure:
+- Row 1: Issue type identified
+- Row 2: Empathy message (acknowledge their frustration)
+- Row 3: Resolution path/warranty info
+- Row 4: Primary CTA (warranty claim link)
+- Row 5: Secondary CTA (contact support link)
+- Row 6 (optional): Troubleshooting steps
+
+<div>
+  <div>Container Issue</div>
+</div>
+<div>
+  <div>I understand how frustrating this must be, especially after investing in a quality blender. Let's get this resolved for you.</div>
+</div>
+<div>
+  <div>Container blade issues are covered under your 10-year full warranty. You're eligible for a free replacement.</div>
+</div>
+<div>
+  <div><a href="https://www.vitamix.com/support/warranty">Start Warranty Claim</a></div>
+</div>
+<div>
+  <div><a href="https://www.vitamix.com/contact">Chat with Support</a></div>
+</div>
+<div>
+  <div><ol><li>Check that the container is properly seated on the base</li><li>Inspect the blade assembly for visible damage</li><li>Try running with just water to test</li></ol></div>
+</div>`,
+
+    'budget-breakdown': `
+## HTML Template (price transparency):
+Generate budget-friendly options. Structure:
+- Row 1: Title
+- Rows 2+: Price tiers with tier name in first cell, products in second cell
+
+<div>
+  <div>Your Options by Budget</div>
+</div>
+<div>
+  <div>Under $350</div>
+  <div><ul><li>Explorian E310: $299</li><li>Certified Reconditioned: from $199</li></ul></div>
+</div>
+<div>
+  <div>$350-$500</div>
+  <div><ul><li>Explorian E320: $449</li><li>Ascent A2300: $499</li></ul></div>
+</div>
+<div>
+  <div>Refurbished Deals</div>
+  <div><ul><li>Reconditioned A2500: $299</li><li>Reconditioned A3500: $399</li></ul></div>
+</div>`,
+
+    'accessibility-specs': `
+## HTML Template (physical/ergonomic specs):
+Generate accessibility-focused specifications. Structure:
+- Row 1: Title
+- Rows 2+: Product rows with product name | weight | lid ease | control type
+
+<div>
+  <div>Ease of Use Specifications</div>
+</div>
+<div>
+  <div><a href="PRODUCT_URL">Vitamix E320</a></div>
+  <div>10.5 lbs</div>
+  <div>Easy twist-off</div>
+  <div>Simple dial</div>
+</div>
+<div>
+  <div><a href="PRODUCT_URL">Vitamix ONE</a></div>
+  <div>9.7 lbs</div>
+  <div>Easy twist-off</div>
+  <div>2 buttons only</div>
+</div>
+<div>
+  <div><a href="PRODUCT_URL">Vitamix A3500</a></div>
+  <div>12.5 lbs</div>
+  <div>Easy twist-off</div>
+  <div>Touchscreen + dial</div>
+</div>`,
+
+    'empathy-hero': `
+## HTML Template (warm, acknowledging hero):
+Generate empathetic content that validates the user's situation. Structure:
+- Row 1: Empathetic headline (acknowledge their situation)
+- Row 2: Supportive message
+- Row 3: Promise to help
+- Row 4 (optional): CTA
+
+<div>
+  <div>I hear you.</div>
+</div>
+<div>
+  <div>Preparing safe, consistent meals when texture matters isn't just cooking—it's care. Every blend needs to be perfect, and that responsibility weighs on you.</div>
+</div>
+<div>
+  <div>Let me help you find a blender that gives you peace of mind, every single time.</div>
+</div>
+<div>
+  <div><a href="#recommendations">See My Recommendations</a></div>
+</div>`,
+
+    'sustainability-info': `
+## HTML Template (environmental responsibility):
+Generate content about Vitamix's environmental responsibility. Structure:
+- Row 1: Title
+- Row 2: Manufacturing info
+- Row 3: Materials info
+- Row 4: Lifespan info
+- Row 5 (optional): Recycling/end-of-life info
+
+<div>
+  <div>Environmental Responsibility</div>
+</div>
+<div>
+  <div>Made in Cleveland, Ohio with domestic and global components. Designed for repairability with replaceable parts.</div>
+</div>
+<div>
+  <div>BPA-free Tritan containers. Recyclable packaging. No harmful plasticizers or phthalates.</div>
+</div>
+<div>
+  <div>Built to last 10-20+ years with proper care, reducing replacement cycles compared to disposable blenders.</div>
+</div>
+<div>
+  <div>Blade assemblies can be replaced rather than discarding entire unit. Motor base designed for long-term service.</div>
+</div>`,
+
+    'smart-features': `
+## HTML Template (connected/app capabilities):
+Generate honest content about smart features. Structure:
+- Row 1: Title
+- Row 2: App features
+- Row 3: Voice assistant info
+- Row 4: What you CAN do
+- Row 5: Limitations (what you CAN'T do)
+
+<div>
+  <div>Smart & Connected Features</div>
+</div>
+<div>
+  <div><ul><li>Perfect Blend app with 500+ recipes</li><li>Guided step-by-step instructions</li><li>Auto-detect container size</li><li>Wireless timer sync</li></ul></div>
+</div>
+<div>
+  <div>Works with Alexa for recipe suggestions. No direct blender control via voice (safety feature).</div>
+</div>
+<div>
+  <div><ul><li>Browse recipes on your phone</li><li>Send recipes to the blender display</li><li>Track nutrition and usage</li><li>Get timer notifications</li></ul></div>
+</div>
+<div>
+  <div><ul><li>Cannot start/stop blender remotely</li><li>Cannot adjust speed via app during blend</li><li>Requires WiFi (no offline mode)</li></ul></div>
+</div>`,
+
+    'engineering-specs': `
+## HTML Template (technical specifications):
+Generate raw technical data for spec-focused users. Structure:
+- Row 1: Title/product name
+- Rows 2+: Spec label | Value | Notes
+
+<div>
+  <div>Technical Specifications - Ascent A3500</div>
+</div>
+<div>
+  <div>Motor Power</div>
+  <div>2.2 HP (continuous)</div>
+  <div>Peak: 3.2 HP</div>
+</div>
+<div>
+  <div>Motor Type</div>
+  <div>Radial cooling fan motor</div>
+  <div>All-metal drive socket</div>
+</div>
+<div>
+  <div>Max RPM</div>
+  <div>24,000 RPM</div>
+  <div>No-load blade speed</div>
+</div>
+<div>
+  <div>Sound Level</div>
+  <div>88 dBA</div>
+  <div>Measured at 1m, max speed</div>
+</div>
+<div>
+  <div>Container Material</div>
+  <div>Tritan copolyester</div>
+  <div>BPA-free, shatter-resistant</div>
+</div>
+<div>
+  <div>Blade Assembly</div>
+  <div>Stainless steel, 4-point</div>
+  <div>Laser-cut, hardened</div>
+</div>
+<div>
+  <div>Warranty</div>
+  <div>10 years</div>
+  <div>Full coverage, includes shipping</div>
+</div>`,
+
+    'noise-context': `
+## HTML Template (real-world noise comparisons):
+Generate honest noise comparisons. Structure:
+- Row 1: Title
+- Rows 2+: Item/model | dB level | Comparison context
+
+<div>
+  <div>Real-World Noise Comparison</div>
+</div>
+<div>
+  <div>Normal conversation</div>
+  <div>60 dB</div>
+  <div>Easy to talk over</div>
+</div>
+<div>
+  <div>Vacuum cleaner</div>
+  <div>75 dB</div>
+  <div>Noticeable but brief</div>
+</div>
+<div>
+  <div>Vitamix (low speed)</div>
+  <div>78 dB</div>
+  <div>Like a loud vacuum</div>
+</div>
+<div>
+  <div>Vitamix (high speed)</div>
+  <div>88 dB</div>
+  <div>Like a motorcycle at 25ft</div>
+</div>
+<div>
+  <div>Vitamix ONE (quietest)</div>
+  <div>82 dB</div>
+  <div>Noticeably quieter</div>
+</div>`,
+
+    'allergen-safety': `
+## HTML Template (cross-contamination protocols):
+Generate allergen safety content. Structure:
+- Row 1: Title
+- Row 2: Sanitization protocol
+- Row 3: Container strategy
+- Row 4: Material safety info
+
+<div>
+  <div>Allergen Safety Guide</div>
+</div>
+<div>
+  <div><ol><li>Disassemble blade from container</li><li>Wash with hot soapy water (140°F+)</li><li>Rinse thoroughly</li><li>Sanitize: 1 tsp bleach per gallon water, soak 2 min</li><li>Final rinse and air dry</li></ol></div>
+</div>
+<div>
+  <div><p>Dedicated container strategy:</p><ul><li>Container 1: Allergen-free only</li><li>Container 2: Contains allergens</li><li>Color-coded labels recommended</li></ul></div>
+</div>
+<div>
+  <div><ul><li>All containers BPA-free</li><li>Tritan plastic is non-porous</li><li>Stainless steel blades sanitize with heat</li><li>Inspect gaskets for wear regularly</li></ul></div>
+</div>`,
   };
 
   return templates[blockType] || '';
@@ -504,6 +788,15 @@ async function generateBlockContent(
       ...verifiedReviews.slice(0, 1),
     ].slice(0, 4);
     dataContext = `\n\n## Real Testimonials (USE THESE EXACT QUOTES - do not invent):\n${buildTestimonialContext(selectedReviews)}`;
+  } else if (['engineering-specs', 'noise-context'].includes(block.type)) {
+    // For technical specs, provide detailed product info
+    const mainProduct = ragContext.relevantProducts[0];
+    if (mainProduct) {
+      dataContext = `\n\n## Product Context:\n- ${mainProduct.name}\n- Price: $${mainProduct.price}\n- Features: ${mainProduct.features?.join(', ') || 'High performance blending'}`;
+    }
+  } else if (['sustainability-info', 'allergen-safety', 'smart-features'].includes(block.type)) {
+    // For informational blocks, provide general context
+    dataContext = `\n\n## Related Products:\n${buildProductContext(ragContext.relevantProducts.slice(0, 2))}`;
   }
 
   // Get HTML template for the block type

@@ -1,0 +1,195 @@
+/* Budget Breakdown Block Styles */
+
+.budget-breakdown {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.budget-breakdown-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.budget-breakdown-icon {
+  color: #22c55e;
+}
+
+.budget-breakdown-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.budget-breakdown-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.budget-breakdown-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.budget-tier {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #eee;
+}
+
+.tier-header {
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Tier variants */
+.tier-budget .tier-header {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tier-standard .tier-header {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.tier-premium .tier-header {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.tier-refurbished .tier-header {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.tier-products {
+  padding: 1rem 1.25rem;
+}
+
+.tier-products ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tier-products li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tier-products li:last-child {
+  border-bottom: none;
+}
+
+.tier-products a {
+  color: #1a1a1a;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.tier-products a:hover {
+  color: #d4030f;
+}
+
+.tier-products .price {
+  font-weight: 700;
+  color: #d4030f;
+}
+
+.tier-products .refurb-price {
+  font-size: 0.85rem;
+  color: #7c3aed;
+  margin-left: 0.5rem;
+}
+
+.budget-breakdown-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1.5rem;
+}
+
+.note-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.note-content {
+  font-size: 0.95rem;
+  color: #713f12;
+  line-height: 1.5;
+}
+
+.note-content strong {
+  color: #854d0e;
+}
+
+.budget-breakdown-refurb-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.budget-breakdown-refurb-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+}
+
+.refurb-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.refurb-text {
+  font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .budget-breakdown {
+    padding: 1rem;
+  }
+
+  .budget-breakdown-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .tier-products li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .budget-breakdown-refurb-cta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

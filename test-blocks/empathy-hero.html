@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Empathy Hero Block</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/blocks/empathy-hero/empathy-hero.css">
+</head>
+<body>
+  <main>
+    <h1>Empathy Hero Block Test</h1>
+
+    <div class="empathy-hero block" data-block-name="empathy-hero">
+      <div>
+        <div>I hear you.</div>
+      </div>
+      <div>
+        <div>Preparing safe, consistent meals when texture matters isn't just cooking - it's an act of care. Every blend needs to be perfect, and that responsibility weighs on you.</div>
+      </div>
+      <div>
+        <div>Let me help you find a blender that gives you peace of mind, every single time.</div>
+      </div>
+      <div>
+        <div><a href="#recommendations">See My Recommendations</a></div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import decorate from '/blocks/empathy-hero/empathy-hero.js';
+    const block = document.querySelector('.empathy-hero');
+    if (block) {
+      decorate(block);
+      console.log('empathy-hero block decorated successfully');
+    }
+  </script>
+</body>
+</html>

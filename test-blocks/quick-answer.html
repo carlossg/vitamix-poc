@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Quick Answer Block</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/blocks/quick-answer/quick-answer.css">
+</head>
+<body>
+  <main>
+    <h1>Quick Answer Block Test</h1>
+
+    <div class="quick-answer block" data-block-name="quick-answer">
+      <div>
+        <div>Vitamix E320</div>
+      </div>
+      <div>
+        <div>It's reliable, affordable at $449, and handles smoothies, soups, and nut butters perfectly.</div>
+      </div>
+      <div>
+        <div>$449</div>
+      </div>
+      <div>
+        <div><a href="https://www.vitamix.com/us/en_us/shop/e320">View Product</a></div>
+      </div>
+      <div>
+        <div>The E320 features a 2.2 HP motor, 64oz container, variable speed dial, and pulse function. It's our most popular choice for home cooks who want professional results without complexity. Backed by a 10-year warranty.</div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import decorate from '/blocks/quick-answer/quick-answer.js';
+    const block = document.querySelector('.quick-answer');
+    if (block) {
+      decorate(block);
+      console.log('quick-answer block decorated successfully');
+    }
+  </script>
+</body>
+</html>

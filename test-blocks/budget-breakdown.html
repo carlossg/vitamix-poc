@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Budget Breakdown Block</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/blocks/budget-breakdown/budget-breakdown.css">
+</head>
+<body>
+  <main>
+    <h1>Budget Breakdown Block Test</h1>
+
+    <div class="budget-breakdown block" data-block-name="budget-breakdown">
+      <div>
+        <div>Vitamix by Price Range</div>
+      </div>
+      <div>
+        <div>Budget (Under $350)</div>
+        <div>
+          <ul>
+            <li>Vitamix ONE - $249 (personal size)</li>
+            <li>Vitamix E310 - $299 (entry level)</li>
+            <li>Certified Refurbished - Starting at $199</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div>Standard ($350-500)</div>
+        <div>
+          <ul>
+            <li>Vitamix E320 - $449 (best value)</li>
+            <li>Vitamix A2300 - $499 (smart features)</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div>Premium ($500+)</div>
+        <div>
+          <ul>
+            <li>Vitamix A2500 - $549 (programs + smart)</li>
+            <li>Vitamix A3500 - $649 (touchscreen)</li>
+            <li>Vitamix X5 - $750 (commercial-grade)</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div>Refurbished Deals</div>
+        <div>
+          <ul>
+            <li>Save 40-50% on certified refurbished</li>
+            <li>Same warranty as new</li>
+            <li>Factory-tested and inspected</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import decorate from '/blocks/budget-breakdown/budget-breakdown.js';
+    const block = document.querySelector('.budget-breakdown');
+    if (block) {
+      decorate(block);
+      console.log('budget-breakdown block decorated successfully');
+    }
+  </script>
+</body>
+</html>

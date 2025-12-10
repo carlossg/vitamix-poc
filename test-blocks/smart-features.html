@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Smart Features Block</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/blocks/smart-features/smart-features.css">
+</head>
+<body>
+  <main>
+    <h1>Smart Features Block Test</h1>
+
+    <div class="smart-features block" data-block-name="smart-features">
+      <div>
+        <div>Smart & Connected Features</div>
+      </div>
+      <div>
+        <div>
+          <ul>
+            <li>Perfect Blend app with 500+ guided recipes</li>
+            <li>Step-by-step cooking instructions</li>
+            <li>Auto-detect container size via SELF-DETECT technology</li>
+            <li>Wireless timer sync between app and blender</li>
+            <li>Track your blending history and nutrition</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div>Compatible with Amazon Alexa for recipe suggestions and hands-free searching. Note: You cannot control the blender remotely via voice for safety reasons.</div>
+      </div>
+      <div>
+        <div>
+          <ul>
+            <li>Browse and save recipes on your phone</li>
+            <li>Send recipes directly to the blender touchscreen</li>
+            <li>Track nutrition info and calorie counts</li>
+            <li>Receive push notifications when blend is complete</li>
+            <li>Access exclusive app-only recipes</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div>
+          <ul>
+            <li>Cannot start or stop the blender remotely (safety feature)</li>
+            <li>Cannot adjust speed via the app while blending</li>
+            <li>Requires WiFi connection - no offline mode</li>
+            <li>App only works with Ascent Series models</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import decorate from '/blocks/smart-features/smart-features.js';
+    const block = document.querySelector('.smart-features');
+    if (block) {
+      decorate(block);
+      console.log('smart-features block decorated successfully');
+    }
+  </script>
+</body>
+</html>

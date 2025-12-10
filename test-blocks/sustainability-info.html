@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Sustainability Info Block</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/blocks/sustainability-info/sustainability-info.css">
+</head>
+<body>
+  <main>
+    <h1>Sustainability Info Block Test</h1>
+
+    <div class="sustainability-info block" data-block-name="sustainability-info">
+      <div>
+        <div>Environmental Responsibility</div>
+      </div>
+      <div>
+        <div>Made in Cleveland, Ohio USA since 1921. Vitamix uses domestic and global sourcing with a commitment to reducing environmental impact. Our factory is designed for efficiency with waste reduction programs in place.</div>
+      </div>
+      <div>
+        <div>All containers are BPA-free Tritan copolyester. We use recyclable packaging materials and have eliminated unnecessary plastic wrap. No harmful plasticizers or phthalates in any components.</div>
+      </div>
+      <div>
+        <div>Vitamix blenders are built to last 10-20+ years with proper care. This longevity means fewer blenders in landfills compared to replacing cheap models every 2-3 years.</div>
+      </div>
+      <div>
+        <div>Blade assemblies and other parts can be replaced individually rather than discarding the entire unit. We offer repair services to extend product life even further.</div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import decorate from '/blocks/sustainability-info/sustainability-info.js';
+    const block = document.querySelector('.sustainability-info');
+    if (block) {
+      decorate(block);
+      console.log('sustainability-info block decorated successfully');
+    }
+  </script>
+</body>
+</html>

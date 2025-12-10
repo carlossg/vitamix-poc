@@ -252,7 +252,20 @@ export type IntentType =
   | 'specs'
   | 'reviews'
   | 'price'
-  | 'recommendation';
+  | 'recommendation'
+  | 'support'        // Product issues, warranty, returns
+  | 'partnership'    // Affiliate, creator, B2B inquiries
+  | 'gift'           // Buying for someone else
+  | 'medical'        // Healthcare/therapeutic use
+  | 'accessibility'; // Physical limitations focus
+
+// User mode for adapting response style
+export type UserMode =
+  | 'quick'      // Wants fast answer
+  | 'research'   // Wants depth
+  | 'gift'       // Buying for others
+  | 'support'    // Has a problem
+  | 'commercial'; // B2B inquiry
 
 export type JourneyStage = 'exploring' | 'comparing' | 'deciding';
 
@@ -287,7 +300,19 @@ export type BlockType =
   | 'cta'
   | 'split-content'
   | 'columns'
-  | 'text';
+  | 'text'
+  // New blocks for improved user experience
+  | 'quick-answer'        // TL;DR for decisive users
+  | 'support-triage'      // Help frustrated customers
+  | 'budget-breakdown'    // Price/value transparency
+  | 'accessibility-specs' // Physical/ergonomic specs
+  | 'empathy-hero'        // Warm, acknowledging hero variant
+  // Phase 2 blocks
+  | 'sustainability-info' // Environmental responsibility
+  | 'smart-features'      // Connected/app capabilities
+  | 'engineering-specs'   // Deep technical specifications
+  | 'noise-context'       // Real-world noise comparisons
+  | 'allergen-safety';    // Cross-contamination protocols
 
 // ============================================
 // Reasoning Types

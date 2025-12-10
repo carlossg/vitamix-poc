@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Support Triage Block</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/blocks/support-triage/support-triage.css">
+</head>
+<body>
+  <main>
+    <h1>Support Triage Block Test</h1>
+
+    <div class="support-triage block" data-block-name="support-triage">
+      <div>
+        <div>Container Blade Issue</div>
+      </div>
+      <div>
+        <div>I'm sorry you're experiencing this frustration. Let's get this resolved quickly.</div>
+      </div>
+      <div>
+        <div>Good news: This is likely covered under your warranty. Container issues are the most common repair and usually resolved within 5-7 business days.</div>
+      </div>
+      <div>
+        <div><a href="https://www.vitamix.com/warranty">Start Warranty Claim</a></div>
+      </div>
+      <div>
+        <div><a href="https://www.vitamix.com/chat">Chat with Support</a></div>
+      </div>
+      <div>
+        <div>
+          <ol>
+            <li>Check if the blade assembly is properly seated in the container</li>
+            <li>Inspect the rubber gasket for wear or damage</li>
+            <li>Try hand-tightening the blade assembly counterclockwise</li>
+            <li>If wobbling persists, the blade bearing may need replacement</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import decorate from '/blocks/support-triage/support-triage.js';
+    const block = document.querySelector('.support-triage');
+    if (block) {
+      decorate(block);
+      console.log('support-triage block decorated successfully');
+    }
+  </script>
+</body>
+</html>

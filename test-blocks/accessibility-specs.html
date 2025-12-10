@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Accessibility Specs Block</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/blocks/accessibility-specs/accessibility-specs.css">
+</head>
+<body>
+  <main>
+    <h1>Accessibility Specs Block Test</h1>
+
+    <div class="accessibility-specs block" data-block-name="accessibility-specs">
+      <div>
+        <div>Ergonomic Comparison</div>
+        <div>Weight</div>
+        <div>Lid Ease</div>
+        <div>Controls</div>
+      </div>
+      <div>
+        <div><a href="https://www.vitamix.com/us/en_us/shop/e320">Vitamix E320</a></div>
+        <div>10.5 lbs</div>
+        <div>Standard twist-off</div>
+        <div>Dial + toggle</div>
+      </div>
+      <div>
+        <div><a href="https://www.vitamix.com/us/en_us/shop/one">Vitamix ONE</a></div>
+        <div>9.7 lbs (lightest)</div>
+        <div>Easy twist-off</div>
+        <div>2 buttons only</div>
+      </div>
+      <div>
+        <div><a href="https://www.vitamix.com/us/en_us/shop/a3500">Vitamix A3500</a></div>
+        <div>12.5 lbs</div>
+        <div>Easy twist-off</div>
+        <div>Touchscreen + dial</div>
+      </div>
+      <div>
+        <div><a href="https://www.vitamix.com/us/en_us/shop/propel-750">Vitamix Propel 750</a></div>
+        <div>11.2 lbs</div>
+        <div>Easy twist-off</div>
+        <div>Dial + 5 programs</div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import decorate from '/blocks/accessibility-specs/accessibility-specs.js';
+    const block = document.querySelector('.accessibility-specs');
+    if (block) {
+      decorate(block);
+      console.log('accessibility-specs block decorated successfully');
+    }
+  </script>
+</body>
+</html>

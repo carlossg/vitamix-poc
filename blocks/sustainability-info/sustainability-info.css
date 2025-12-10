@@ -1,0 +1,156 @@
+/* Sustainability Info Block Styles */
+
+.sustainability-info {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 2rem auto;
+}
+
+.sustainability-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.sustainability-icon {
+  color: #16a34a;
+  background: #f0fdf4;
+  padding: 0.75rem;
+  border-radius: 50%;
+}
+
+.sustainability-icon svg {
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+
+.sustainability-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.sustainability-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sustainability-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sustainability-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.card-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.5rem;
+}
+
+.card-content {
+  font-size: 0.95rem;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.card-content p {
+  margin: 0;
+}
+
+.sustainability-highlight {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+  border: 1px solid #86efac;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.highlight-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.highlight-content {
+  color: #166534;
+}
+
+.highlight-content strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #15803d;
+}
+
+.highlight-content p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.sustainability-certifications {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.cert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .sustainability-info {
+    padding: 1rem;
+  }
+
+  .sustainability-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .sustainability-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sustainability-highlight {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .sustainability-certifications {
+    flex-direction: column;
+    align-items: center;
+  }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Engineering Specs Block</title>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/blocks/engineering-specs/engineering-specs.css">
+</head>
+<body>
+  <main>
+    <h1>Engineering Specs Block Test</h1>
+
+    <div class="engineering-specs block" data-block-name="engineering-specs">
+      <div>
+        <div>Technical Specifications - Ascent A3500</div>
+      </div>
+      <div>
+        <div>Motor Power</div>
+        <div>2.2 HP (continuous)</div>
+        <div>Peak: 3.2 HP (1,500W input)</div>
+      </div>
+      <div>
+        <div>Motor Type</div>
+        <div>Radial cooling fan motor</div>
+        <div>All-metal drive socket</div>
+      </div>
+      <div>
+        <div>Max Blade Speed</div>
+        <div>24,000 RPM</div>
+        <div>No-load measurement</div>
+      </div>
+      <div>
+        <div>Sound Level</div>
+        <div>88 dBA (max)</div>
+        <div>Measured at 1m, A-weighted</div>
+      </div>
+      <div>
+        <div>Container Volume</div>
+        <div>64 oz (1.9L)</div>
+        <div>Low-profile design</div>
+      </div>
+      <div>
+        <div>Container Material</div>
+        <div>Tritan copolyester</div>
+        <div>BPA-free, shatter-resistant</div>
+      </div>
+      <div>
+        <div>Blade Assembly</div>
+        <div>Stainless steel, 4-point</div>
+        <div>Laser-cut, hardened</div>
+      </div>
+      <div>
+        <div>Thermal Protection</div>
+        <div>Auto-shutoff at 180F</div>
+        <div>Reset after cooling</div>
+      </div>
+      <div>
+        <div>Electrical</div>
+        <div>120V, 60Hz, 12A</div>
+        <div>NEMA 5-15P plug</div>
+      </div>
+      <div>
+        <div>Warranty</div>
+        <div>10 years full coverage</div>
+        <div>Includes free shipping both ways</div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import decorate from '/blocks/engineering-specs/engineering-specs.js';
+    const block = document.querySelector('.engineering-specs');
+    if (block) {
+      decorate(block);
+      console.log('engineering-specs block decorated successfully');
+    }
+  </script>
+</body>
+</html>

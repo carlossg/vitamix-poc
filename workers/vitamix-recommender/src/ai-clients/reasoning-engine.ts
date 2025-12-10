@@ -59,6 +59,16 @@ CRITICAL - Your reasoning will be shown directly to users. Write like you're tal
 | faq | Common questions - for support |
 | follow-up | Suggestion chips for next actions (always include at end) |
 | cta | Call-to-action button - for conversion |
+| quick-answer | TL;DR for decisive users - use when they want direct answers |
+| support-triage | Help frustrated customers - for product issues/warranty |
+| budget-breakdown | Price/value transparency - for budget-conscious users |
+| accessibility-specs | Physical/ergonomic specs - for mobility/accessibility concerns |
+| empathy-hero | Warm, acknowledging hero - for medical/emotional situations |
+| sustainability-info | Environmental responsibility - for eco-conscious buyers |
+| smart-features | Connected/app capabilities - for tech-forward users |
+| engineering-specs | Deep technical data - for engineers/spec-focused buyers |
+| noise-context | Real-world noise comparisons - for noise-sensitive users |
+| allergen-safety | Cross-contamination protocols - for allergy-concerned users |
 
 ## Block Selection Guidelines
 
@@ -68,6 +78,76 @@ CRITICAL - Your reasoning will be shown directly to users. Write like you're tal
    - Exploring: hero, use-case-cards, feature-highlights, follow-up
    - Comparing: hero, comparison-table, product-cards, follow-up
    - Deciding: product-hero, product-recommendation, recipe-cards, cta, follow-up
+
+## SPECIAL HANDLING RULES (CRITICAL - Follow These First!)
+
+### 1. Support/Frustrated Customer Detection
+Keywords: "problem", "broken", "frustrated", "warranty", "return", "issue", "not working", "third container"
+- ALWAYS lead with support-triage block
+- NEVER show product recommendations to frustrated customers
+- Prioritize empathy and resolution over sales
+- Block sequence: support-triage, faq, follow-up
+
+### 2. Quick/Decisive User Detection
+Keywords: "just tell me", "which one", "best for", "don't have time", "tell me what to get"
+- Lead with quick-answer block
+- Minimize other blocks - they want brevity
+- Block sequence: quick-answer, follow-up (optionally product-recommendation if they want details)
+
+### 3. Medical/Accessibility Queries
+Keywords: "arthritis", "disability", "dysphagia", "stroke", "mobility", "grip", "heavy", "aging"
+- Lead with empathy-hero to acknowledge their situation
+- Include accessibility-specs for physical considerations
+- Block sequence: empathy-hero, accessibility-specs, product-recommendation, follow-up
+
+### 4. Budget-Conscious Users
+Keywords: "budget", "afford", "cheap", "worth it", "broke", "student", "expensive"
+- Include budget-breakdown block prominently
+- Be honest about alternatives
+- Block sequence: hero, budget-breakdown, product-cards, follow-up
+
+### 5. Gift Queries
+Keywords: "gift", "for my", "birthday", "wedding", "christmas", "present"
+- Focus on recipient's needs, not the buyer's expertise
+- Offer "safe bet" recommendations
+- Surface gift card option
+- Block sequence: hero, quick-answer or product-recommendation, product-cards, follow-up
+
+### 6. Commercial/B2B Queries
+Keywords: "restaurant", "business", "commercial", "bulk", "b2b", "professional kitchen"
+- Focus on durability, warranty, volume
+- Mention commercial support contact
+- Block sequence: hero, specs-table, comparison-table, follow-up
+
+### 7. Sustainability/Eco-Conscious Queries
+Keywords: "eco", "sustainable", "environment", "green", "waste", "landfill", "plastic", "carbon"
+- Include sustainability-info block prominently
+- Focus on longevity and repairability as eco-benefits
+- Block sequence: hero, sustainability-info, product-recommendation, follow-up
+
+### 8. Noise-Sensitive Users
+Keywords: "noise", "quiet", "loud", "apartment", "roommate", "neighbors", "dB", "decibel"
+- Include noise-context block with real-world comparisons
+- Be honest about limitations - blenders are loud
+- Block sequence: hero, noise-context, product-cards, follow-up
+
+### 9. Allergy/Cross-Contamination Concerns
+Keywords: "allergy", "allergen", "cross-contamination", "peanut", "gluten", "celiac", "anaphylaxis"
+- Include allergen-safety block with cleaning protocols
+- Emphasize dedicated container strategy
+- Block sequence: hero, allergen-safety, product-recommendation, follow-up
+
+### 10. Smart Home/Tech Integration Queries
+Keywords: "app", "wifi", "connected", "smart", "alexa", "voice", "bluetooth", "smart home"
+- Include smart-features block with honest assessment
+- Be transparent about limitations
+- Block sequence: hero, smart-features, comparison-table, follow-up
+
+### 11. Engineering/Deep Specs Queries
+Keywords: "wattage", "rpm", "motor", "specs", "specifications", "technical", "engineer"
+- Include engineering-specs block - no marketing fluff
+- Focus on raw data and measurements
+- Block sequence: hero, engineering-specs, comparison-table, follow-up
 
 ## Output Format
 
@@ -305,8 +385,14 @@ function getFallbackReasoningResult(
     'use-case': ['hero', 'feature-highlights', 'recipe-cards', 'product-recommendation', 'follow-up'],
     specs: ['hero', 'specs-table', 'comparison-table', 'follow-up'],
     reviews: ['hero', 'testimonials', 'product-recommendation', 'follow-up'],
-    price: ['hero', 'product-cards', 'comparison-table', 'follow-up'],
-    recommendation: ['product-hero', 'product-recommendation', 'recipe-cards', 'cta', 'follow-up'],
+    price: ['hero', 'budget-breakdown', 'product-cards', 'follow-up'],
+    recommendation: ['quick-answer', 'product-recommendation', 'follow-up'],
+    // New intent types
+    support: ['support-triage', 'faq', 'follow-up'],
+    partnership: ['hero', 'feature-highlights', 'testimonials', 'follow-up'],
+    gift: ['hero', 'quick-answer', 'product-cards', 'follow-up'],
+    medical: ['empathy-hero', 'accessibility-specs', 'product-recommendation', 'follow-up'],
+    accessibility: ['empathy-hero', 'accessibility-specs', 'product-recommendation', 'follow-up'],
   };
 
   const blocks = blocksByIntent[intent.intentType] || blocksByIntent.discovery;

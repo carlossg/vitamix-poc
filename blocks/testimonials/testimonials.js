@@ -1,21 +1,8 @@
 /**
  * Testimonials Block
  *
- * Displays customer testimonials with avatar, quote, author, and source link.
- * HTML structure from orchestrator:
- * <div class="testimonials">
- *   <div><h2>Section title</h2></div>
- *   <div class="testimonial-card">
- *     <div><img alt="Name" /></div>
- *     <div>
- *       <p>★★★★★</p>
- *       <p>"Quote"</p>
- *       <p><strong>Name</strong>, Title</p>
- *       <p><a href="source-url">Read the full story</a></p>
- *     </div>
- *   </div>
- *   ...
- * </div>
+ * Displays customer testimonials with quote, author, and source link.
+ * Single column layout with centered text, no images.
  */
 
 export default function decorate(block) {
@@ -31,8 +18,9 @@ export default function decorate(block) {
     row.classList.add('testimonial-card');
 
     const cells = [...row.children];
+    // Hide avatar/image cell
     if (cells[0]) {
-      cells[0].classList.add('testimonial-avatar');
+      cells[0].style.display = 'none';
     }
     if (cells[1]) {
       cells[1].classList.add('testimonial-content');
