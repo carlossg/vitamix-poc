@@ -441,7 +441,7 @@ export async function analyzeAndSelectBlocks(
 
     return result;
   } catch (error) {
-    console.error('Reasoning engine error:', error);
+    console.error('[ReasoningEngine] Error:', error instanceof Error ? error.message : error);
     // Return fallback result
     return getFallbackReasoningResult(intent);
   }

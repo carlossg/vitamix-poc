@@ -250,6 +250,7 @@ export class ModelFactory {
 
     if (!response.ok) {
       const error = await response.text();
+      console.error(`[Cerebras] API error ${response.status}:`, error);
       throw new Error(`Cerebras API error: ${response.status} - ${error}`);
     }
 

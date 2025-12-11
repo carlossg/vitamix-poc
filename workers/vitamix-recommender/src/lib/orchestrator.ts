@@ -828,7 +828,7 @@ Rationale: ${block.rationale}`,
       sectionStyle: getSectionStyle(block.type),
     };
   } catch (error) {
-    console.error(`Error generating ${block.type}:`, error);
+    console.error(`[ContentGen] Error generating ${block.type}:`, error instanceof Error ? error.message : error);
     return {
       type: block.type,
       html: `<div class="${block.type}"><p>Content generation failed</p></div>`,
