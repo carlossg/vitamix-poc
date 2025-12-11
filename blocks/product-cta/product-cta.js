@@ -1,14 +1,17 @@
 /**
  * Product CTA Block
  *
- * Final call-to-action for product detail page with buy button and secondary actions.
+ * Final call-to-action for product detail page with actions.
  *
  * Content Model (DA Table):
  * | Product CTA |
  * |-------------|
  * | ## Ready to Blend? | Start your Vitamix journey today. |
- * | [Buy Now](link) | [Find a Retailer](link) | [Compare Models](link) |
+ * | [View Details](link) | [Find a Retailer](link) | [Compare Models](link) |
  */
+
+import { decorateCTA } from '../../scripts/cta-utils.js';
+
 export default function decorate(block) {
   const rows = [...block.children];
   const wrapper = document.createElement('div');
@@ -54,6 +57,8 @@ export default function decorate(block) {
           btn.href = link.href;
           btn.textContent = link.textContent;
           btn.className = `product-cta-button ${index === 0 ? 'primary' : 'secondary'}`;
+          // Decorate CTA with appropriate icon and sanitize text
+          decorateCTA(btn);
           ctaGroup.appendChild(btn);
         });
       }

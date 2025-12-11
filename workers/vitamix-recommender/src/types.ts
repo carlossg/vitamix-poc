@@ -362,6 +362,13 @@ export interface QueryHistoryItem {
     ingredients: string[];
     goals: string[];
   };
+  // Enriched context fields
+  recommendedProducts?: string[];
+  recommendedRecipes?: string[];
+  blockTypes?: string[];
+  journeyStage?: JourneyStage;
+  confidence?: number;
+  nextBestAction?: string;
 }
 
 export interface UserProfile {
@@ -406,8 +413,26 @@ export type SSEEvent =
   | { event: 'block-content'; data: { html: string; sectionStyle?: string } }
   | { event: 'block-rationale'; data: { blockType: BlockType; rationale: string } }
   | { event: 'image-ready'; data: { imageId: string; url: string } }
-  | { event: 'generation-complete'; data: { totalBlocks: number; duration: number } }
+  | { event: 'generation-complete'; data: GenerationCompleteData }
   | { event: 'error'; data: { message: string; code?: string } };
+
+// Enriched generation-complete event data
+export interface GenerationCompleteData {
+  totalBlocks: number;
+  duration: number;
+  intent?: IntentClassification;
+  reasoning?: {
+    journeyStage: JourneyStage;
+    confidence: number;
+    nextBestAction: string;
+    suggestedFollowUps: string[];
+  };
+  recommendations?: {
+    products: string[];
+    recipes: string[];
+    blockTypes: string[];
+  };
+}
 
 // ============================================
 // Model Configuration Types

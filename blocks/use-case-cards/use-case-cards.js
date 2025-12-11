@@ -1,7 +1,9 @@
 /**
  * Use Case Cards Block
- * Displays use cases in a grid layout with clickable cards that generate contextual pages
+ * Displays use cases in a grid layout with clickable cards that generate contextual AI pages
  */
+
+import { createCTAIcon } from '../../scripts/cta-utils.js';
 
 /**
  * Get page context for generating contextual queries
@@ -98,6 +100,17 @@ function setupCardClickHandler(card) {
   card.setAttribute('role', 'button');
   card.setAttribute('tabindex', '0');
   card.setAttribute('aria-label', `Learn more about ${title}`);
+  card.classList.add('cta-ai-generated');
+
+  // Add AI indicator if not already present
+  if (!card.querySelector('.use-case-ai-indicator')) {
+    const indicator = document.createElement('span');
+    indicator.className = 'use-case-ai-indicator';
+    const icon = createCTAIcon('ai-generated');
+    indicator.appendChild(icon);
+    indicator.appendChild(document.createTextNode(' Explore'));
+    card.appendChild(indicator);
+  }
 
   // Add click handler
   card.addEventListener('click', (e) => handleCardClick(e, title));

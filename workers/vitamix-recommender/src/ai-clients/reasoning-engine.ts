@@ -177,7 +177,33 @@ Respond with valid JSON only:
     "suggestedFollowUps": ["What can I make with a Vitamix?", "Compare top models"]
   },
   "confidence": 0.92
-}`;
+}
+
+## CRITICAL: Follow-up Suggestion Guidelines
+
+suggestedFollowUps MUST:
+1. Be contextually relevant to BOTH the current query AND products/content shown
+2. Offer BOTH directions when appropriate:
+   - NARROWING: "Tell me more about [specific product shown]", "Compare the top 2 options"
+   - BROADENING: "What other use cases work for me?", "Show me budget alternatives"
+3. Reference session context when available:
+   - "Back to comparing A3500 vs E310" (if they've seen these)
+   - "More recipes like [previous recipe shown]"
+4. Be phrased as natural questions or prompts users would actually ask
+5. NEVER include purchase-intent language:
+   - NO: "Buy now", "Add to cart", "Shop now", "Purchase", "Checkout"
+   - YES: "View details", "Learn more", "Explore options", "See full specs"
+
+Example good follow-ups:
+- "What makes the A3500 worth the extra cost?"
+- "Show me recipes I can make with this blender"
+- "Compare this with budget options"
+- "Tell me about the warranty"
+
+Example BAD follow-ups (never use):
+- "Buy the A3500 now"
+- "Add to cart"
+- "Shop now"`;
 
 // ============================================
 // Reasoning Engine Functions
@@ -217,6 +243,18 @@ function buildReasoningPrompt(
     .map((q) => `  - "${q.query}" (${q.intent})`)
     .join('\n') || 'New session';
 
+  // Get last query's enriched context for conversational flow
+  const lastQuery = sessionContext?.previousQueries?.slice(-1)[0];
+  const lastQueryContext = lastQuery ? `
+## Last Query Context (IMPORTANT for conversational flow)
+- Query: "${lastQuery.query}"
+- Journey Stage: ${lastQuery.journeyStage || 'exploring'}
+- Confidence: ${lastQuery.confidence || 0.5}
+- Products Shown: ${lastQuery.recommendedProducts?.join(', ') || 'None'}
+- Recipes Shown: ${lastQuery.recommendedRecipes?.join(', ') || 'None'}
+- Blocks Used: ${lastQuery.blockTypes?.join(', ') || 'None'}
+- Next Best Action Suggested: ${lastQuery.nextBestAction || 'None'}` : '';
+
   return `## User Query
 "${query}"
 
@@ -242,6 +280,7 @@ ${recipeContext || 'No recipes matched'}
 
 ## Session History
 ${sessionHistory}
+${lastQueryContext}
 
 ## User Profile
 ${sessionContext?.profile ? JSON.stringify(sessionContext.profile, null, 2) : 'No profile data'}
@@ -249,7 +288,30 @@ ${sessionContext?.profile ? JSON.stringify(sessionContext.profile, null, 2) : 'N
 ## Your Task
 Analyze this query deeply and select the optimal blocks to render.
 Include your reasoning so users understand how you approached their question.
-Consider the user's journey stage and what would move them closer to a confident decision.`;
+Consider the user's journey stage and what would move them closer to a confident decision.
+
+## CRITICAL: Conversational Flow Detection
+If there's a Last Query Context above, determine the conversation flow:
+
+1. **NARROWING** (user drilling down): Keywords like "which is best", "the best one", "tell me more about X", "just one"
+   - If high confidence (>0.8) on a single product: Use product-recommendation block
+   - If moderate confidence: Use comparison-table with filtered options
+   - Reference previously shown products in your reasoning
+
+2. **EXPANDING** (user wants alternatives): Keywords like "what else", "other options", "not sure", "different", "more"
+   - Show different products than last time
+   - Add a follow-up like "Back to comparing [previous products] →"
+   - Acknowledge they've already seen certain options
+
+3. **NEW_TOPIC** (unrelated query): Completely different intent/topic
+   - Treat as fresh query but keep user preferences in mind
+   - Don't reference previous products unless relevant
+
+**Follow-up chip rules:**
+- If NARROWING: "View this model on Vitamix →", "See full specs →", "Find recipes for this →"
+- If EXPANDING: "Back to comparing X vs Y →", "Try a different approach →"
+- Always make one follow-up reference what they saw before
+- NEVER use purchase language like "Buy", "Add to cart", "Shop now"`;
 }
 
 /**
@@ -346,6 +408,19 @@ export async function analyzeAndSelectBlocks(
 ): Promise<ReasoningResult> {
   const modelFactory = new ModelFactory(preset || env.MODEL_PRESET || 'production');
 
+  // Debug: Log session context
+  const lastQuery = sessionContext?.previousQueries?.slice(-1)[0];
+  console.log('[ReasoningEngine] Session context queries:', sessionContext?.previousQueries?.length || 0);
+  if (lastQuery) {
+    console.log('[ReasoningEngine] Last query:', lastQuery.query);
+    console.log('[ReasoningEngine] Last query products:', lastQuery.recommendedProducts);
+    console.log('[ReasoningEngine] Last query journey stage:', lastQuery.journeyStage);
+  }
+
+  const reasoningPrompt = buildReasoningPrompt(query, intent, ragContext, sessionContext);
+  // Log if lastQueryContext is present
+  console.log('[ReasoningEngine] Has lastQueryContext:', reasoningPrompt.includes('Last Query Context'));
+
   const messages: Message[] = [
     {
       role: 'system',
@@ -353,7 +428,7 @@ export async function analyzeAndSelectBlocks(
     },
     {
       role: 'user',
-      content: buildReasoningPrompt(query, intent, ragContext, sessionContext),
+      content: reasoningPrompt,
     },
   ];
 

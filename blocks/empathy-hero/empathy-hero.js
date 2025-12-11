@@ -3,6 +3,10 @@
  * A warm, acknowledging hero variant that validates the user's
  * specific situation before presenting solutions.
  * Used for medical, emotional, or challenging situations.
+ *
+ * NOTE: This block intentionally has NO CTA - it's purely for
+ * acknowledgment and comfort. Actionable content follows in
+ * subsequent blocks.
  */
 
 export default function decorate(block) {
@@ -10,7 +14,7 @@ export default function decorate(block) {
   // Row 1: Empathy headline (acknowledging their situation)
   // Row 2: Supportive message
   // Row 3: Promise/transition to help
-  // Row 4 (optional): CTA
+  // (No CTA - empathy blocks are for acknowledgment only)
 
   const rows = [...block.children];
   if (rows.length < 3) {
@@ -21,9 +25,6 @@ export default function decorate(block) {
   const headline = rows[0]?.textContent?.trim() || 'We Understand';
   const message = rows[1]?.textContent?.trim() || '';
   const promise = rows[2]?.textContent?.trim() || '';
-  const ctaEl = rows[3]?.querySelector('a');
-  const ctaText = ctaEl?.textContent || rows[3]?.textContent?.trim() || '';
-  const ctaUrl = ctaEl?.href || '#';
 
   // Clear the block
   block.innerHTML = '';
@@ -76,14 +77,7 @@ export default function decorate(block) {
     content.appendChild(promiseEl);
   }
 
-  // CTA
-  if (ctaText) {
-    const cta = document.createElement('a');
-    cta.className = 'empathy-cta button';
-    cta.href = ctaUrl;
-    cta.textContent = ctaText;
-    content.appendChild(cta);
-  }
+  // No CTA - empathy hero is purely for acknowledgment
 
   hero.appendChild(content);
   block.appendChild(hero);

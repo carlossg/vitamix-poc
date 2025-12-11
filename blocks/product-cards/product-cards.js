@@ -12,7 +12,7 @@
  * | **Vitamix A3500**         |
  * | ★★★★★ (1,234)             |
  * | $649.95                   |
- * | [[Add to Cart]]           |
+ * | [[View Details]]          |
  *
  * For sale items, use the "sale" variant:
  * | Product Cards (sale)      |
@@ -22,10 +22,12 @@
  * | ★★★★★ (2,341)             |
  * | Now $299.95               |
  * | Save $50 | Was $349.95    |
- * | [[Add to Cart]]           |
+ * | [[View Details]]          |
  *
  * Each row represents one product card.
  */
+
+import { decorateCTA } from '../../scripts/cta-utils.js';
 
 /**
  * Generates star rating HTML from a rating value
@@ -146,11 +148,13 @@ export default function decorate(block) {
       const ul = block.querySelector('ul');
       ul.dataset.cardCount = existingCards.length;
     }
-    // Ensure links have proper styling
-    block.querySelectorAll('a.button').forEach((link) => {
+    // Ensure links have proper styling and icons
+    block.querySelectorAll('a.button, a.product-cta').forEach((link) => {
       if (!link.classList.contains('product-cta')) {
         link.classList.add('product-cta');
       }
+      // Decorate CTA with appropriate icon and sanitize text
+      decorateCTA(link);
     });
     return;
   }
@@ -229,6 +233,8 @@ export default function decorate(block) {
         btn.className = 'product-cta button';
         btn.href = link.href;
         btn.textContent = link.textContent;
+        // Decorate CTA with appropriate icon and sanitize text
+        decorateCTA(btn);
         bodyDiv.appendChild(btn);
       }
     });

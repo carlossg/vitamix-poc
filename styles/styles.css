@@ -300,6 +300,92 @@ button.ghost:hover {
   text-decoration-thickness: 2px;
 }
 
+/* CTA Type Icons */
+.cta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.cta-icon::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* External link icon */
+.cta-icon-external::before {
+  background-image: url('/icons/external-link.svg');
+}
+
+/* AI sparkle icon */
+.cta-icon-ai-generated::before {
+  background-image: url('/icons/ai-sparkle.svg');
+}
+
+/* External link styling */
+.cta-external {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.cta-external .cta-icon {
+  order: 1; /* Icon after text */
+}
+
+/* Button icons should be white */
+a.button .cta-icon-external::before,
+a.button .cta-icon-ai-generated::before {
+  filter: brightness(0) invert(1);
+}
+
+/* Secondary button icons keep original color */
+a.button.secondary .cta-icon-external::before,
+a.button.secondary .cta-icon-ai-generated::before {
+  filter: none;
+}
+
+/* AI-generated link styling */
+.cta-ai-generated {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.cta-ai-generated .cta-icon {
+  order: -1; /* Icon before text */
+}
+
+/* Subtle sparkle animation */
+@keyframes sparkle-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.cta-ai-generated:hover .cta-icon-ai-generated {
+  animation: sparkle-pulse 1.5s ease-in-out infinite;
+}
+
+/* Dark section adjustments */
+main .section.dark .cta-icon-external::before,
+main .section.dark .cta-icon-ai-generated::before {
+  filter: brightness(0) invert(1);
+}
+
 main img {
   max-width: 100%;
   width: auto;

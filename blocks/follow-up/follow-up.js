@@ -36,9 +36,20 @@ export default function decorate(block) {
 
   suggestions.forEach((suggestion) => {
     const chip = document.createElement('button');
-    chip.className = 'follow-up-chip';
-    chip.textContent = suggestion;
+    chip.className = 'follow-up-chip cta-ai-generated';
     chip.setAttribute('type', 'button');
+
+    // Add AI sparkle icon
+    const icon = document.createElement('span');
+    icon.className = 'cta-icon cta-icon-ai-generated';
+    icon.setAttribute('aria-hidden', 'true');
+    chip.appendChild(icon);
+
+    // Add suggestion text
+    const text = document.createElement('span');
+    text.className = 'follow-up-chip-text';
+    text.textContent = suggestion;
+    chip.appendChild(text);
 
     // Handle click - navigate to new query
     chip.addEventListener('click', () => {

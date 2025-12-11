@@ -12,20 +12,25 @@
  * |                                  | Perfect for daily smoothies. |
  * |                                  | $649.95                      |
  * |                                  | 10-Year Warranty             |
- * |                                  | [[Shop Now]]                 |
+ * |                                  | [[View on Vitamix]]          |
  * |                                  | [[Learn More]]               |
  */
+
+import { decorateCTA } from '../../scripts/cta-utils.js';
+
 export default function decorate(block) {
   // Check if already structured (AI-generated content)
   const existingImage = block.querySelector('.product-recommendation-image');
   const existingContent = block.querySelector('.product-recommendation-content');
 
   if (existingImage && existingContent) {
-    // Already structured - just ensure buttons have proper classes
+    // Already structured - ensure buttons have proper classes and decoration
     block.querySelectorAll('.product-recommendation-ctas a').forEach((link, idx) => {
       if (!link.classList.contains('button')) {
         link.classList.add('button', idx === 0 ? 'primary' : 'secondary');
       }
+      // Decorate CTA with appropriate icon and sanitize text
+      decorateCTA(link);
     });
     return;
   }
@@ -107,6 +112,8 @@ export default function decorate(block) {
             links.forEach((link, idx) => {
               const btn = link.cloneNode(true);
               btn.className = idx === 0 ? 'button primary' : 'button secondary';
+              // Decorate CTA with appropriate icon and sanitize text
+              decorateCTA(btn);
               ctaContainer.appendChild(btn);
             });
           }

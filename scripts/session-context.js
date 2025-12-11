@@ -18,6 +18,12 @@ const MAX_HISTORY = 10;
  * @property {string[]} entities.ingredients - Ingredient mentions
  * @property {string[]} entities.goals - User goals (energy, weight loss, etc.)
  * @property {string} generatedPath - The path of the generated page
+ * @property {string[]} [recommendedProducts] - Products shown in response
+ * @property {string[]} [recommendedRecipes] - Recipes shown in response
+ * @property {string[]} [blockTypes] - Block types that were generated
+ * @property {string} [journeyStage] - 'exploring' | 'comparing' | 'deciding'
+ * @property {number} [confidence] - AI confidence 0-1
+ * @property {string} [nextBestAction] - What AI suggests next
  */
 
 /**
@@ -58,7 +64,7 @@ export class SessionContextManager {
   static addQuery(entry) {
     const context = this.getContext();
 
-    // Ensure entry has required fields
+    // Ensure entry has required fields + enriched context fields
     const normalizedEntry = {
       query: entry.query || '',
       timestamp: entry.timestamp || Date.now(),
@@ -69,6 +75,13 @@ export class SessionContextManager {
         goals: entry.entities?.goals || [],
       },
       generatedPath: entry.generatedPath || '',
+      // Enriched context fields
+      recommendedProducts: entry.recommendedProducts || [],
+      recommendedRecipes: entry.recommendedRecipes || [],
+      blockTypes: entry.blockTypes || [],
+      journeyStage: entry.journeyStage || 'exploring',
+      confidence: entry.confidence || 0.5,
+      nextBestAction: entry.nextBestAction || '',
     };
 
     context.queries.push(normalizedEntry);
@@ -93,6 +106,13 @@ export class SessionContextManager {
         query: q.query,
         intent: q.intent,
         entities: q.entities,
+        // Include enriched context for conversational flow
+        recommendedProducts: q.recommendedProducts,
+        recommendedRecipes: q.recommendedRecipes,
+        blockTypes: q.blockTypes,
+        journeyStage: q.journeyStage,
+        confidence: q.confidence,
+        nextBestAction: q.nextBestAction,
       })),
     };
   }

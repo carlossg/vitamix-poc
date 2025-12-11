@@ -31,6 +31,7 @@ import {
   getAllReviews,
   type RAGContext,
 } from '../content/content-service';
+import { selectHeroImage } from './hero-images';
 
 // ============================================
 // Types
@@ -441,7 +442,7 @@ First child is the image, second child is the content.
       <span class="price-note">10-Year Warranty</span>
     </div>
     <div class="product-recommendation-ctas">
-      <a href="EXACT_PRODUCT_URL" class="button primary" target="_blank">Shop Now</a>
+      <a href="EXACT_PRODUCT_URL" class="button primary cta-external" target="_blank">View on Vitamix</a>
     </div>
   </div>
 </div>`,
@@ -559,7 +560,9 @@ Generate empathetic content that validates the user's situation. Structure:
 - Row 1: Empathetic headline (acknowledge their situation)
 - Row 2: Supportive message
 - Row 3: Promise to help
-- Row 4 (optional): CTA
+
+IMPORTANT: Do NOT include any CTA buttons. The empathy-hero is purely for acknowledgment and comfort.
+The actionable content (product recommendations, specs) follows in subsequent blocks.
 
 <div>
   <div>I hear you.</div>
@@ -569,9 +572,6 @@ Generate empathetic content that validates the user's situation. Structure:
 </div>
 <div>
   <div>Let me help you find a blender that gives you peace of mind, every single time.</div>
-</div>
-<div>
-  <div><a href="#recommendations">See My Recommendations</a></div>
 </div>`,
 
     'sustainability-info': `
@@ -733,7 +733,9 @@ async function generateBlockContent(
   block: BlockSelection,
   ragContext: RAGContext,
   env: Env,
-  preset?: string
+  preset?: string,
+  intent?: IntentClassification,
+  query?: string
 ): Promise<GeneratedBlock> {
   const modelFactory = createModelFactory(env, preset);
 
@@ -753,11 +755,13 @@ async function generateBlockContent(
   } else if (['recipe-cards'].includes(block.type)) {
     dataContext = `\n\n## Available Recipes (USE THESE EXACT IMAGE URLs):\n${buildRecipeContext(ragContext.relevantRecipes)}`;
   } else if (['hero', 'product-hero'].includes(block.type)) {
-    // For hero, use first product image or a generic one
-    const heroProduct = ragContext.relevantProducts[0];
-    if (heroProduct?.images?.primary) {
-      dataContext = `\n\n## Hero Image (USE THIS EXACT URL): ${heroProduct.images.primary}`;
-    }
+    // Select hero image based on intent, use cases, and query keywords for variety
+    const heroImageUrl = selectHeroImage(
+      intent?.intentType,
+      intent?.entities?.useCases,
+      query
+    );
+    dataContext = `\n\n## Hero Image (USE THIS EXACT URL): ${heroImageUrl}`;
   } else if (['use-case-cards'].includes(block.type)) {
     dataContext = `\n\n## Use Cases to Highlight:\n${buildUseCaseContext(ragContext.relevantUseCases)}`;
     // Also include products for context
@@ -852,6 +856,111 @@ function getSectionStyle(blockType: string): string {
   if (darkBlocks.includes(blockType)) return 'dark';
   if (highlightBlocks.includes(blockType)) return 'highlight';
   return 'default';
+}
+
+// ============================================
+// Context Extraction Helpers
+// ============================================
+
+/**
+ * Extract product names from generated block HTML for session context
+ */
+function extractProductNamesFromBlocks(blocks: GeneratedBlock[]): string[] {
+  const products: string[] = [];
+  const productBlocks = blocks.filter(b =>
+    ['product-cards', 'product-recommendation', 'comparison-table', 'accessibility-specs'].includes(b.type)
+  );
+
+  for (const block of productBlocks) {
+    // Extract from product-name class
+    const nameMatches = block.html.match(/class="product-name"[^>]*>(?:<a[^>]*>)?([^<]+)/g);
+    if (nameMatches) {
+      for (const match of nameMatches) {
+        const name = match.replace(/class="product-name"[^>]*>(?:<a[^>]*>)?/, '').trim();
+        if (name && !products.includes(name)) {
+          products.push(name);
+        }
+      }
+    }
+
+    // Extract from product-recommendation-headline (h2)
+    const headlineMatches = block.html.match(/class="product-recommendation-headline"[^>]*>([^<]+)/g);
+    if (headlineMatches) {
+      for (const match of headlineMatches) {
+        const name = match.replace(/class="product-recommendation-headline"[^>]*>/, '').trim();
+        if (name && !products.includes(name)) {
+          products.push(name);
+        }
+      }
+    }
+
+    // Extract from h2/h3 headings (product cards use h3, recommendations use h2)
+    const headingMatches = block.html.match(/<h[23][^>]*>(?:<a[^>]*>)?([^<]+)/g);
+    if (headingMatches) {
+      for (const match of headingMatches) {
+        const name = match.replace(/<h[23][^>]*>(?:<a[^>]*>)?/, '').trim();
+        // Filter out generic headings
+        if (name && !products.includes(name) &&
+            !name.includes('Specifications') &&
+            !name.includes('Continue') &&
+            !name.includes('Tips')) {
+          products.push(name);
+        }
+      }
+    }
+
+    // Extract from comparison table headers (columnheader with product names)
+    const thMatches = block.html.match(/<(?:th|columnheader)[^>]*>(?:<[^>]*>)*([A-Z][a-zA-Z0-9\s]+)(?:<\/[^>]*>)*<\/(?:th|columnheader)>/g);
+    if (thMatches) {
+      for (const match of thMatches) {
+        // Extract just the text content
+        const textMatch = match.match(/>([A-Z][a-zA-Z0-9\s]+)</);
+        if (textMatch) {
+          const name = textMatch[1].trim();
+          if (name && !products.includes(name) && name.length > 2 &&
+              !['Price', 'Weight', 'Controls', 'Model', 'Lid'].includes(name)) {
+            products.push(name);
+          }
+        }
+      }
+    }
+  }
+
+  return products.slice(0, 5); // Limit to top 5
+}
+
+/**
+ * Extract recipe names from generated block HTML for session context
+ */
+function extractRecipeNamesFromBlocks(blocks: GeneratedBlock[]): string[] {
+  const recipes: string[] = [];
+  const recipeBlocks = blocks.filter(b => b.type === 'recipe-cards');
+
+  for (const block of recipeBlocks) {
+    // Extract from recipe-card-title class or h4 headings
+    const titleMatches = block.html.match(/class="recipe-card-title"[^>]*>([^<]+)/g);
+    if (titleMatches) {
+      for (const match of titleMatches) {
+        const name = match.replace(/class="recipe-card-title"[^>]*>/, '').trim();
+        if (name && !recipes.includes(name)) {
+          recipes.push(name);
+        }
+      }
+    }
+
+    // Also try h4 headings
+    const h4Matches = block.html.match(/<h4[^>]*>([^<]+)/g);
+    if (h4Matches) {
+      for (const match of h4Matches) {
+        const name = match.replace(/<h4[^>]*>/, '').trim();
+        if (name && !recipes.includes(name)) {
+          recipes.push(name);
+        }
+      }
+    }
+  }
+
+  return recipes.slice(0, 5); // Limit to top 5
 }
 
 // ============================================
@@ -1003,7 +1112,7 @@ export async function orchestrate(
       } else if (blockSelection.type === 'follow-up') {
         block = generateFollowUpBlock(ctx.reasoningResult.userJourney);
       } else {
-        block = await generateBlockContent(blockSelection, ctx.ragContext, env, preset);
+        block = await generateBlockContent(blockSelection, ctx.ragContext, env, preset, ctx.intent, ctx.query);
       }
 
       blocks.push(block);
@@ -1022,11 +1131,37 @@ export async function orchestrate(
 
     ctx.generatedBlocks = blocks;
 
-    // Stage 6: Complete
+    // Stage 6: Complete - send enriched data for session context
     const duration = Date.now() - startTime;
+
+    // Extract product/recipe names from generated HTML for context persistence
+    const extractedProducts = extractProductNamesFromBlocks(blocks);
+    const extractedRecipes = extractRecipeNamesFromBlocks(blocks);
+
+    // Debug logging
+    console.log('[Orchestrator] Extracted products:', extractedProducts);
+    console.log('[Orchestrator] Extracted recipes:', extractedRecipes);
+    console.log('[Orchestrator] Block types:', blocks.map(b => b.type));
+    console.log('[Orchestrator] Session context received:', sessionContext ? JSON.stringify(sessionContext).slice(0, 500) : 'none');
+
     onEvent({
       event: 'generation-complete',
-      data: { totalBlocks: blocks.length, duration },
+      data: {
+        totalBlocks: blocks.length,
+        duration,
+        intent: ctx.intent,
+        reasoning: {
+          journeyStage: ctx.reasoningResult.userJourney.currentStage,
+          confidence: ctx.reasoningResult.confidence,
+          nextBestAction: ctx.reasoningResult.userJourney.nextBestAction,
+          suggestedFollowUps: ctx.reasoningResult.userJourney.suggestedFollowUps,
+        },
+        recommendations: {
+          products: extractedProducts,
+          recipes: extractedRecipes,
+          blockTypes: blocks.map(b => b.type),
+        },
+      },
     });
 
     return {

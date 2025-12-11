@@ -827,13 +827,27 @@ async function renderVitamixRecommenderPage() {
       document.title = `${h1.textContent} | Vitamix`;
     }
 
-    // Save query to session context for follow-up queries
+    // Save query to session context with enriched data for conversational flow
     SessionContextManager.addQuery({
       query,
       timestamp: Date.now(),
       intent: data.intent?.intentType || 'general',
       entities: data.intent?.entities || { products: [], ingredients: [], goals: [] },
       generatedPath: `/discover/${slug}`,
+      // Enriched context from worker
+      recommendedProducts: data.recommendations?.products || [],
+      recommendedRecipes: data.recommendations?.recipes || [],
+      blockTypes: data.recommendations?.blockTypes || [],
+      journeyStage: data.reasoning?.journeyStage || 'exploring',
+      confidence: data.reasoning?.confidence || 0.5,
+      nextBestAction: data.reasoning?.nextBestAction || '',
+    });
+
+    // eslint-disable-next-line no-console
+    console.log('[Recommender] Session context updated:', {
+      journeyStage: data.reasoning?.journeyStage,
+      confidence: data.reasoning?.confidence,
+      products: data.recommendations?.products,
     });
   });
 
