@@ -212,9 +212,9 @@ function buildReasoningPrompt(
   - Concerns: ${ragContext.detectedPersona.keyBarriers.join(', ')}`
     : 'No specific persona detected';
 
-  const sessionHistory = sessionContext?.queries
+  const sessionHistory = sessionContext?.previousQueries
     ?.slice(-3)
-    .map((q) => `  - "${q.text}" (${q.intent})`)
+    .map((q) => `  - "${q.query}" (${q.intent})`)
     .join('\n') || 'New session';
 
   return `## User Query

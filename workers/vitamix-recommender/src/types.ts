@@ -350,14 +350,18 @@ export interface UserJourneyPlan {
 // ============================================
 
 export interface SessionContext {
-  queries: QueryHistoryItem[];
-  profile: UserProfile;
+  previousQueries: QueryHistoryItem[];
+  profile?: UserProfile;
 }
 
 export interface QueryHistoryItem {
-  text: string;
-  intent: IntentType;
-  timestamp: number;
+  query: string;
+  intent: string;
+  entities?: {
+    products: string[];
+    ingredients: string[];
+    goals: string[];
+  };
 }
 
 export interface UserProfile {

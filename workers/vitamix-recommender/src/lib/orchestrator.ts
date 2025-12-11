@@ -88,8 +88,8 @@ async function classifyIntent(
 ): Promise<IntentClassification> {
   const modelFactory = createModelFactory(env, preset);
 
-  const contextInfo = sessionContext?.queries?.length
-    ? `\n\nPrevious queries in this session:\n${sessionContext.queries.map((q) => `- "${q.text}" (${q.intent})`).join('\n')}`
+  const contextInfo = sessionContext?.previousQueries?.length
+    ? `\n\nPrevious queries in this session:\n${sessionContext.previousQueries.map((q) => `- "${q.query}" (${q.intent})`).join('\n')}`
     : '';
 
   const messages: Message[] = [
@@ -954,7 +954,7 @@ export async function orchestrate(
 
     // Stage 4: Deep reasoning (model depends on preset)
     const effectivePreset = preset || env.MODEL_PRESET || 'production';
-    const reasoningModel = effectivePreset === 'all-cerebras' ? 'cerebras-llama-3.3-70b' : 'claude-opus-4-5';
+    const reasoningModel = effectivePreset === 'all-cerebras' ? 'cerebras-zai-glm-4.6' : 'claude-opus-4-5';
     onEvent({
       event: 'reasoning-start',
       data: { model: reasoningModel, preset: effectivePreset },
