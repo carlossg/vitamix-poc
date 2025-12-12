@@ -859,6 +859,9 @@ function wrapBlockHTML(type: string, content: string, variant?: string): string 
   // Extract just the inner content if wrapped in tags
   let html = content.trim();
 
+  // Strip markdown code fences if LLM included them (handles ``` html, ```html, etc.)
+  html = html.replace(/^```\s*html?\s*\n?/i, '').replace(/\n?```\s*$/g, '').trim();
+
   // If content doesn't start with the block div, wrap it
   if (!html.startsWith(`<div class="${type}`)) {
     const variantClass = variant ? ` ${variant}` : '';

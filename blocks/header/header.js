@@ -242,12 +242,7 @@ export default async function decorate(block) {
     window.location.href = `/?q=${encodeURIComponent(query)}&preset=${preset}`;
   };
 
-  // Pre-fill search input with current query if on a search page
   const urlParams = new URLSearchParams(window.location.search);
-  const currentQuery = urlParams.get('q');
-  if (currentQuery) {
-    searchInput.value = currentQuery;
-  }
 
   // Update AI toggle to reflect current page mode based on preset parameter
   const currentPreset = urlParams.get('preset');
@@ -269,9 +264,13 @@ export default async function decorate(block) {
     }
   });
 
-  nav.appendChild(searchContainer);
-  nav.appendChild(aiModeToggle);
-  nav.appendChild(qualityToggle);
+  // Only show nav-search on non-home pages (home page has its own search form)
+  const isHomePage = window.location.pathname === '/' && !window.location.search;
+  if (!isHomePage) {
+    nav.appendChild(searchContainer);
+    nav.appendChild(aiModeToggle);
+    nav.appendChild(qualityToggle);
+  }
 
   const navWrapper = document.createElement('div');
   navWrapper.className = 'nav-wrapper';
