@@ -120,7 +120,7 @@ export function decorateLinkWithIcon(link, type) {
 }
 
 /**
- * Fully decorate a CTA link: classify, sanitize text, add icon
+ * Fully decorate a CTA link: classify, sanitize text, add icon, track conversions
  * @param {HTMLAnchorElement} link - The link element
  * @returns {'external' | 'ai-generated' | 'internal'} - The classified type
  */
@@ -145,6 +145,28 @@ export function decorateCTA(link) {
   // Add icon for external and AI-generated links
   if (type === 'external' || type === 'ai-generated') {
     decorateLinkWithIcon(link, type);
+  }
+
+  // Track conversions for vitamix.com links
+  if (type === 'external' && link.href.includes('vitamix.com')) {
+    link.addEventListener('click', () => {
+      // Try window.analyticsTracker first (set by delayed.js)
+      // Then try importing the tracker directly
+      if (window.analyticsTracker) {
+        window.analyticsTracker.trackConversion(link.href, link.textContent?.trim());
+      } else {
+        // Dynamic import as fallback
+        import('./analytics-tracker.js').then(({ getAnalyticsTracker }) => {
+          const tracker = getAnalyticsTracker({
+            endpoint: 'https://vitamix-analytics.paolo-moz.workers.dev',
+          });
+          if (!tracker.initialized) tracker.init();
+          tracker.trackConversion(link.href, link.textContent?.trim());
+        }).catch(() => {
+          // Silently fail if analytics module not available
+        });
+      }
+    });
   }
 
   return type;

@@ -21,6 +21,16 @@ import { isExperimentRequest, initExperiment } from './experiment.js';
 // Session context for query history
 import { SessionContextManager } from './session-context.js';
 
+// Analytics tracker
+import { getAnalyticsTracker } from './analytics-tracker.js';
+
+// Initialize analytics tracker globally for conversion tracking in cta-utils.js
+const analyticsTracker = getAnalyticsTracker({
+  endpoint: 'https://vitamix-analytics.paolo-moz.workers.dev',
+});
+analyticsTracker.init();
+window.analyticsTracker = analyticsTracker;
+
 // Worker URLs
 const GENERATIVE_WORKER_URL = 'https://vitamix-generative.paolo-moz.workers.dev';
 const FAST_WORKER_URL = 'https://vitamix-generative-fast.paolo-moz.workers.dev';
@@ -838,6 +848,22 @@ async function renderVitamixRecommenderPage() {
       confidence: data.reasoning?.confidence || 0.5,
       nextBestAction: data.reasoning?.nextBestAction || '',
     });
+
+    // Track query in analytics
+    try {
+      const tracker = getAnalyticsTracker({
+        endpoint: 'https://vitamix-analytics.paolo-moz.workers.dev',
+      });
+      if (!tracker.initialized) tracker.init();
+      tracker.trackQuery({
+        query,
+        intent: data.intent?.intentType || 'general',
+        journeyStage: data.reasoning?.journeyStage || 'exploring',
+      });
+    } catch (e) {
+      // Analytics tracking failure should not break the app
+      console.warn('[Recommender] Analytics tracking failed:', e);
+    }
 
     // eslint-disable-next-line no-console
     console.log('[Recommender] Session context updated:', {

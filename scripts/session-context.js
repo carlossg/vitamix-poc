@@ -31,6 +31,7 @@ const MAX_HISTORY = 10;
  * @property {QueryHistoryEntry[]} queries - Array of query history entries
  * @property {number} sessionStart - Timestamp when session started
  * @property {number} lastUpdated - Timestamp of last update
+ * @property {string} sessionId - Unique session identifier for analytics
  */
 
 /**
@@ -45,7 +46,13 @@ export class SessionContextManager {
     try {
       const stored = sessionStorage.getItem(CONTEXT_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const context = JSON.parse(stored);
+        // Ensure sessionId exists for older sessions
+        if (!context.sessionId) {
+          context.sessionId = crypto.randomUUID();
+          sessionStorage.setItem(CONTEXT_KEY, JSON.stringify(context));
+        }
+        return context;
       }
     } catch (e) {
       // Ignore parse errors, return fresh context
@@ -54,6 +61,7 @@ export class SessionContextManager {
       queries: [],
       sessionStart: Date.now(),
       lastUpdated: Date.now(),
+      sessionId: crypto.randomUUID(),
     };
   }
 
@@ -133,6 +141,24 @@ export class SessionContextManager {
   static hasContext() {
     const context = this.getContext();
     return context.queries.length > 0;
+  }
+
+  /**
+   * Get the session ID for analytics tracking
+   * @returns {string}
+   */
+  static getSessionId() {
+    const context = this.getContext();
+    return context.sessionId;
+  }
+
+  /**
+   * Get the consecutive query count for this session
+   * @returns {number}
+   */
+  static getConsecutiveQueryCount() {
+    const context = this.getContext();
+    return context.queries.length;
   }
 
   /**

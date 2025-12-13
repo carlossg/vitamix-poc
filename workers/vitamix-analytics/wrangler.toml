@@ -1,0 +1,30 @@
+# Vitamix Analytics Worker Configuration
+name = "vitamix-analytics"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ============================================
+# REQUIRED SETUP BEFORE DEPLOYMENT
+# ============================================
+# 1. Create KV namespace:
+#    wrangler kv:namespace create ANALYTICS
+#    Then update the id below with the returned ID
+#
+# 2. Set API secret for AI analysis:
+#    wrangler secret put ANTHROPIC_API_KEY
+# ============================================
+
+# Environment variables
+[vars]
+DEBUG = "false"
+
+# KV for analytics data (create with: wrangler kv:namespace create ANALYTICS)
+[[kv_namespaces]]
+binding = "ANALYTICS"
+id = "1ce3e3fd729841be88ba8aef876e5df9"
+
+# Development settings
+[dev]
+port = 8788
+local_protocol = "http"
