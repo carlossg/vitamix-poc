@@ -296,7 +296,6 @@ export type BlockType =
   | 'testimonials'
   | 'faq'
   | 'follow-up'
-  | 'cta'
   | 'split-content'
   | 'columns'
   | 'text'

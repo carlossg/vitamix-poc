@@ -45,10 +45,11 @@ export default function decorate(block) {
     icon.setAttribute('aria-hidden', 'true');
     chip.appendChild(icon);
 
-    // Add suggestion text
+    // Add suggestion text - strip any trailing arrows since CSS adds one
+    const cleanedSuggestion = suggestion.replace(/\s*[→\u2192]\s*$/g, '').trim();
     const text = document.createElement('span');
     text.className = 'follow-up-chip-text';
-    text.textContent = suggestion;
+    text.textContent = cleanedSuggestion;
     chip.appendChild(text);
 
     // Handle click - navigate to new query

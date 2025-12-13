@@ -29,7 +29,9 @@ import {
   getAllProducts,
   getProductsByUseCase,
   getAllReviews,
+  getFAQsForQuery,
   type RAGContext,
+  type FAQ,
 } from '../content/content-service';
 import { selectHeroImage } from './hero-images';
 
@@ -141,6 +143,7 @@ function buildProductContext(products: Product[]): string {
   return products.map(p => `
 - ${p.name} (${p.series})
   Price: $${p.price}
+  Warranty: ${p.warranty || 'Full Warranty'}
   Image: ${p.images?.primary || 'no-image'}
   URL: ${p.url}
   Tagline: ${p.tagline || p.description?.slice(0, 100) || 'Premium blender'}
@@ -202,6 +205,14 @@ function buildTestimonialContext(reviews: Review[]): string {
 - "${r.content}"
   Author: ${r.author}${r.authorTitle ? `, ${r.authorTitle}` : ''}${typeInfo}${sourceInfo}`;
   }).join('\n');
+}
+
+function buildFAQContext(faqs: FAQ[]): string {
+  if (!faqs.length) return 'No FAQs available.';
+  return faqs.map(faq => `
+- Q: ${faq.question}
+  A: ${faq.answer}
+  Category: ${faq.category}`).join('\n');
 }
 
 function getBlockTemplate(blockType: string): string {
@@ -364,20 +375,18 @@ CRITICAL: The <h3> title with the product model name MUST be the first thing in 
     'faq': `
 ## HTML Template (accordion Q&A pairs):
 Each row has TWO cells: question cell and answer cell.
-Generate 4-6 relevant FAQs.
+CRITICAL: Use ONLY the FAQs provided in the context below. Do NOT invent FAQs.
+Copy the questions and answers EXACTLY from the provided data.
 
 <div>
-  <div>Question text goes here?</div>
-  <div>Answer text providing helpful information about the topic.</div>
+  <div>EXACT_QUESTION_FROM_CONTEXT?</div>
+  <div>EXACT_ANSWER_FROM_CONTEXT</div>
 </div>
 <div>
-  <div>Another question?</div>
-  <div>Another helpful answer.</div>
+  <div>EXACT_QUESTION_FROM_CONTEXT?</div>
+  <div>EXACT_ANSWER_FROM_CONTEXT</div>
 </div>
-<div>
-  <div>Third question?</div>
-  <div>Third answer with details.</div>
-</div>`,
+<!-- Include 4-6 FAQs from the provided context -->`,
 
     'testimonials': `
 ## HTML Template (use ONLY the real testimonials provided below):
@@ -407,7 +416,10 @@ Structure: Output simple table rows that the block JS will transform.
 First row is header with product names (LINKED to their vitamix.com pages), remaining rows are spec comparisons.
 Output simple divs - the block JS will convert to a table.
 
-IMPORTANT: Product names in the header row MUST be links to their vitamix.com product pages.
+IMPORTANT:
+- Product names in the header row MUST be links to their vitamix.com product pages.
+- ONLY compare Vitamix products to each other - we do not have competitor data.
+- If user mentions a competitor brand (Blendtec, Ninja, etc.), compare 2-3 Vitamix models instead and note that competitor specs are not available.
 
 <div>
   <div></div>
@@ -443,22 +455,11 @@ First child is the image, second child is the content.
     <p class="product-recommendation-body">Why this specific product is the best choice for the user's needs. Be specific about features that match their requirements.</p>
     <div class="product-recommendation-price">
       <span class="price">$XXX.XX</span>
-      <span class="price-note">10-Year Warranty</span>
+      <span class="price-note">[USE WARRANTY FROM PRODUCT CONTEXT]</span>
     </div>
     <div class="product-recommendation-ctas">
       <a href="EXACT_PRODUCT_URL" class="button primary cta-external" target="_blank">View on Vitamix</a>
     </div>
-  </div>
-</div>`,
-
-    'cta': `
-## HTML Template (simple call-to-action):
-<div>
-  <div>
-    <h2>Headline Text</h2>
-    <p>Supporting description text.</p>
-    <p><a href="#" class="button primary">Primary CTA</a></p>
-    <p><a href="#" class="button secondary">Secondary CTA</a></p>
   </div>
 </div>`,
 
@@ -496,7 +497,7 @@ Generate empathetic support content. Structure:
   <div>I understand how frustrating this must be, especially after investing in a quality blender. Let's get this resolved for you.</div>
 </div>
 <div>
-  <div>Container blade issues are covered under your 10-year full warranty. You're eligible for a free replacement.</div>
+  <div>Container blade issues are typically covered under your Vitamix warranty. Check your model's warranty period in the product context below - you may be eligible for a free replacement.</div>
 </div>
 <div>
   <div><a href="https://www.vitamix.com/support/warranty">Start Warranty Claim</a></div>
@@ -534,29 +535,20 @@ Generate budget-friendly options. Structure:
 ## HTML Template (physical/ergonomic specs):
 Generate accessibility-focused specifications. Structure:
 - Row 1: Title
-- Rows 2+: Product rows with product name | weight | lid ease | control type
+- Rows 2+: Product rows with product name (LINKED to vitamix.com URL) | weight | lid ease | control type
+
+IMPORTANT: Use the actual product URLs from the context data. Do NOT use placeholder URLs like "PRODUCT_URL" or "#".
 
 <div>
   <div>Ease of Use Specifications</div>
 </div>
 <div>
-  <div><a href="PRODUCT_URL">Vitamix E320</a></div>
-  <div>10.5 lbs</div>
-  <div>Easy twist-off</div>
-  <div>Simple dial</div>
+  <div><a href="EXACT_PRODUCT_URL_FROM_CONTEXT" target="_blank">Product Name</a></div>
+  <div>Weight in lbs</div>
+  <div>Lid ease description</div>
+  <div>Control type</div>
 </div>
-<div>
-  <div><a href="PRODUCT_URL">Vitamix ONE</a></div>
-  <div>9.7 lbs</div>
-  <div>Easy twist-off</div>
-  <div>2 buttons only</div>
-</div>
-<div>
-  <div><a href="PRODUCT_URL">Vitamix A3500</a></div>
-  <div>12.5 lbs</div>
-  <div>Easy twist-off</div>
-  <div>Touchscreen + dial</div>
-</div>`,
+<!-- Repeat for 2-4 products from context -->`,
 
     'empathy-hero': `
 ## HTML Template (warm, acknowledging hero):
@@ -758,8 +750,15 @@ async function generateBlockContent(
       specsTableProductName = mainProduct.name;
     }
   } else if (['faq'].includes(block.type)) {
-    // For FAQ, provide context about the query and products
-    dataContext = `\n\n## Context for FAQ:\n- User's question: ${block.contentGuidance}\n- Related products: ${ragContext.relevantProducts.slice(0, 2).map(p => p.name).join(', ')}\n\nGenerate FAQs that would help answer common questions related to this topic.`;
+    // For FAQ, get real FAQs from the database based on query
+    const queryText = block.contentGuidance || query || '';
+    const relevantFAQs = getFAQsForQuery(queryText);
+    if (relevantFAQs.length > 0) {
+      dataContext = `\n\n## Real FAQs (USE THESE EXACT Q&A PAIRS - do not invent):\n${buildFAQContext(relevantFAQs.slice(0, 6))}`;
+    } else {
+      // Fallback if no FAQs match - provide product context for general questions
+      dataContext = `\n\n## Context:\n- User's question: ${block.contentGuidance}\n- Related products: ${ragContext.relevantProducts.slice(0, 2).map(p => p.name).join(', ')}\n\nGenerate FAQs about Vitamix blender warranty, cleaning, and usage.`;
+    }
   } else if (['recipe-cards'].includes(block.type)) {
     dataContext = `\n\n## Available Recipes (USE THESE EXACT IMAGE URLs):\n${buildRecipeContext(ragContext.relevantRecipes)}`;
   } else if (['hero', 'product-hero'].includes(block.type)) {
@@ -801,6 +800,9 @@ async function generateBlockContent(
   } else if (['sustainability-info', 'allergen-safety', 'smart-features'].includes(block.type)) {
     // For informational blocks, provide general context
     dataContext = `\n\n## Related Products:\n${buildProductContext(ragContext.relevantProducts.slice(0, 2))}`;
+  } else if (['accessibility-specs'].includes(block.type)) {
+    // For accessibility specs, provide multiple products with details for comparison
+    dataContext = `\n\n## Products for Accessibility Comparison (USE THESE EXACT URLs):\n${buildProductContext(ragContext.relevantProducts.slice(0, 4))}`;
   }
 
   // Get HTML template for the block type
@@ -872,7 +874,7 @@ function wrapBlockHTML(type: string, content: string, variant?: string): string 
 }
 
 function getSectionStyle(blockType: string): string {
-  const darkBlocks = ['hero', 'product-hero', 'cta'];
+  const darkBlocks = ['hero', 'product-hero'];
   const highlightBlocks = ['reasoning', 'reasoning-user', 'testimonials'];
 
   if (darkBlocks.includes(blockType)) return 'dark';

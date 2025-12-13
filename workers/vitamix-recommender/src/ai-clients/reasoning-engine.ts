@@ -148,6 +148,15 @@ Keywords: "wattage", "rpm", "motor", "specs", "specifications", "technical", "en
 - Focus on raw data and measurements
 - Block sequence: hero, engineering-specs, comparison-table, follow-up
 
+### 12. Competitor Comparison Queries
+Keywords: "blendtec", "ninja", "nutribullet", "kitchenaid", "cuisinart", "breville", "compare to", "vs", "better than"
+- IMPORTANT: We only have Vitamix data - cannot make direct competitor comparisons
+- Acknowledge the competitor honestly in the response
+- Focus on Vitamix strengths without false claims about competitors
+- Suggest user research competitors separately for fair comparison
+- Never fabricate competitor specs or make up comparison data
+- Block sequence: hero, feature-highlights (Vitamix strengths), product-recommendation, follow-up
+
 ## Output Format
 
 Respond with valid JSON only:
@@ -354,7 +363,6 @@ function parseReasoningResponse(content: string): ReasoningResult {
 function normalizeBlockType(type: string): string {
   // Map common AI variations to correct block names
   const blockNameMap: Record<string, string> = {
-    'cta-block': 'cta',
     'hero-block': 'hero',
     'faq-block': 'faq',
     'reasoning': 'reasoning-user', // Always use the user-focused reasoning block
@@ -455,7 +463,7 @@ function getFallbackReasoningResult(
   const blocksByIntent: Record<string, BlockType[]> = {
     discovery: ['hero', 'use-case-cards', 'product-cards', 'follow-up'],
     comparison: ['hero', 'comparison-table', 'product-cards', 'follow-up'],
-    'product-detail': ['product-hero', 'specs-table', 'recipe-cards', 'cta', 'follow-up'],
+    'product-detail': ['product-hero', 'specs-table', 'recipe-cards', 'follow-up'],
     'use-case': ['hero', 'feature-highlights', 'recipe-cards', 'product-recommendation', 'follow-up'],
     specs: ['hero', 'specs-table', 'comparison-table', 'follow-up'],
     reviews: ['hero', 'testimonials', 'product-recommendation', 'follow-up'],

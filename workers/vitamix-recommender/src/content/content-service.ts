@@ -29,6 +29,7 @@ import reviewsData from '../../../../content/metadata/reviews.json';
 import personasData from '../../../../content/metadata/personas.json';
 import productProfilesData from '../../../../content/metadata/product-profiles.json';
 import recipeAssociationsData from '../../../../content/metadata/recipe-associations.json';
+import faqsData from '../../../../content/metadata/faqs.json';
 
 // Type the imported data
 interface ProductsFile {
@@ -79,6 +80,18 @@ interface RecipeAssociationsFile {
   servingSizeToProducts: Record<string, string[]>;
 }
 
+export interface FAQ {
+  id: string;
+  category: string;
+  question: string;
+  answer: string;
+  keywords: string[];
+}
+
+interface FAQsFile {
+  faqs: FAQ[];
+}
+
 // Cast imported data
 const products = (productsData as ProductsFile).products;
 const recipes = (recipesData as RecipesFile).recipes;
@@ -90,6 +103,7 @@ const reviews = (reviewsData as ReviewsFile).reviews;
 const personas = (personasData as PersonasFile).personas;
 const productProfiles = (productProfilesData as ProductProfilesFile).profiles;
 const recipeAssociations = recipeAssociationsData as RecipeAssociationsFile;
+const faqs = (faqsData as FAQsFile).faqs;
 
 // ============================================
 // Product Queries
@@ -434,6 +448,49 @@ export function getRecipesForRecipeCategory(categoryId: string): Recipe[] {
 }
 
 // ============================================
+// FAQ Queries
+// ============================================
+
+export function getAllFAQs(): FAQ[] {
+  return faqs;
+}
+
+export function getFAQsByCategory(category: string): FAQ[] {
+  return faqs.filter(faq => faq.category === category);
+}
+
+export function getFAQsForQuery(query: string): FAQ[] {
+  const lowerQuery = query.toLowerCase();
+
+  // Score each FAQ based on keyword matches
+  const scored = faqs.map(faq => {
+    let score = 0;
+
+    // Check if query contains any FAQ keywords
+    for (const keyword of faq.keywords) {
+      if (lowerQuery.includes(keyword.toLowerCase())) {
+        score += 2;
+      }
+    }
+
+    // Check if question or answer contains query words
+    const queryWords = lowerQuery.split(/\s+/).filter(w => w.length > 3);
+    for (const word of queryWords) {
+      if (faq.question.toLowerCase().includes(word)) score += 1;
+      if (faq.answer.toLowerCase().includes(word)) score += 0.5;
+    }
+
+    return { faq, score };
+  });
+
+  // Return FAQs with score > 0, sorted by score
+  return scored
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(s => s.faq);
+}
+
+// ============================================
 // Build RAG Context
 // ============================================
 
@@ -710,6 +767,11 @@ export default {
   getProductsWithFeature,
   getRecommendedProductsForRecipe,
   getRecipesForRecipeCategory,
+
+  // FAQs
+  getAllFAQs,
+  getFAQsByCategory,
+  getFAQsForQuery,
 
   // Utilities
   getContentSummary,
