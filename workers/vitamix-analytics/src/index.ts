@@ -642,7 +642,7 @@ Return ONLY valid JSON with this exact structure (no markdown, no code blocks):
 }
 
 /**
- * Get recent queries with generated page URLs
+ * Get recent queries with generated page URLs and cached analysis
  */
 async function handleRecentQueries(env: Env, url: URL): Promise<Response> {
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '10'), 50);
@@ -654,6 +654,7 @@ async function handleRecentQueries(env: Env, url: URL): Promise<Response> {
     intent?: string;
     journeyStage?: string;
     sessionId: string;
+    analysis?: SinglePageAnalysis;
   }[] = [];
 
   const now = new Date();
@@ -694,9 +695,24 @@ async function handleRecentQueries(env: Env, url: URL): Promise<Response> {
 
   // Sort by timestamp descending (most recent first)
   queries.sort((a, b) => b.timestamp - a.timestamp);
+  const limitedQueries = queries.slice(0, limit);
+
+  // Fetch cached analysis for queries with page URLs
+  for (const q of limitedQueries) {
+    if (q.generatedPageUrl) {
+      const cacheKey = `page-analysis:${q.generatedPageUrl}`;
+      const cached = await env.ANALYTICS.get(cacheKey, 'json') as {
+        timestamp: number;
+        analysis: SinglePageAnalysis;
+      } | null;
+      if (cached) {
+        q.analysis = cached.analysis;
+      }
+    }
+  }
 
   return jsonResponse({
-    queries: queries.slice(0, limit),
+    queries: limitedQueries,
     total: queries.length,
   });
 }

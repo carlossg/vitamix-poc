@@ -188,11 +188,20 @@ function createQueryRow(queryData) {
   if (queryData.generatedPageUrl) {
     const analyzeBtn = document.createElement('button');
     analyzeBtn.className = 'analyze-btn';
-    analyzeBtn.textContent = 'Analyse';
 
     // Results container (expandable)
     const resultsContainer = document.createElement('div');
     resultsContainer.className = 'query-results';
+
+    // Check if analysis already exists (persisted)
+    if (queryData.analysis) {
+      analyzeBtn.textContent = 'Analyzed';
+      analyzeBtn.classList.add('analyzed');
+      resultsContainer.appendChild(createAnalysisResults(queryData.analysis));
+      resultsContainer.classList.add('expanded');
+    } else {
+      analyzeBtn.textContent = 'Analyse';
+    }
 
     analyzeBtn.addEventListener('click', () => {
       if (analyzeBtn.classList.contains('analyzed')) {
