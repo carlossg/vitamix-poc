@@ -61,7 +61,113 @@ function createPagesList(title, pages, className) {
 }
 
 /**
- * Load last analysis info
+ * Display analysis results
+ */
+function displayAnalysisResults(block, analysis, cached = false) {
+  const analysisResults = block.querySelector('.analysis-results');
+  const analysisInfo = block.querySelector('.analysis-info');
+
+  // Update analysis info
+  analysisInfo.innerHTML = `
+    <p>Last analysis: ${formatRelativeTime(analysis.timestamp)}
+    (Score: ${analysis.overallScore}/100, ${analysis.pagesAnalyzed} pages)</p>
+  `;
+
+  // Build results
+  analysisResults.innerHTML = '';
+
+  // Scores section
+  const scoresSection = document.createElement('div');
+  scoresSection.className = 'scores-section';
+  scoresSection.appendChild(createScoreGauge(analysis.overallScore, 'Overall'));
+  scoresSection.appendChild(createScoreGauge(analysis.contentScore, 'Content'));
+  scoresSection.appendChild(createScoreGauge(analysis.layoutScore, 'Layout'));
+  scoresSection.appendChild(createScoreGauge(analysis.conversionScore, 'Conversion'));
+  analysisResults.appendChild(scoresSection);
+
+  // Top issues
+  if (analysis.topIssues && analysis.topIssues.length > 0) {
+    const issuesSection = document.createElement('div');
+    issuesSection.className = 'issues-section';
+    issuesSection.innerHTML = `
+      <h4>Top Issues</h4>
+      <ul class="issues-list">
+        ${analysis.topIssues.map((issue) => `<li>${issue}</li>`).join('')}
+      </ul>
+    `;
+    analysisResults.appendChild(issuesSection);
+  }
+
+  // Suggestions tabs
+  const suggestionsSection = document.createElement('div');
+  suggestionsSection.className = 'suggestions-container';
+  suggestionsSection.innerHTML = '<h4>Improvement Suggestions</h4>';
+
+  const tabsContainer = document.createElement('div');
+  tabsContainer.className = 'suggestions-tabs';
+
+  const tabs = [
+    { id: 'content', label: 'Content', suggestions: analysis.suggestions?.content || [] },
+    { id: 'layout', label: 'Layout', suggestions: analysis.suggestions?.layout || [] },
+    { id: 'conversion', label: 'Conversion', suggestions: analysis.suggestions?.conversion || [] },
+  ];
+
+  tabs.forEach((tab, index) => {
+    const tabButton = document.createElement('button');
+    tabButton.className = `tab-button ${index === 0 ? 'active' : ''}`;
+    tabButton.textContent = tab.label;
+    tabButton.dataset.tab = tab.id;
+    tabsContainer.appendChild(tabButton);
+  });
+
+  suggestionsSection.appendChild(tabsContainer);
+
+  const tabContent = document.createElement('div');
+  tabContent.className = 'tab-content';
+  tabs.forEach((tab, index) => {
+    const panel = document.createElement('div');
+    panel.className = `tab-panel ${index === 0 ? 'active' : ''}`;
+    panel.dataset.tab = tab.id;
+    if (tab.suggestions.length > 0) {
+      panel.innerHTML = `<ul>${tab.suggestions.map((s) => `<li>${s}</li>`).join('')}</ul>`;
+    } else {
+      panel.innerHTML = '<p class="no-data">No suggestions in this category</p>';
+    }
+    tabContent.appendChild(panel);
+  });
+  suggestionsSection.appendChild(tabContent);
+
+  // Tab click handlers
+  tabsContainer.querySelectorAll('.tab-button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      tabsContainer.querySelectorAll('.tab-button').forEach((b) => b.classList.remove('active'));
+      tabContent.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
+      btn.classList.add('active');
+      tabContent.querySelector(`.tab-panel[data-tab="${btn.dataset.tab}"]`).classList.add('active');
+    });
+  });
+
+  analysisResults.appendChild(suggestionsSection);
+
+  // Pages lists
+  const pagesContainer = document.createElement('div');
+  pagesContainer.className = 'pages-container';
+
+  if (analysis.exemplaryPages && analysis.exemplaryPages.length > 0) {
+    pagesContainer.appendChild(createPagesList('Exemplary Pages', analysis.exemplaryPages, 'exemplary'));
+  }
+
+  if (analysis.problematicPages && analysis.problematicPages.length > 0) {
+    pagesContainer.appendChild(createPagesList('Pages Needing Improvement', analysis.problematicPages, 'problematic'));
+  }
+
+  if (pagesContainer.children.length > 0) {
+    analysisResults.appendChild(pagesContainer);
+  }
+}
+
+/**
+ * Load last analysis info and display results if available
  */
 async function loadAnalysisInfo(block) {
   const analysisInfo = block.querySelector('.analysis-info');
@@ -72,11 +178,9 @@ async function loadAnalysisInfo(block) {
 
     const data = await response.json();
 
-    if (data.lastAnalysis) {
-      analysisInfo.innerHTML = `
-        <p>Last analysis: ${formatRelativeTime(data.lastAnalysis.timestamp)}
-        (Score: ${data.lastAnalysis.overallScore}/100, ${data.lastAnalysis.pagesAnalyzed} pages)</p>
-      `;
+    if (data.lastAnalysis && data.lastAnalysis.overallScore !== undefined) {
+      // Display full analysis results
+      displayAnalysisResults(block, data.lastAnalysis, true);
     } else {
       analysisInfo.innerHTML = '<p>No analysis run yet</p>';
     }
@@ -91,7 +195,6 @@ async function loadAnalysisInfo(block) {
 async function runAnalysis(block) {
   const analysisButton = block.querySelector('.run-analysis-btn');
   const analysisResults = block.querySelector('.analysis-results');
-  const analysisInfo = block.querySelector('.analysis-info');
 
   analysisButton.disabled = true;
   analysisButton.textContent = 'Analyzing...';
@@ -108,106 +211,7 @@ async function runAnalysis(block) {
     }
 
     const data = await response.json();
-    const analysis = data.analysis;
-
-    // Update analysis info
-    analysisInfo.innerHTML = `
-      <p>Analysis ${data.cached ? 'from cache' : 'completed'}: ${formatRelativeTime(analysis.timestamp)}
-      (${analysis.pagesAnalyzed} pages analyzed)</p>
-      ${data.cached ? `<p class="cache-notice">Next analysis available: ${new Date(data.nextAvailable).toLocaleTimeString()}</p>` : ''}
-    `;
-
-    // Build results
-    analysisResults.innerHTML = '';
-
-    // Scores section
-    const scoresSection = document.createElement('div');
-    scoresSection.className = 'scores-section';
-    scoresSection.appendChild(createScoreGauge(analysis.overallScore, 'Overall'));
-    scoresSection.appendChild(createScoreGauge(analysis.contentScore, 'Content'));
-    scoresSection.appendChild(createScoreGauge(analysis.layoutScore, 'Layout'));
-    scoresSection.appendChild(createScoreGauge(analysis.conversionScore, 'Conversion'));
-    analysisResults.appendChild(scoresSection);
-
-    // Top issues
-    if (analysis.topIssues && analysis.topIssues.length > 0) {
-      const issuesSection = document.createElement('div');
-      issuesSection.className = 'issues-section';
-      issuesSection.innerHTML = `
-        <h4>Top Issues</h4>
-        <ul class="issues-list">
-          ${analysis.topIssues.map((issue) => `<li>${issue}</li>`).join('')}
-        </ul>
-      `;
-      analysisResults.appendChild(issuesSection);
-    }
-
-    // Suggestions tabs
-    const suggestionsSection = document.createElement('div');
-    suggestionsSection.className = 'suggestions-container';
-    suggestionsSection.innerHTML = '<h4>Improvement Suggestions</h4>';
-
-    const tabsContainer = document.createElement('div');
-    tabsContainer.className = 'suggestions-tabs';
-
-    const tabs = [
-      { id: 'content', label: 'Content', suggestions: analysis.suggestions?.content || [] },
-      { id: 'layout', label: 'Layout', suggestions: analysis.suggestions?.layout || [] },
-      { id: 'conversion', label: 'Conversion', suggestions: analysis.suggestions?.conversion || [] },
-    ];
-
-    tabs.forEach((tab, index) => {
-      const tabButton = document.createElement('button');
-      tabButton.className = `tab-button ${index === 0 ? 'active' : ''}`;
-      tabButton.textContent = tab.label;
-      tabButton.dataset.tab = tab.id;
-      tabsContainer.appendChild(tabButton);
-    });
-
-    suggestionsSection.appendChild(tabsContainer);
-
-    const tabContent = document.createElement('div');
-    tabContent.className = 'tab-content';
-    tabs.forEach((tab, index) => {
-      const panel = document.createElement('div');
-      panel.className = `tab-panel ${index === 0 ? 'active' : ''}`;
-      panel.dataset.tab = tab.id;
-      if (tab.suggestions.length > 0) {
-        panel.innerHTML = `<ul>${tab.suggestions.map((s) => `<li>${s}</li>`).join('')}</ul>`;
-      } else {
-        panel.innerHTML = '<p class="no-data">No suggestions in this category</p>';
-      }
-      tabContent.appendChild(panel);
-    });
-    suggestionsSection.appendChild(tabContent);
-
-    // Tab click handlers
-    tabsContainer.querySelectorAll('.tab-button').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        tabsContainer.querySelectorAll('.tab-button').forEach((b) => b.classList.remove('active'));
-        tabContent.querySelectorAll('.tab-panel').forEach((p) => p.classList.remove('active'));
-        btn.classList.add('active');
-        tabContent.querySelector(`.tab-panel[data-tab="${btn.dataset.tab}"]`).classList.add('active');
-      });
-    });
-
-    analysisResults.appendChild(suggestionsSection);
-
-    // Pages lists
-    const pagesContainer = document.createElement('div');
-    pagesContainer.className = 'pages-container';
-
-    if (analysis.exemplaryPages && analysis.exemplaryPages.length > 0) {
-      pagesContainer.appendChild(createPagesList('Exemplary Pages', analysis.exemplaryPages, 'exemplary'));
-    }
-
-    if (analysis.problematicPages && analysis.problematicPages.length > 0) {
-      pagesContainer.appendChild(createPagesList('Pages Needing Improvement', analysis.problematicPages, 'problematic'));
-    }
-
-    if (pagesContainer.children.length > 0) {
-      analysisResults.appendChild(pagesContainer);
-    }
+    displayAnalysisResults(block, data.analysis, data.cached);
   } catch (error) {
     console.error('[Analytics] Analysis failed:', error);
     analysisResults.innerHTML = `

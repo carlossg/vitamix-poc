@@ -340,7 +340,7 @@ async function handleSummary(env: Env): Promise<Response> {
     .slice(0, 10)
     .map(([query, count]) => ({ query, count }));
 
-  // Get last analysis result
+  // Get last analysis result (return full analysis for persistence)
   const lastAnalysis: AnalysisResult | null = await env.ANALYTICS.get('analysis:latest', 'json');
 
   return jsonResponse({
@@ -355,11 +355,7 @@ async function handleSummary(env: Env): Promise<Response> {
     journeyStageBreakdown,
     topQueries,
     dailyTrend: days.slice(0, 7).reverse(),
-    lastAnalysis: lastAnalysis ? {
-      timestamp: lastAnalysis.timestamp,
-      overallScore: lastAnalysis.overallScore,
-      pagesAnalyzed: lastAnalysis.pagesAnalyzed,
-    } : null,
+    lastAnalysis: lastAnalysis || null,
   });
 }
 
