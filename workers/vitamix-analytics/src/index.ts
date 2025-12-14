@@ -112,6 +112,14 @@ export default {
         return handleAnalyze(env);
       }
 
+      if (url.pathname === '/api/analytics/queries/recent' && request.method === 'GET') {
+        return handleRecentQueries(env, url);
+      }
+
+      if (url.pathname === '/api/analytics/analyze-page' && request.method === 'POST') {
+        return handleAnalyzePage(request, env);
+      }
+
       // Health check
       if (url.pathname === '/health') {
         return jsonResponse({ status: 'ok', timestamp: Date.now() });
@@ -631,6 +639,224 @@ Return ONLY valid JSON with this exact structure (no markdown, no code blocks):
     analysis: result,
     nextAvailable: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
   });
+}
+
+/**
+ * Get recent queries with generated page URLs
+ */
+async function handleRecentQueries(env: Env, url: URL): Promise<Response> {
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '10'), 50);
+  const queries: {
+    query: string;
+    timestamp: number;
+    generatedPageUrl?: string;
+    generatedPagePath?: string;
+    intent?: string;
+    journeyStage?: string;
+    sessionId: string;
+  }[] = [];
+
+  const now = new Date();
+
+  // Look through recent days to find queries
+  for (let i = 0; i < 7 && queries.length < limit; i++) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    const daily: DailyStats | null = await env.ANALYTICS.get(`daily:${dateStr}`, 'json');
+
+    if (daily) {
+      // Reverse to get most recent first
+      const sessionIds = [...daily.sessionIds].reverse();
+      for (const sessionId of sessionIds) {
+        if (queries.length >= limit) break;
+
+        const session: SessionData | null = await env.ANALYTICS.get(`sessions:${sessionId}`, 'json');
+        if (session && session.queries.length > 0) {
+          // Reverse queries to get most recent first
+          const sessionQueries = [...session.queries].reverse();
+          for (const q of sessionQueries) {
+            if (queries.length >= limit) break;
+            queries.push({
+              query: q.query,
+              timestamp: q.timestamp,
+              generatedPageUrl: q.generatedPageUrl,
+              generatedPagePath: q.generatedPagePath,
+              intent: q.intent,
+              journeyStage: q.journeyStage,
+              sessionId: session.sessionId,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // Sort by timestamp descending (most recent first)
+  queries.sort((a, b) => b.timestamp - a.timestamp);
+
+  return jsonResponse({
+    queries: queries.slice(0, limit),
+    total: queries.length,
+  });
+}
+
+/**
+ * Analyze a single page
+ */
+async function handleAnalyzePage(request: Request, env: Env): Promise<Response> {
+  if (!env.ANTHROPIC_API_KEY) {
+    return jsonResponse({ error: 'ANTHROPIC_API_KEY not configured' }, 500);
+  }
+
+  const body = await request.json() as { query: string; url: string };
+  const { query, url: pageUrl } = body;
+
+  if (!query || !pageUrl) {
+    return jsonResponse({ error: 'Missing query or url parameter' }, 400);
+  }
+
+  // Check cache first (cache per URL for 1 hour)
+  const cacheKey = `page-analysis:${pageUrl}`;
+  const cached = await env.ANALYTICS.get(cacheKey, 'json') as {
+    timestamp: number;
+    analysis: SinglePageAnalysis;
+  } | null;
+
+  if (cached && Date.now() - cached.timestamp < 60 * 60 * 1000) {
+    return jsonResponse({
+      cached: true,
+      analysis: cached.analysis,
+    });
+  }
+
+  // Fetch page content
+  let content: string;
+  try {
+    const response = await fetch(pageUrl, {
+      headers: { 'User-Agent': 'Vitamix-Analytics/1.0' },
+    });
+    if (!response.ok) {
+      return jsonResponse({ error: `Failed to fetch page: ${response.status}` }, 400);
+    }
+    const html = await response.text();
+    content = extractMainContent(html);
+    if (content.length < 100) {
+      return jsonResponse({ error: 'Page content too short for analysis' }, 400);
+    }
+    content = content.slice(0, 8000); // Limit content size
+  } catch (e) {
+    return jsonResponse({ error: `Failed to fetch page: ${(e as Error).message}` }, 500);
+  }
+
+  // Build analysis prompt for single page
+  const analysisPrompt = `Analyze this generated page from a Vitamix AI recommender application.
+
+User's Query: "${query}"
+Page URL: ${pageUrl}
+
+Page Content:
+${content}
+
+Evaluate this page on how well it serves the user's query. Score each category from 0-100:
+
+1. CONTENT RELEVANCE (contentScore)
+- Does the content directly address the user's query?
+- Are product recommendations appropriate for the query?
+- Are recipes/use cases helpful and relevant?
+- Is the information accurate and useful?
+
+2. LAYOUT QUALITY (layoutScore)
+- Is the information well-organized and easy to scan?
+- Is there a clear visual hierarchy?
+- Are sections logically structured?
+
+3. CONVERSION OPTIMIZATION (conversionScore)
+- Are there clear CTAs to vitamix.com?
+- Is there a visible path to learn more or purchase?
+- Are product links prominent and compelling?
+
+Return ONLY valid JSON with this exact structure (no markdown, no code blocks):
+{
+  "overallScore": <0-100 weighted average>,
+  "contentScore": <0-100>,
+  "layoutScore": <0-100>,
+  "conversionScore": <0-100>,
+  "summary": "<2-3 sentence summary of the page quality>",
+  "strengths": ["<strength 1>", "<strength 2>"],
+  "improvements": ["<improvement 1>", "<improvement 2>", "<improvement 3>"]
+}`;
+
+  // Call Claude API
+  const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: analysisPrompt,
+        },
+      ],
+    }),
+  });
+
+  if (!claudeResponse.ok) {
+    const error = await claudeResponse.text();
+    console.error('Claude API error:', error);
+    return jsonResponse({ error: 'AI analysis failed' }, 500);
+  }
+
+  const claudeResult = await claudeResponse.json() as {
+    content: { type: string; text: string }[];
+  };
+
+  const analysisText = claudeResult.content[0]?.text || '';
+
+  // Parse JSON response
+  let analysis: SinglePageAnalysis;
+  try {
+    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      analysis = JSON.parse(jsonMatch[0]);
+    } else {
+      throw new Error('No JSON found in response');
+    }
+  } catch (e) {
+    console.error('Failed to parse analysis:', e, analysisText);
+    return jsonResponse({
+      error: 'Failed to parse AI analysis response',
+    }, 500);
+  }
+
+  // Cache the result
+  await env.ANALYTICS.put(cacheKey, JSON.stringify({
+    timestamp: Date.now(),
+    analysis,
+  }), {
+    expirationTtl: 24 * 60 * 60, // 24 hours
+  });
+
+  return jsonResponse({
+    cached: false,
+    analysis,
+  });
+}
+
+interface SinglePageAnalysis {
+  overallScore: number;
+  contentScore: number;
+  layoutScore: number;
+  conversionScore: number;
+  summary: string;
+  strengths: string[];
+  improvements: string[];
 }
 
 /**
