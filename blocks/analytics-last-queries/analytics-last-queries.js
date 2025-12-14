@@ -7,6 +7,106 @@
 const ANALYTICS_ENDPOINT = 'https://vitamix-analytics.paolo-moz.workers.dev';
 
 /**
+ * Show a toast notification
+ */
+function showNotification(message, type = 'success') {
+  const existing = document.querySelector('.analytics-notification');
+  if (existing) existing.remove();
+
+  const notification = document.createElement('div');
+  notification.className = `analytics-notification ${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  setTimeout(() => notification.classList.add('show'), 10);
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+/**
+ * Generate a Claude Code prompt for selected improvements
+ */
+function generateImprovementPrompt(query, pageUrl, selectedImprovements) {
+  const improvementsList = selectedImprovements.map((imp) => `- ${imp}`).join('\n');
+
+  return `# Page Improvement Task
+
+## Original Query
+"${query}"
+
+## Page URL
+${pageUrl}
+
+## Improvements to Implement
+${improvementsList}
+
+## Instructions
+1. Analyze the page content and structure at the URL above
+2. Identify the blocks and templates responsible for generating this content
+3. Implement the listed improvements following existing code patterns
+4. Focus on improving the user experience for similar queries
+5. Test changes locally before committing
+
+## Project Context
+- This is a Vitamix product recommendation site built on AEM Edge Delivery Services
+- Pages are dynamically generated based on user queries
+- The improvements should enhance content relevance and conversion
+
+Please implement these improvements to address the issues identified in the page analysis.`;
+}
+
+/**
+ * Handle execute button click for improvements
+ */
+async function handleImprovementExecute(button, query, pageUrl, container) {
+  const checkboxes = container.querySelectorAll('.improvement-checkbox:checked');
+  const selectedImprovements = Array.from(checkboxes).map((cb) => cb.dataset.improvement);
+
+  if (selectedImprovements.length === 0) {
+    showNotification('Please select at least one improvement', 'error');
+    return;
+  }
+
+  const originalContent = button.innerHTML;
+  button.disabled = true;
+  button.innerHTML = '<span class="spinner"></span>';
+  button.classList.add('loading');
+
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const prompt = generateImprovementPrompt(query, pageUrl, selectedImprovements);
+    await navigator.clipboard.writeText(prompt);
+
+    button.innerHTML = '✓';
+    button.classList.remove('loading');
+    button.classList.add('success');
+
+    showNotification('Prompt copied to clipboard! Paste it in Claude Code.');
+
+    setTimeout(() => {
+      button.innerHTML = originalContent;
+      button.classList.remove('success');
+      button.disabled = false;
+    }, 2000);
+  } catch (error) {
+    console.error('[Analytics] Failed to generate prompt:', error);
+    button.innerHTML = '✗';
+    button.classList.remove('loading');
+    button.classList.add('error');
+    showNotification('Failed to copy prompt', 'error');
+
+    setTimeout(() => {
+      button.innerHTML = originalContent;
+      button.classList.remove('error');
+      button.disabled = false;
+    }, 2000);
+  }
+}
+
+/**
  * Format a timestamp as relative time
  */
 function formatRelativeTime(timestamp) {
@@ -37,7 +137,7 @@ function createScoreBadge(score, label) {
 /**
  * Create the analysis results HTML
  */
-function createAnalysisResults(analysis) {
+function createAnalysisResults(analysis, query, pageUrl) {
   const container = document.createElement('div');
   container.className = 'analysis-results';
 
@@ -75,10 +175,47 @@ function createAnalysisResults(analysis) {
   if (analysis.improvements && analysis.improvements.length > 0) {
     const improvementsDiv = document.createElement('div');
     improvementsDiv.className = 'analysis-column improvements';
-    improvementsDiv.innerHTML = `
-      <h5>Improvements</h5>
-      <ul>${analysis.improvements.map((s) => `<li>${s}</li>`).join('')}</ul>
-    `;
+
+    const header = document.createElement('h5');
+    header.textContent = 'Improvements';
+    improvementsDiv.appendChild(header);
+
+    const list = document.createElement('ul');
+    list.className = 'improvements-list';
+
+    analysis.improvements.forEach((improvement) => {
+      const li = document.createElement('li');
+      li.className = 'improvement-item';
+
+      const label = document.createElement('label');
+      label.className = 'improvement-label';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'improvement-checkbox';
+      checkbox.dataset.improvement = improvement;
+
+      const text = document.createElement('span');
+      text.className = 'improvement-text';
+      text.textContent = improvement;
+
+      label.appendChild(checkbox);
+      label.appendChild(text);
+      li.appendChild(label);
+      list.appendChild(li);
+    });
+
+    improvementsDiv.appendChild(list);
+
+    // Add Execute button for selected improvements
+    if (query && pageUrl) {
+      const executeBtn = document.createElement('button');
+      executeBtn.className = 'execute-improvements-btn';
+      executeBtn.innerHTML = 'Execute Selected';
+      executeBtn.addEventListener('click', () => handleImprovementExecute(executeBtn, query, pageUrl, improvementsDiv));
+      improvementsDiv.appendChild(executeBtn);
+    }
+
     columns.appendChild(improvementsDiv);
   }
 
@@ -110,7 +247,7 @@ async function analyzePage(query, url, resultsContainer, button) {
 
     const data = await response.json();
     resultsContainer.innerHTML = '';
-    resultsContainer.appendChild(createAnalysisResults(data.analysis));
+    resultsContainer.appendChild(createAnalysisResults(data.analysis, query, url));
 
     if (data.cached) {
       const cacheNote = document.createElement('p');
@@ -197,7 +334,7 @@ function createQueryRow(queryData) {
     if (queryData.analysis) {
       analyzeBtn.textContent = 'Analyzed';
       analyzeBtn.classList.add('analyzed');
-      resultsContainer.appendChild(createAnalysisResults(queryData.analysis));
+      resultsContainer.appendChild(createAnalysisResults(queryData.analysis, queryData.query, queryData.generatedPageUrl));
       resultsContainer.classList.add('expanded');
     } else {
       analyzeBtn.textContent = 'Analyse';
