@@ -372,7 +372,7 @@ async function loadQueries(block) {
   const container = block.querySelector('.queries-list');
 
   try {
-    const response = await fetch(`${ANALYTICS_ENDPOINT}/api/analytics/queries/recent?limit=10`);
+    const response = await fetch(`${ANALYTICS_ENDPOINT}/api/analytics/queries/recent?limit=5`);
     if (!response.ok) throw new Error('Failed to load queries');
 
     const data = await response.json();
