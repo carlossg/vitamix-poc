@@ -11,8 +11,10 @@ compatibility_flags = ["nodejs_compat"]
 #    wrangler kv:namespace create ANALYTICS
 #    Then update the id below with the returned ID
 #
-# 2. Set API secret for AI analysis:
+# 2. Set API secrets for multi-agent AI analysis:
 #    wrangler secret put ANTHROPIC_API_KEY
+#    wrangler secret put OPENAI_API_KEY
+#    wrangler secret put GOOGLE_API_KEY
 # ============================================
 
 # Environment variables

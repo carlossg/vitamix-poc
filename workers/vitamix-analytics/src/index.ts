@@ -7,6 +7,8 @@
 interface Env {
   ANALYTICS: KVNamespace;
   ANTHROPIC_API_KEY?: string;
+  OPENAI_API_KEY?: string;
+  GOOGLE_API_KEY?: string;
   DEBUG?: string;
 }
 
@@ -435,6 +437,260 @@ async function handleExport(env: Env): Promise<Response> {
   });
 }
 
+// =============================================================================
+// MULTI-AGENT ANALYSIS FUNCTIONS
+// =============================================================================
+
+interface ModelAnalysis {
+  model: string;
+  success: boolean;
+  analysis?: unknown;
+  error?: string;
+}
+
+/**
+ * Call Claude API for analysis
+ */
+async function callClaude(prompt: string, env: Env, maxTokens = 2048): Promise<ModelAnalysis> {
+  if (!env.ANTHROPIC_API_KEY) {
+    return { model: 'claude', success: false, error: 'ANTHROPIC_API_KEY not configured' };
+  }
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('[Claude] API error:', error);
+      return { model: 'claude', success: false, error: 'API request failed' };
+    }
+
+    const result = await response.json() as { content: { type: string; text: string }[] };
+    const text = result.content[0]?.text || '';
+
+    // Parse JSON from response
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return { model: 'claude', success: true, analysis: JSON.parse(jsonMatch[0]) };
+    }
+    return { model: 'claude', success: false, error: 'No JSON in response' };
+  } catch (e) {
+    console.error('[Claude] Error:', e);
+    return { model: 'claude', success: false, error: (e as Error).message };
+  }
+}
+
+/**
+ * Call Gemini API for analysis
+ */
+async function callGemini(prompt: string, env: Env): Promise<ModelAnalysis> {
+  if (!env.GOOGLE_API_KEY) {
+    return { model: 'gemini', success: false, error: 'GOOGLE_API_KEY not configured' };
+  }
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${env.GOOGLE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+          },
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('[Gemini] API error:', error);
+      return { model: 'gemini', success: false, error: 'API request failed' };
+    }
+
+    const result = await response.json() as {
+      candidates?: { content?: { parts?: { text?: string }[] } }[];
+    };
+    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    // Parse JSON from response
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return { model: 'gemini', success: true, analysis: JSON.parse(jsonMatch[0]) };
+    }
+    return { model: 'gemini', success: false, error: 'No JSON in response' };
+  } catch (e) {
+    console.error('[Gemini] Error:', e);
+    return { model: 'gemini', success: false, error: (e as Error).message };
+  }
+}
+
+/**
+ * Call OpenAI API for analysis
+ */
+async function callOpenAI(prompt: string, env: Env): Promise<ModelAnalysis> {
+  if (!env.OPENAI_API_KEY) {
+    return { model: 'gpt', success: false, error: 'OPENAI_API_KEY not configured' };
+  }
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('[OpenAI] API error:', error);
+      return { model: 'gpt', success: false, error: 'API request failed' };
+    }
+
+    const result = await response.json() as {
+      choices?: { message?: { content?: string } }[];
+    };
+    const text = result.choices?.[0]?.message?.content || '';
+
+    // Parse JSON from response
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return { model: 'gpt', success: true, analysis: JSON.parse(jsonMatch[0]) };
+    }
+    return { model: 'gpt', success: false, error: 'No JSON in response' };
+  } catch (e) {
+    console.error('[OpenAI] Error:', e);
+    return { model: 'gpt', success: false, error: (e as Error).message };
+  }
+}
+
+/**
+ * Run multi-agent analysis in parallel (Claude, Gemini, GPT)
+ */
+async function runMultiAgentAnalysis(
+  prompt: string,
+  env: Env
+): Promise<{ analyses: ModelAnalysis[]; successCount: number }> {
+  console.log('[MultiAgent] Starting parallel analysis with 3 models...');
+
+  const results = await Promise.all([
+    callClaude(prompt, env),
+    callGemini(prompt, env),
+    callOpenAI(prompt, env),
+  ]);
+
+  const successCount = results.filter((r) => r.success).length;
+  console.log(`[MultiAgent] Completed: ${successCount}/3 models succeeded`);
+
+  return { analyses: results, successCount };
+}
+
+/**
+ * Synthesize multiple analyses into a unified result using Claude
+ */
+async function synthesizeAnalyses(
+  analyses: ModelAnalysis[],
+  originalPromptContext: string,
+  env: Env
+): Promise<{ success: boolean; synthesis?: unknown; error?: string }> {
+  if (!env.ANTHROPIC_API_KEY) {
+    return { success: false, error: 'ANTHROPIC_API_KEY not configured for synthesis' };
+  }
+
+  const successfulAnalyses = analyses.filter((a) => a.success && a.analysis);
+
+  if (successfulAnalyses.length === 0) {
+    return { success: false, error: 'No successful analyses to synthesize' };
+  }
+
+  // If only one succeeded, return it directly (already synthesized)
+  if (successfulAnalyses.length === 1) {
+    return { success: true, synthesis: successfulAnalyses[0].analysis };
+  }
+
+  // Build synthesis prompt
+  const analysesJson = successfulAnalyses
+    .map((a, i) => `Analysis ${i + 1}:\n${JSON.stringify(a.analysis, null, 2)}`)
+    .join('\n\n');
+
+  const synthesisPrompt = `You are synthesizing ${successfulAnalyses.length} independent AI analyses of the same content into a single unified analysis.
+
+ORIGINAL CONTEXT:
+${originalPromptContext}
+
+INDEPENDENT ANALYSES TO SYNTHESIZE:
+${analysesJson}
+
+SYNTHESIS INSTRUCTIONS:
+1. Create a unified analysis that represents the consensus of all ${successfulAnalyses.length} analyses
+2. For scores: Calculate weighted averages, but use your judgment to adjust based on reasoning quality
+3. For lists (strengths, improvements, suggestions, issues): Merge and deduplicate items, keeping the most actionable and specific ones
+4. For text summaries: Write a new synthesis that captures key insights from all analyses
+5. IMPORTANT: Do NOT mention or reference which analysis said what - present as a single unified view
+6. Maintain the exact same JSON structure as the input analyses
+
+Return ONLY valid JSON with the synthesized result (no markdown, no code blocks, no explanation).`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: synthesisPrompt }],
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('[Synthesis] API error:', error);
+      return { success: false, error: 'Synthesis API request failed' };
+    }
+
+    const result = await response.json() as { content: { type: string; text: string }[] };
+    const text = result.content[0]?.text || '';
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      console.log('[Synthesis] Successfully synthesized analyses');
+      return { success: true, synthesis: JSON.parse(jsonMatch[0]) };
+    }
+    return { success: false, error: 'No JSON in synthesis response' };
+  } catch (e) {
+    console.error('[Synthesis] Error:', e);
+    return { success: false, error: (e as Error).message };
+  }
+}
+
+// =============================================================================
+// ANALYSIS HANDLERS
+// =============================================================================
+
 /**
  * Run AI analysis on recent queries and generated pages
  */
@@ -569,55 +825,25 @@ Return ONLY valid JSON with this exact structure (no markdown, no code blocks):
   "problematicPages": [{"url": "...", "query": "...", "reason": "..."}]
 }`;
 
-  // Call Claude API
-  const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      messages: [
-        {
-          role: 'user',
-          content: analysisPrompt,
-        },
-      ],
-    }),
-  });
+  // Run multi-agent analysis (Claude, Gemini, GPT in parallel)
+  const { analyses, successCount } = await runMultiAgentAnalysis(analysisPrompt, env);
 
-  if (!claudeResponse.ok) {
-    const error = await claudeResponse.text();
-    console.error('Claude API error:', error);
-    return jsonResponse({ error: 'AI analysis failed' }, 500);
+  if (successCount === 0) {
+    const errors = analyses.map((a) => `${a.model}: ${a.error}`).join('; ');
+    console.error('[Analyze] All models failed:', errors);
+    return jsonResponse({ error: 'All AI models failed to analyze' }, 500);
   }
 
-  const claudeResult = await claudeResponse.json() as {
-    content: { type: string; text: string }[];
-  };
+  // Synthesize analyses into unified result
+  const promptContext = `Batch analysis of ${pageContents.length} generated pages from Vitamix AI recommender`;
+  const synthesisResult = await synthesizeAnalyses(analyses, promptContext, env);
 
-  const analysisText = claudeResult.content[0]?.text || '';
-
-  // Parse JSON response
-  let analysis: Omit<AnalysisResult, 'timestamp' | 'pagesAnalyzed'>;
-  try {
-    // Try to extract JSON from the response
-    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      analysis = JSON.parse(jsonMatch[0]);
-    } else {
-      throw new Error('No JSON found in response');
-    }
-  } catch (e) {
-    console.error('Failed to parse analysis:', e, analysisText);
-    return jsonResponse({
-      error: 'Failed to parse AI analysis response',
-      raw: analysisText,
-    }, 500);
+  if (!synthesisResult.success || !synthesisResult.synthesis) {
+    console.error('[Analyze] Synthesis failed:', synthesisResult.error);
+    return jsonResponse({ error: 'Failed to synthesize analyses' }, 500);
   }
+
+  const analysis = synthesisResult.synthesis as Omit<AnalysisResult, 'timestamp' | 'pagesAnalyzed'>;
 
   // Store result
   const result: AnalysisResult = {
@@ -799,53 +1025,25 @@ Return ONLY valid JSON with this exact structure (no markdown, no code blocks):
   "improvements": ["<improvement 1>", "<improvement 2>", "<improvement 3>"]
 }`;
 
-  // Call Claude API
-  const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: analysisPrompt,
-        },
-      ],
-    }),
-  });
+  // Run multi-agent analysis (Claude, Gemini, GPT in parallel)
+  const { analyses, successCount } = await runMultiAgentAnalysis(analysisPrompt, env);
 
-  if (!claudeResponse.ok) {
-    const error = await claudeResponse.text();
-    console.error('Claude API error:', error);
-    return jsonResponse({ error: 'AI analysis failed' }, 500);
+  if (successCount === 0) {
+    const errors = analyses.map((a) => `${a.model}: ${a.error}`).join('; ');
+    console.error('[AnalyzePage] All models failed:', errors);
+    return jsonResponse({ error: 'All AI models failed to analyze' }, 500);
   }
 
-  const claudeResult = await claudeResponse.json() as {
-    content: { type: string; text: string }[];
-  };
+  // Synthesize analyses into unified result
+  const promptContext = `Single page analysis for query: "${query}" at URL: ${pageUrl}`;
+  const synthesisResult = await synthesizeAnalyses(analyses, promptContext, env);
 
-  const analysisText = claudeResult.content[0]?.text || '';
-
-  // Parse JSON response
-  let analysis: SinglePageAnalysis;
-  try {
-    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      analysis = JSON.parse(jsonMatch[0]);
-    } else {
-      throw new Error('No JSON found in response');
-    }
-  } catch (e) {
-    console.error('Failed to parse analysis:', e, analysisText);
-    return jsonResponse({
-      error: 'Failed to parse AI analysis response',
-    }, 500);
+  if (!synthesisResult.success || !synthesisResult.synthesis) {
+    console.error('[AnalyzePage] Synthesis failed:', synthesisResult.error);
+    return jsonResponse({ error: 'Failed to synthesize analyses' }, 500);
   }
+
+  const analysis = synthesisResult.synthesis as SinglePageAnalysis;
 
   // Cache the result
   await env.ANALYTICS.put(cacheKey, JSON.stringify({
