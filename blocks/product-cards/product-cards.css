@@ -203,6 +203,7 @@ a.product-card-image {
 
 /* ===== Price ===== */
 .product-price {
+  margin-top: auto;
   margin-bottom: var(--spacing-md);
 }
 

@@ -37,25 +37,31 @@ export class DAClient {
     const formData = new FormData();
     formData.append('data', new Blob([htmlContent], { type: 'text/html' }), 'index.html');
 
+    const url = `${this.baseUrl}/source/${this.org}/${this.repo}${path}.html`;
+    console.log(`[DAClient] Creating page at: ${url}`);
+    console.log(`[DAClient] Token present: ${!!this.token}, length: ${this.token?.length || 0}`);
+    console.log(`[DAClient] HTML content length: ${htmlContent.length}`);
+
     try {
-      const response = await fetch(
-        `${this.baseUrl}/source/${this.org}/${this.repo}${path}.html`,
-        {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-          body: formData,
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${this.token}`,
         },
-      );
+        body: formData,
+      });
+
+      const responseText = await response.text();
+      console.log(`[DAClient] Response status: ${response.status}`);
+      console.log(`[DAClient] Response body: ${responseText.substring(0, 500)}`);
 
       if (!response.ok) {
-        const error = await response.text();
-        return { success: false, error: `Failed to create page: ${response.status} - ${error}` };
+        return { success: false, error: `Failed to create page: ${response.status} - ${responseText}` };
       }
 
       return { success: true };
     } catch (error) {
+      console.error(`[DAClient] Fetch error:`, error);
       return { success: false, error: (error as Error).message };
     }
   }
@@ -64,33 +70,46 @@ export class DAClient {
    * Upload a media file (image)
    */
   async uploadMedia(
-    filename: string,
+    hash: string,
+    ext: string,
     buffer: ArrayBuffer,
     contentType: string,
+    folderPath: string,
   ): Promise<{ success: boolean; url?: string; error?: string }> {
+    // Media files use ./media_<hash>.<ext> naming convention
+    const filename = `media_${hash}.${ext}`;
     const formData = new FormData();
     formData.append('data', new Blob([buffer], { type: contentType }), filename);
 
+    // Build full path including folder
+    const fullPath = `${folderPath}${filename}`.replace(/\/+/g, '/');
+    console.log(`[DAClient] Uploading media to: ${fullPath}`);
+
     try {
-      const response = await fetch(
-        `${this.baseUrl}/source/${this.org}/${this.repo}/media/${filename}`,
-        {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
-          body: formData,
+      const uploadUrl = `${this.baseUrl}/source/${this.org}/${this.repo}${fullPath}`;
+      console.log(`[DAClient] Upload URL: ${uploadUrl}`);
+
+      // Upload to same folder as the page
+      const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${this.token}`,
         },
-      );
+        body: formData,
+      });
+
+      const responseText = await response.text();
+      console.log(`[DAClient] Upload response: ${response.status} - ${responseText.substring(0, 200)}`);
 
       if (!response.ok) {
-        const error = await response.text();
-        return { success: false, error: `Failed to upload media: ${response.status} - ${error}` };
+        return { success: false, error: `Failed to upload media: ${response.status} - ${responseText}` };
       }
 
+      // Return simple relative path - media is in same folder as page
+      console.log(`[DAClient] Media upload successful, URL: ./${filename}`);
       return {
         success: true,
-        url: `/media/${filename}`,
+        url: `./${filename}`,
       };
     } catch (error) {
       return { success: false, error: (error as Error).message };
@@ -145,12 +164,16 @@ export class AEMAdminClient {
    * Trigger preview for a path
    */
   async preview(path: string): Promise<{ success: boolean; url?: string; error?: string }> {
+    const endpoint = `/preview/${this.org}/${this.site}/${this.ref}${path}`;
+    console.log(`[AEMAdmin] Preview request: ${this.baseUrl}${endpoint}`);
+
     try {
-      const response = await this.request('POST', `/preview/${this.org}/${this.site}/${this.ref}${path}`);
+      const response = await this.request('POST', endpoint);
+      const responseText = await response.text();
+      console.log(`[AEMAdmin] Preview response: ${response.status} - ${responseText.substring(0, 200)}`);
 
       if (!response.ok) {
-        const error = await response.text();
-        return { success: false, error: `Preview failed: ${response.status} - ${error}` };
+        return { success: false, error: `Preview failed: ${response.status} - ${responseText}` };
       }
 
       return {
@@ -158,6 +181,7 @@ export class AEMAdminClient {
         url: `https://${this.ref}--${this.site}--${this.org}.aem.page${path}`,
       };
     } catch (error) {
+      console.error(`[AEMAdmin] Preview error:`, error);
       return { success: false, error: (error as Error).message };
     }
   }
@@ -166,12 +190,16 @@ export class AEMAdminClient {
    * Publish to live
    */
   async publish(path: string): Promise<{ success: boolean; url?: string; error?: string }> {
+    const endpoint = `/live/${this.org}/${this.site}/${this.ref}${path}`;
+    console.log(`[AEMAdmin] Publish request: ${this.baseUrl}${endpoint}`);
+
     try {
-      const response = await this.request('POST', `/live/${this.org}/${this.site}/${this.ref}${path}`);
+      const response = await this.request('POST', endpoint);
+      const responseText = await response.text();
+      console.log(`[AEMAdmin] Publish response: ${response.status} - ${responseText.substring(0, 200)}`);
 
       if (!response.ok) {
-        const error = await response.text();
-        return { success: false, error: `Publish failed: ${response.status} - ${error}` };
+        return { success: false, error: `Publish failed: ${response.status} - ${responseText}` };
       }
 
       return {
@@ -179,6 +207,7 @@ export class AEMAdminClient {
         url: `https://${this.ref}--${this.site}--${this.org}.aem.live${path}`,
       };
     } catch (error) {
+      console.error(`[AEMAdmin] Publish error:`, error);
       return { success: false, error: (error as Error).message };
     }
   }
@@ -286,6 +315,121 @@ ${sectionsHtml}
 }
 
 /**
+ * Escape special characters for use in RegExp
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Generate a content-based hash for media files
+ * Creates a hash similar to what AEM uses (hex string from image content)
+ */
+async function generateContentHash(buffer: ArrayBuffer): Promise<string> {
+  // Use SHA-256 and return first 40 chars (similar to SHA-1 length used by AEM)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  // Return first 40 chars prefixed with 1 (matching AEM format like "1d970deb539...")
+  return '1' + hashHex.substring(0, 39);
+}
+
+/**
+ * Get file extension from URL or content-type
+ */
+function getImageExtension(url: string, contentType?: string): string {
+  // Try to get from content-type first
+  if (contentType) {
+    const match = contentType.match(/image\/(\w+)/);
+    if (match) {
+      const ext = match[1].toLowerCase();
+      if (ext === 'jpeg') return 'jpg';
+      return ext;
+    }
+  }
+
+  // Fall back to URL
+  const urlPath = new URL(url).pathname;
+  const ext = urlPath.split('.').pop()?.toLowerCase() || 'jpg';
+  return ext.split('?')[0]; // Remove query params
+}
+
+/**
+ * Download an image and upload it to DA media folder
+ */
+async function processExternalImage(
+  imageUrl: string,
+  daClient: DAClient,
+  folderPath: string,
+): Promise<string | null> {
+  try {
+    console.log(`[DAClient] Downloading image: ${imageUrl}`);
+
+    const response = await fetch(imageUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': 'https://www.vitamix.com/',
+      },
+    });
+
+    console.log(`[DAClient] Download response: ${response.status} ${response.statusText}`);
+
+    if (!response.ok) {
+      console.error(`[DAClient] Failed to download image: ${response.status} - URL: ${imageUrl}`);
+      return null;
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    const buffer = await response.arrayBuffer();
+    console.log(`[DAClient] Downloaded ${buffer.byteLength} bytes, type: ${contentType}`);
+
+    const ext = getImageExtension(imageUrl, contentType);
+    const hash = await generateContentHash(buffer);
+
+    console.log(`[DAClient] Uploading image as: media_${hash}.${ext} (${buffer.byteLength} bytes)`);
+
+    const uploadResult = await daClient.uploadMedia(hash, ext, buffer, contentType, folderPath);
+
+    if (uploadResult.success && uploadResult.url) {
+      console.log(`[DAClient] Image uploaded successfully: ${uploadResult.url}`);
+
+      // Media files with media_ prefix are automatically served after page preview/publish
+      // No need to separately preview/publish the media file
+
+      return uploadResult.url;
+    }
+
+    console.error(`[DAClient] Failed to upload image: ${uploadResult.error}`);
+    return null;
+  } catch (error) {
+    console.error(`[DAClient] Image processing error:`, error);
+    return null;
+  }
+}
+
+/**
+ * Process HTML images - currently keeping external URLs as-is
+ *
+ * NOTE: DA media upload works (files go to source) but content delivery
+ * from content.da.live doesn't serve the uploaded files. This requires
+ * investigation into the proper DA media sync process.
+ *
+ * For now, external URLs are kept and will show as broken in DA preview.
+ * A future solution could use Cloudflare R2/Images for reliable image hosting.
+ */
+async function processHtmlImages(html: string, _daClient: DAClient, pagePath: string): Promise<string> {
+  console.log(`[DAClient] Processing images for page: ${pagePath}`);
+  console.log(`[DAClient] NOTE: Image upload to DA source works but content delivery is not synced.`);
+  console.log(`[DAClient] Keeping external URLs as-is for now.`);
+
+  // For now, just return HTML unchanged - external images will be kept
+  // TODO: Implement Cloudflare R2 storage for reliable image hosting
+  return html;
+}
+
+/**
  * Complete persist and publish flow
  */
 export async function persistAndPublish(
@@ -297,8 +441,13 @@ export async function persistAndPublish(
   const adminClient = new AEMAdminClient(env);
 
   try {
+    // 0. Process external images - download and upload to DA media
+    console.log('[DAClient] Processing external images...');
+    const processedHtml = await processHtmlImages(html, daClient, path);
+    console.log('[DAClient] Image processing complete');
+
     // 1. Create page in DA
-    const createResult = await daClient.createPage(path, html);
+    const createResult = await daClient.createPage(path, processedHtml);
     if (!createResult.success) {
       return { success: false, error: createResult.error };
     }

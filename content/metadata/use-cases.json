@@ -3,24 +3,48 @@
     {
       "id": "smoothies",
       "name": "Smoothies & Shakes",
-      "description": "Daily smoothies, protein shakes, and fruit blends",
+      "description": "Daily smoothies, protein shakes, and fruit blends - a favorite for kids who love fruity drinks",
       "icon": "smoothie",
       "relevantFeatures": ["variable-speed", "pulse", "self-cleaning"],
       "recommendedSeries": ["Ascent", "Explorian", "Propel"],
       "difficultyLevel": "easy",
       "timeInvestment": "5-10 minutes",
-      "popularRecipes": ["green-smoothie", "protein-shake", "acai-bowl"]
+      "popularRecipes": ["green-smoothie", "protein-shake", "acai-bowl"],
+      "kidFriendlyBenefits": [
+        "Fun, colorful drinks that kids love to make and drink",
+        "Easy way to get fruits into their daily diet",
+        "Can sneak in spinach or kale - berries mask the green color",
+        "Quick breakfast option for busy school mornings"
+      ],
+      "familyTips": [
+        "Let kids pick their favorite fruits to make it a fun activity",
+        "Frozen fruit creates a thicker, milkshake-like texture kids love",
+        "Add a small handful of spinach to berry smoothies - undetectable",
+        "Use fun cups and straws to make smoothie time exciting"
+      ]
     },
     {
       "id": "soups",
       "name": "Hot Soups",
-      "description": "Hot soups made from scratch using friction heat",
+      "description": "Hot soups made from scratch using friction heat - perfect for sneaking vegetables into picky eaters' meals",
       "icon": "soup",
       "relevantFeatures": ["hot-soup-program", "variable-speed", "high-power"],
       "recommendedSeries": ["Ascent", "5200"],
       "difficultyLevel": "medium",
       "timeInvestment": "10-15 minutes",
-      "popularRecipes": ["tomato-soup", "butternut-squash-soup", "broccoli-cheddar"]
+      "popularRecipes": ["tomato-soup", "butternut-squash-soup", "broccoli-cheddar"],
+      "kidFriendlyBenefits": [
+        "Blends vegetables into smooth, undetectable textures",
+        "Creates creamy soups that hide greens in plain sight",
+        "Makes nutritious meals that even picky eaters love",
+        "Hot soup program heats and blends in under 10 minutes"
+      ],
+      "familyTips": [
+        "Add spinach or kale to tomato soup - the red color hides the greens",
+        "Blend carrots and sweet potatoes for naturally sweet, kid-approved soups",
+        "Use the friction heat to make soup without a stove - faster cleanup",
+        "Make large batches and freeze individual portions for busy weeknights"
+      ]
     },
     {
       "id": "nut-butters",

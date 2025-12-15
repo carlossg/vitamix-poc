@@ -112,6 +112,16 @@ Keywords: "gift", "for my", "birthday", "wedding", "christmas", "present"
 - Surface gift card option
 - Block sequence: hero, product-recommendation, product-cards, follow-up
 
+### 5b. Family with Picky Eaters / Kids Queries
+Keywords: "picky eater", "picky eaters", "kids", "children", "family of", "son", "daughter", "doesn't like veggies", "won't eat vegetables", "hiding vegetables", "sneak vegetables"
+- Lead with empathetic hero acknowledging the parenting challenge
+- EMPHASIZE soup-making capabilities as a solution for hiding vegetables
+- Highlight that soups can sneak in nutrition without kids noticing
+- Include smoothie-making for kids who love them
+- Focus on self-cleaning and quick prep for busy parents
+- Block sequence: hero (family-focused), feature-highlights (soup + smoothie capabilities), recipe-cards (kid-friendly soups AND smoothies), product-recommendation, follow-up
+- Content guidance should mention: "Your Vitamix can make creamy, delicious soups that hide vegetables in plain sight - even green ones! Kids love the smooth texture and won't detect the hidden nutrition."
+
 ### 6. Commercial/B2B Queries
 Keywords: "restaurant", "business", "commercial", "bulk", "b2b", "professional kitchen"
 - Focus on durability, warranty, volume

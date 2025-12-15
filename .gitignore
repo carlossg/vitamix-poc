@@ -14,3 +14,7 @@ tools/crawler/node_modules/*
 workers/embed-recipes/node_modules/*
 workers/vitamix-recommender/node_modules/*
 workers/vitamix-analytics/node_modules/*
+
+# Cloudflare Workers secrets and temp files
+.dev.vars
+.wrangler/

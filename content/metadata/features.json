@@ -31,9 +31,16 @@
     {
       "id": "hot-soup-program",
       "name": "Hot Soup Program",
-      "description": "Creates steaming hot soup from cold ingredients in minutes",
-      "benefit": "Friction heat for fresh soup without a stove",
-      "availableIn": ["ascent-x3", "ascent-x4", "ascent-x5", "propel-series-750"]
+      "description": "Creates steaming hot soup from cold ingredients in minutes - perfect for making silky-smooth soups that hide vegetables from picky eaters",
+      "benefit": "Friction heat for fresh soup without a stove. Blends veggies so smooth that even the pickiest eaters won't detect them. Great for busy parents who want to sneak nutrition into meals.",
+      "availableIn": ["ascent-x3", "ascent-x4", "ascent-x5", "propel-series-750"],
+      "familyBenefits": [
+        "Blends vegetables into completely smooth, undetectable textures",
+        "Creates hot soup in under 10 minutes from cold ingredients",
+        "No need to use the stove - safer around kids",
+        "Makes large family-sized batches",
+        "Perfect for hiding greens like spinach and kale in tomato-based soups"
+      ]
     },
     {
       "id": "touchscreen",

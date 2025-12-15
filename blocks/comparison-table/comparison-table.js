@@ -11,6 +11,31 @@
  * | **Price**        | $649  | $549  | $349  |  <- Spec rows
  * | **Motor**        | 2.2HP | 2.2HP | 2.0HP |
  */
+
+/**
+ * Generate a Vitamix product URL from a product name
+ * @param {string} productName - Product name like "Ascent® X5" or "Vitamix A3500"
+ * @returns {string} URL to the product page
+ */
+function generateProductUrl(productName) {
+  // Remove "Vitamix" prefix if present
+  let slug = productName.replace(/^Vitamix\s*/i, '');
+  // Remove trademark symbols
+  slug = slug.replace(/[®™©]/g, '');
+  // Convert to lowercase
+  slug = slug.toLowerCase();
+  // Replace spaces with hyphens
+  slug = slug.replace(/\s+/g, '-');
+  // Remove any remaining special characters except hyphens
+  slug = slug.replace(/[^a-z0-9-]/g, '');
+  // Remove consecutive hyphens
+  slug = slug.replace(/-+/g, '-');
+  // Trim hyphens from start/end
+  slug = slug.replace(/^-|-$/g, '');
+
+  return `https://www.vitamix.com/us/en_us/shop/${slug}`;
+}
+
 export default function decorate(block) {
   const rows = [...block.children];
   if (rows.length === 0) return;
@@ -38,9 +63,19 @@ export default function decorate(block) {
         th.textContent = cell.textContent.trim() || '';
       } else {
         th.className = 'comparison-table-product';
-        // Extract product name (might be in strong tag)
+        // Extract product name (might be in strong tag or link)
         const strong = cell.querySelector('strong');
-        th.textContent = strong ? strong.textContent : cell.textContent.trim();
+        const existingLink = cell.querySelector('a');
+        const productName = strong ? strong.textContent : cell.textContent.trim();
+
+        // Create link to product page
+        const link = document.createElement('a');
+        link.textContent = productName;
+        // Use existing link href if available, otherwise generate from product name
+        link.href = existingLink ? existingLink.href : generateProductUrl(productName);
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        th.appendChild(link);
       }
       tr.appendChild(th);
     });
@@ -48,8 +83,28 @@ export default function decorate(block) {
     thead.appendChild(tr);
   }
 
-  // Process remaining rows as spec comparisons
+  // Track number of products for colspan
+  const productCount = rows[0] ? [...rows[0].children].length : 1;
+
+  // Separate recommendation rows from spec rows
+  const specRows = [];
+  const recommendationRows = [];
+
   rows.slice(1).forEach((row) => {
+    const firstCell = row.children[0];
+    const firstCellText = firstCell ? firstCell.textContent.trim().toLowerCase() : '';
+
+    // Check if this is a recommendation row
+    if (firstCellText.startsWith('best for') || firstCellText.startsWith('recommended')
+        || firstCellText.startsWith('our pick') || firstCellText.startsWith('winner')) {
+      recommendationRows.push(row);
+    } else {
+      specRows.push(row);
+    }
+  });
+
+  // Process spec rows
+  specRows.forEach((row) => {
     const tr = document.createElement('tr');
     const cells = [...row.children];
 
@@ -105,9 +160,97 @@ export default function decorate(block) {
   table.appendChild(thead);
   table.appendChild(tbody);
 
+  // Process recommendation rows as tfoot
+  if (recommendationRows.length > 0) {
+    const tfoot = document.createElement('tfoot');
+
+    recommendationRows.forEach((row) => {
+      // Parse recommendation text: "Best for X: Product Name"
+      const firstCell = row.children[0];
+      const fullText = firstCell ? firstCell.textContent.trim() : '';
+
+      // Skip if recommendation is "none of them" or similar non-recommendation
+      const lowerText = fullText.toLowerCase();
+      if (lowerText.includes('none of') || lowerText.includes('no clear')
+          || lowerText.includes('not recommended') || lowerText.includes('n/a')
+          || lowerText.includes('no winner') || lowerText.includes('no best')) {
+        return; // Skip this recommendation row
+      }
+
+      const tr = document.createElement('tr');
+      tr.className = 'comparison-table-recommendation';
+
+      const td = document.createElement('td');
+      td.colSpan = productCount;
+      td.className = 'comparison-table-recommendation-cell';
+
+      // Try to extract the reason and product name
+      const colonIndex = fullText.indexOf(':');
+      if (colonIndex > -1) {
+        const reason = fullText.substring(0, colonIndex).trim();
+        const productNameFull = fullText.substring(colonIndex + 1).trim();
+
+        // Extract clean product name (without parenthetical notes) for URL
+        // e.g., "Propel® 750 Classic Bundle (has Hot Soup Program)" -> "Propel® 750 Classic Bundle"
+        const cleanProductName = productNameFull.replace(/\s*\([^)]*\)\s*$/, '').trim();
+
+        // Create recommendation banner content
+        const icon = document.createElement('span');
+        icon.className = 'recommendation-icon';
+        icon.textContent = '🏆';
+        icon.setAttribute('aria-hidden', 'true');
+
+        const textWrapper = document.createElement('span');
+        textWrapper.className = 'recommendation-text';
+
+        const reasonSpan = document.createElement('span');
+        reasonSpan.className = 'recommendation-reason';
+        reasonSpan.textContent = reason;
+
+        const productSpan = document.createElement('span');
+        productSpan.className = 'recommendation-product';
+
+        // Make product name a link - display full name but use clean name for URL
+        const productLink = document.createElement('a');
+        productLink.textContent = productNameFull;
+        productLink.href = generateProductUrl(cleanProductName);
+        productLink.target = '_blank';
+        productLink.rel = 'noopener noreferrer';
+        productSpan.appendChild(productLink);
+
+        textWrapper.appendChild(reasonSpan);
+        textWrapper.appendChild(document.createTextNode(': '));
+        textWrapper.appendChild(productSpan);
+
+        td.appendChild(icon);
+        td.appendChild(textWrapper);
+      } else {
+        // No colon, just show the text with icon
+        const icon = document.createElement('span');
+        icon.className = 'recommendation-icon';
+        icon.textContent = '🏆';
+        icon.setAttribute('aria-hidden', 'true');
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'recommendation-text';
+        textSpan.textContent = fullText;
+
+        td.appendChild(icon);
+        td.appendChild(textSpan);
+      }
+
+      tr.appendChild(td);
+      tfoot.appendChild(tr);
+    });
+
+    // Only append tfoot if it has rows
+    if (tfoot.children.length > 0) {
+      table.appendChild(tfoot);
+    }
+  }
+
   // Track number of products for responsive styling
-  const productCount = rows[0] ? [...rows[0].children].length - 1 : 0;
-  block.dataset.products = productCount;
+  block.dataset.products = productCount - 1;
 
   block.textContent = '';
   block.appendChild(table);

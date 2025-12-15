@@ -504,14 +504,15 @@ export interface RAGContext {
 
 // Keywords to match against use cases and product features
 const USE_CASE_KEYWORDS: Record<string, string[]> = {
-  smoothies: ['smoothie', 'smoothies', 'shake', 'shakes', 'fruit', 'frozen'],
-  soups: ['soup', 'soups', 'hot soup', 'hot soups', 'puree', 'pureed'],
+  smoothies: ['smoothie', 'smoothies', 'shake', 'shakes', 'fruit', 'frozen', 'kids smoothie', 'morning shake'],
+  soups: ['soup', 'soups', 'hot soup', 'hot soups', 'puree', 'pureed', 'picky eater', 'picky eaters', 'hide vegetables', 'hiding vegetables', 'sneak vegetables', 'doesn\'t like veggies', 'won\'t eat vegetables', 'green soup'],
   'nut-butters': ['nut butter', 'nut butters', 'peanut butter', 'almond butter', 'nuts'],
   'frozen-desserts': ['ice cream', 'frozen dessert', 'sorbet', 'frozen treat', 'nice cream'],
   grinding: ['grind', 'grinding', 'flour', 'grain', 'coffee'],
   dips: ['dip', 'dips', 'hummus', 'salsa', 'guacamole'],
   baby: ['baby food', 'baby', 'infant', 'toddler'],
   cocktails: ['cocktail', 'cocktails', 'margarita', 'frozen drink'],
+  family: ['family', 'kids', 'children', 'son', 'daughter', 'family of'],
 };
 
 function extractKeywords(query: string): string[] {

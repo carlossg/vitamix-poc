@@ -39,25 +39,26 @@
         "timeAvailability": "limited",
         "cookingSkill": "varies"
       },
-      "primaryGoals": ["quick family meals", "baby food", "hiding vegetables"],
-      "keyBarriers": ["time", "picky eaters", "cleanup hassle"],
+      "primaryGoals": ["quick family meals", "baby food", "hiding vegetables", "soups that kids will eat"],
+      "keyBarriers": ["time", "picky eaters", "cleanup hassle", "kids who won't eat vegetables"],
       "emotionalState": {
-        "frustrations": ["complicated kitchen gadgets", "endless cleanup"],
-        "hopes": ["getting kids to eat healthier", "simplifying meal prep"],
-        "fears": ["expensive equipment collecting dust"]
+        "frustrations": ["complicated kitchen gadgets", "endless cleanup", "getting kids to eat healthy"],
+        "hopes": ["getting kids to eat healthier", "simplifying meal prep", "sneaking veggies into meals"],
+        "fears": ["expensive equipment collecting dust", "kids refusing healthy food"]
       },
       "productPriorities": [
         {"attribute": "ease of use", "importance": "high"},
         {"attribute": "self-cleaning", "importance": "high"},
-        {"attribute": "versatility", "importance": "high"}
+        {"attribute": "versatility", "importance": "high"},
+        {"attribute": "hot soup program", "importance": "high"}
       ],
       "effectiveMessaging": {
-        "validationPhrases": ["We know your time is precious"],
-        "benefitEmphasis": ["one-touch programs", "self-cleaning in 60 seconds"],
-        "proofPoints": ["make soup AND clean up in 15 minutes"],
-        "visualizations": ["happy kids drinking smoothies", "quick weeknight dinners"]
+        "validationPhrases": ["We know your time is precious", "Picky eaters? We've got you covered"],
+        "benefitEmphasis": ["one-touch programs", "self-cleaning in 60 seconds", "soups that hide vegetables"],
+        "proofPoints": ["make soup AND clean up in 15 minutes", "blend veggies so smooth kids can't detect them"],
+        "visualizations": ["happy kids drinking smoothies", "quick weeknight dinners", "creamy soups that hide greens"]
       },
-      "triggerPhrases": ["family", "kids", "baby food", "busy", "quick", "easy cleanup"],
+      "triggerPhrases": ["family", "kids", "baby food", "busy", "quick", "easy cleanup", "picky eater", "picky eaters", "son", "daughter", "children", "doesn't like veggies", "won't eat vegetables", "hiding vegetables", "sneak vegetables", "family of"],
       "recommendedProducts": ["ascent-x4", "ascent-x5", "propel-series-750"]
     },
     {
