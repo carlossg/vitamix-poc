@@ -172,6 +172,68 @@ export function getRecipeCategories(): string[] {
   return recipeCategories;
 }
 
+/**
+ * Search recipes across name, description, and ingredients.
+ * Uses score-based ranking for relevance.
+ */
+export function searchRecipes(query: string, maxResults = 50): Recipe[] {
+  const lowerQuery = query.toLowerCase();
+  const queryWords = lowerQuery.split(/\s+/).filter(w => w.length > 2);
+
+  if (queryWords.length === 0) return [];
+
+  const scored = recipes.map(recipe => {
+    let score = 0;
+
+    // Name matching (highest weight)
+    const lowerName = recipe.name.toLowerCase();
+    if (lowerName.includes(lowerQuery)) {
+      score += 10; // Exact phrase match in name
+    } else {
+      for (const word of queryWords) {
+        if (lowerName.includes(word)) score += 3;
+      }
+    }
+
+    // Description matching
+    if (recipe.description) {
+      const lowerDesc = recipe.description.toLowerCase();
+      if (lowerDesc.includes(lowerQuery)) {
+        score += 5;
+      } else {
+        for (const word of queryWords) {
+          if (lowerDesc.includes(word)) score += 1;
+        }
+      }
+    }
+
+    // Ingredient matching (key functionality for ingredient-based search)
+    if (recipe.ingredients?.length) {
+      for (const ingredient of recipe.ingredients) {
+        if (!ingredient.item) continue;
+        const lowerItem = ingredient.item.toLowerCase();
+
+        // Check if ingredient matches query or query contains ingredient
+        if (lowerItem.includes(lowerQuery) || lowerQuery.includes(lowerItem)) {
+          score += 8; // Strong match for exact ingredient
+        } else {
+          for (const word of queryWords) {
+            if (lowerItem.includes(word)) score += 4;
+          }
+        }
+      }
+    }
+
+    return { recipe, score };
+  });
+
+  return scored
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxResults)
+    .map(s => s.recipe);
+}
+
 // ============================================
 // Use Case & Feature Queries
 // ============================================
@@ -502,6 +564,40 @@ export interface RAGContext {
   contentSummary: ContentSummary;
 }
 
+// Common ingredient keywords for detection in user queries
+const COMMON_INGREDIENTS: string[] = [
+  // Fruits
+  'strawberry', 'strawberries', 'banana', 'bananas', 'blueberry', 'blueberries',
+  'apple', 'apples', 'mango', 'mangoes', 'pineapple', 'orange', 'oranges',
+  'peach', 'peaches', 'raspberry', 'raspberries', 'blackberry', 'blackberries',
+  'kale', 'spinach', 'avocado', 'acai', 'berry', 'berries', 'grape', 'grapes',
+  'cherry', 'cherries', 'watermelon', 'papaya', 'lemon', 'lime', 'cranberry',
+  // Vegetables
+  'carrot', 'carrots', 'celery', 'beet', 'beets', 'cucumber', 'tomato', 'tomatoes',
+  'broccoli', 'cauliflower', 'ginger', 'garlic', 'onion', 'pepper', 'sweet potato',
+  'squash', 'zucchini', 'pumpkin',
+  // Nuts & Seeds
+  'almond', 'almonds', 'cashew', 'cashews', 'peanut', 'peanuts', 'walnut', 'walnuts',
+  'hazelnut', 'hazelnuts', 'chia', 'flax', 'hemp', 'sunflower',
+  // Other
+  'coconut', 'oat', 'oats', 'chocolate', 'cocoa', 'cacao', 'vanilla', 'honey',
+  'yogurt', 'milk', 'protein', 'basil', 'mint', 'cilantro', 'turmeric', 'matcha',
+  'coffee', 'espresso', 'cinnamon',
+];
+
+/**
+ * Extract ingredient terms from a user query.
+ * Returns matching ingredient keywords found in the query.
+ */
+export function extractIngredients(query: string): string[] {
+  const lowerQuery = query.toLowerCase();
+  return COMMON_INGREDIENTS.filter(ingredient => {
+    // Use word boundary matching to avoid partial matches
+    const regex = new RegExp(`\\b${ingredient}\\b`, 'i');
+    return regex.test(lowerQuery);
+  });
+}
+
 // Keywords to match against use cases and product features
 const USE_CASE_KEYWORDS: Record<string, string[]> = {
   smoothies: ['smoothie', 'smoothies', 'shake', 'shakes', 'fruit', 'frozen', 'kids smoothie', 'morning shake'],
@@ -583,6 +679,9 @@ export function buildRAGContext(
   // Extract use case keywords from query
   const detectedKeywords = extractKeywords(query);
 
+  // Extract ingredient terms from query (NEW)
+  const detectedIngredients = extractIngredients(query);
+
   // Extract product model names from query
   const productModels = extractProductModels(query);
 
@@ -651,17 +750,41 @@ export function buildRAGContext(
   // Find relevant recipes
   let relevantRecipes: Recipe[] = [];
 
-  // Try category-based recipe search first
-  for (const keyword of detectedKeywords) {
-    const categoryRecipes = recipes.filter(r =>
-      r.category?.toLowerCase().includes(keyword) ||
-      r.name.toLowerCase().includes(keyword) ||
-      r.description?.toLowerCase().includes(keyword)
-    );
-    relevantRecipes = [...relevantRecipes, ...categoryRecipes];
+  // PRIORITY 1: If ingredients detected, use ingredient-based search (NEW)
+  if (detectedIngredients.length > 0) {
+    const ingredientQuery = detectedIngredients.join(' ');
+    const ingredientRecipes = searchRecipes(ingredientQuery, maxRecipes * 2);
+    relevantRecipes = [...ingredientRecipes];
   }
 
-  // If no recipes from keywords, try use cases
+  // PRIORITY 2: Also search using the full query (searches name, description, AND ingredients)
+  if (relevantRecipes.length < maxRecipes) {
+    const queryRecipes = searchRecipes(query, maxRecipes);
+    // Add unique recipes not already found
+    for (const r of queryRecipes) {
+      if (!relevantRecipes.some(existing => existing.name === r.name)) {
+        relevantRecipes.push(r);
+      }
+    }
+  }
+
+  // PRIORITY 3: Try category-based recipe search
+  if (relevantRecipes.length < maxRecipes) {
+    for (const keyword of detectedKeywords) {
+      const categoryRecipes = recipes.filter(r =>
+        r.category?.toLowerCase().includes(keyword) ||
+        r.name.toLowerCase().includes(keyword) ||
+        r.description?.toLowerCase().includes(keyword)
+      );
+      for (const r of categoryRecipes) {
+        if (!relevantRecipes.some(existing => existing.name === r.name)) {
+          relevantRecipes.push(r);
+        }
+      }
+    }
+  }
+
+  // PRIORITY 4: If no recipes from keywords, try use cases
   if (relevantRecipes.length === 0 && relevantUseCases.length > 0) {
     for (const uc of relevantUseCases) {
       const categoryRecipes = getRecipesByCategory(uc.id);
@@ -669,7 +792,7 @@ export function buildRAGContext(
     }
   }
 
-  // Last resort: search by query words
+  // PRIORITY 5: Last resort - search by query words in name/category
   if (relevantRecipes.length === 0) {
     const queryWords = lowerQuery.split(/\s+/).filter(w => w.length > 3);
     relevantRecipes = recipes.filter(r =>
@@ -728,6 +851,8 @@ export default {
   getRecipesByDifficulty,
   getRecipesForProduct,
   getRecipeCategories,
+  searchRecipes,
+  extractIngredients,
 
   // Use Cases & Features
   getAllUseCases,

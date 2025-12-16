@@ -240,6 +240,7 @@ export interface IntentClassification {
     useCases: string[];
     features: string[];
     priceRange?: string;
+    ingredients?: string[];  // Ingredient terms detected in query
   };
   journeyStage: JourneyStage;
 }
