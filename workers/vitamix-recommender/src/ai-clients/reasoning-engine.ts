@@ -19,7 +19,7 @@ import type {
   UserJourneyPlan,
 } from '../types';
 import type { RAGContext } from '../content/content-service';
-import { ModelFactory, type Message } from './model-factory';
+import { createModelFactory, type Message } from './model-factory';
 
 // ============================================
 // Reasoning System Prompt
@@ -529,9 +529,10 @@ export async function analyzeAndSelectBlocks(
   ragContext: RAGContext,
   env: Env,
   sessionContext?: SessionContext,
-  preset?: string
+  preset?: string,
+  modelOverride?: string
 ): Promise<ReasoningResult> {
-  const modelFactory = new ModelFactory(preset || env.MODEL_PRESET || 'production');
+  const modelFactory = createModelFactory(env, preset, modelOverride);
 
   // Debug: Log session context
   const lastQuery = sessionContext?.previousQueries?.slice(-1)[0];

@@ -440,7 +440,7 @@ export interface GenerationCompleteData {
 
 export type ModelRole = 'reasoning' | 'content' | 'classification' | 'validation';
 
-export type ModelProvider = 'anthropic' | 'cerebras' | 'google';
+export type ModelProvider = 'anthropic' | 'cerebras' | 'google' | 'lmstudio';
 
 export interface ModelConfig {
   provider: ModelProvider;
@@ -484,5 +484,8 @@ export interface Env {
 
   // Configuration
   MODEL_PRESET?: string;
+  GEMINI_MODEL_VERSION?: string;
+  LMSTUDIO_BASE_URL?: string;
+  LMSTUDIO_MODEL?: string;
   DEBUG?: string;
 }

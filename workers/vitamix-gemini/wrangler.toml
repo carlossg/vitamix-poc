@@ -30,8 +30,10 @@ compatibility_flags = ["nodejs_compat"]
 
 # Environment variables (secrets should be set via wrangler secret)
 [vars]
-MODEL_PRESET = "production"  # Options: production, fast, all-cerebras, gemini-production, gemini-3-all, gemini-2.5-all, gemini-mixed
+MODEL_PRESET = "production"  # Options: production, fast, all-cerebras, gemini-*, local-gemma, local-fast
 GEMINI_MODEL_VERSION = "gemini-3-flash-preview"  # For Gemini presets: gemini-3-flash-preview or gemini-2.5-flash
+LMSTUDIO_BASE_URL = "http://localhost:1234/v1"  # Local LMStudio server URL
+LMSTUDIO_MODEL = "gemma-2-9b-it"  # Model name loaded in LMStudio (adjust to your loaded model)
 DEBUG = "false"
 # DA (Document Authoring) configuration
 DA_ORG = "paolomoz"

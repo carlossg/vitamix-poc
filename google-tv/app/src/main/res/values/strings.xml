@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vitamix</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="label_vitamix_url">Vitamix URL</string>
+    <string name="hint_vitamix_url">https://...</string>
+    <string name="button_save">Save</string>
+    <string name="msg_url_saved">URL saved successfully</string>
+</resources>

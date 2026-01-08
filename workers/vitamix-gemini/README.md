@@ -8,6 +8,7 @@ This unified worker powers the Vitamix AI Recommender with support for multiple 
 - **Anthropic Claude** (Opus, Sonnet, Haiku) - High-quality reasoning and content
 - **Cerebras** (70B, 120B models) - Ultra-fast inference
 - **Google Gemini Flash** (3.0 Preview, 2.5) - Latest Google models
+- **LMStudio** (Gemma, Llama, etc.) - Local models for zero-cost development
 
 ### Key Features
 
@@ -41,6 +42,14 @@ This unified worker powers the Vitamix AI Recommender with support for multiple 
 #### Google Gemini
 - **gemini-3-flash-preview** - Latest model with enhanced capabilities
 - **gemini-2.5-flash** - Stable production model
+
+#### LMStudio (Local)
+- **gemma-2-9b-it** - Google's Gemma 2 (9B parameters) - Recommended
+- **gemma-2-2b-it** - Smaller, faster Gemma variant
+- **llama-3.2-8b-instruct** - Meta's Llama 3.2
+- **Any OpenAI-compatible local model**
+
+> 📖 **[Complete LMStudio Setup Guide →](LMSTUDIO-SETUP.md)**
 
 ## Model Presets
 
@@ -81,6 +90,22 @@ The worker includes optimized presets for different use cases:
 - Reasoning: Gemini 3.0 Flash Preview
 - Content/Classification/Validation: Gemini 2.5 Flash
 
+### Local Development Presets (LMStudio)
+
+**`local-gemma`** (Zero Cost, 100% Private)
+- All roles: Local LMStudio (Gemma/Llama/etc.)
+- Requires: LMStudio running locally
+- Speed: Medium (depends on hardware)
+- Cost: **$0.00**
+
+**`local-fast`** (Hybrid)
+- Reasoning: Cerebras (cloud, fast)
+- Content/Classification/Validation: LMStudio (local, free)
+- Requires: CEREBRAS_API_KEY + LMStudio
+- Cost: ~$0.002-0.01 per query
+
+> 📖 **[LMStudio Setup Instructions →](LMSTUDIO-SETUP.md)**
+
 ## API Endpoints
 
 ### `GET /generate`
@@ -119,6 +144,9 @@ curl "https://vitamix-gemini.workers.dev/generate?query=smoothie%20recipes&prese
 
 # Override Gemini model version
 curl "https://vitamix-gemini.workers.dev/generate?query=smoothie%20recipes&preset=gemini-production&model=gemini-2.5-flash"
+
+# Use local LMStudio (zero cost!)
+curl "http://localhost:8787/generate?query=smoothies&preset=local-gemma"
 ```
 
 ### `POST /api/persist`
@@ -191,6 +219,9 @@ wrangler secret put CEREBRAS_API_KEY
 # Google Gemini (for gemini-* presets)
 wrangler secret put GOOGLE_API_KEY
 
+# LMStudio - No API key needed! Just run LMStudio locally
+# See LMSTUDIO-SETUP.md for complete instructions
+
 # AEM Document Authoring (S2S - Recommended)
 wrangler secret put DA_CLIENT_ID
 wrangler secret put DA_CLIENT_SECRET
@@ -205,11 +236,14 @@ wrangler secret put DA_TOKEN
 - **Anthropic**: [Get key from Anthropic Console](https://console.anthropic.com/)
 - **Cerebras**: [Get key from Cerebras Cloud](https://cloud.cerebras.ai/)
 - **Google Gemini**: [Get key from Google AI Studio](https://makersuite.google.com/app/apikey)
+- **LMStudio**: No API key needed - see [LMSTUDIO-SETUP.md](LMSTUDIO-SETUP.md)
 
 **Note:** You only need to configure the API keys for the providers you plan to use. For example:
 - Using `production` or `fast` preset? → Need ANTHROPIC_API_KEY and CEREBRAS_API_KEY
 - Using `all-cerebras` preset? → Only need CEREBRAS_API_KEY
 - Using `gemini-*` presets? → Only need GOOGLE_API_KEY
+- Using `local-gemma` preset? → **No API keys needed!** Just run LMStudio
+- Using `local-fast` preset? → Need CEREBRAS_API_KEY + LMStudio
 
 ### 3. Create KV Namespace
 
@@ -267,6 +301,8 @@ Set in `wrangler.toml`:
   - Options: `production`, `fast`, `all-cerebras`, `gemini-production`, `gemini-3-all`, `gemini-2.5-all`, `gemini-mixed`
 - `GEMINI_MODEL_VERSION` - Default Gemini model (default: `gemini-3-flash-preview`)
   - Options: `gemini-3-flash-preview`, `gemini-2.5-flash`
+- `LMSTUDIO_BASE_URL` - LMStudio server URL (default: `http://localhost:1234/v1`)
+- `LMSTUDIO_MODEL` - Model name in LMStudio (default: `gemma-2-9b-it`)
 - `DEBUG` - Enable debug logging (`true`/`false`)
 - `DA_ORG` - AEM Document Authoring organization
 - `DA_REPO` - AEM Document Authoring repository
@@ -300,6 +336,11 @@ preset=gemini-production  # Gemini 3.0 + 2.5 balanced
 
 ### For Development/Testing
 
+**Zero-Cost Local Development:**
+```bash
+preset=local-gemma  # 100% local, $0 cost, complete privacy
+```
+
 **Faster Anthropic:**
 ```bash
 preset=fast  # Claude Sonnet + Cerebras
@@ -317,14 +358,24 @@ preset=gemini-2.5-all  # All Gemini 2.5
 
 ### Cost Optimization
 
-**Lowest Cost:**
+**Zero Cost (Best for Development):**
 ```bash
-preset=all-cerebras  # Fastest, most cost-effective
+preset=local-gemma  # Free, runs locally via LMStudio
+```
+
+**Lowest Cloud Cost:**
+```bash
+preset=all-cerebras  # Fastest, most cost-effective cloud option
 ```
 
 **Gemini Cost-Optimized:**
 ```bash
 preset=gemini-2.5-all  # Stable Gemini 2.5
+```
+
+**Hybrid (Cloud + Local):**
+```bash
+preset=local-fast  # Cerebras reasoning + local content
 ```
 
 ## Provider Comparison
@@ -336,6 +387,9 @@ preset=gemini-2.5-all  # Stable Gemini 2.5
 | **Cerebras** | Ultra-fast | Good | Low | Content generation, classification |
 | **Gemini 3.0** | Fast | High | Medium | Latest features, good reasoning |
 | **Gemini 2.5** | Fast | Good | Low | Stable production, classification |
+| **LMStudio (Local)** | Medium* | Good | **FREE** | Development, privacy, offline work |
+
+\* *Speed depends on your hardware (CPU/GPU)*
 
 ## Session Context
 
@@ -388,7 +442,12 @@ curl "http://localhost:8787/generate?query=smoothie%20recipes&preset=gemini-2.5-
 
 # Test Gemini model override
 curl "http://localhost:8787/generate?query=smoothie%20recipes&preset=gemini-production&model=gemini-2.5-flash"
+
+# Test with local LMStudio (requires LMStudio running)
+curl "http://localhost:8787/generate?query=smoothies&preset=local-gemma"
 ```
+
+> 📖 **Setting up LMStudio?** See [LMSTUDIO-SETUP.md](LMSTUDIO-SETUP.md) for complete instructions.
 
 ### Test Page Persistence
 
