@@ -30,6 +30,7 @@ compatibility_flags = ["nodejs_compat"]
 # Environment variables (secrets should be set via wrangler secret)
 [vars]
 MODEL_PRESET = "production"
+GEMINI_MODEL_VERSION = "gemini-3-flash-preview"
 DEBUG = "false"
 # DA (Document Authoring) configuration
 DA_ORG = "paolomoz"

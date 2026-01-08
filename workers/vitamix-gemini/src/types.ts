@@ -440,7 +440,7 @@ export interface GenerationCompleteData {
 
 export type ModelRole = 'reasoning' | 'content' | 'classification' | 'validation';
 
-export type ModelProvider = 'anthropic' | 'cerebras' | 'google';
+export type ModelProvider = 'anthropic' | 'cerebras' | 'google' | 'lmstudio';
 
 export interface ModelConfig {
   provider: ModelProvider;
@@ -466,6 +466,10 @@ export interface Env {
   CEREBRAS_API_KEY?: string;
   CEREBRAS_KEY?: string;  // Alternative name used in some deployments
   GOOGLE_API_KEY?: string;
+
+  // Local LLM (LMStudio) Configuration
+  LMSTUDIO_BASE_URL?: string;  // Default: http://localhost:1234/v1
+  LMSTUDIO_MODEL?: string;      // Model name loaded in LMStudio
 
   // Cloudflare Bindings
   AI: Ai;

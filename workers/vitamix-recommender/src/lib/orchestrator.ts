@@ -87,9 +87,10 @@ async function classifyIntent(
   query: string,
   env: Env,
   sessionContext?: SessionContext,
-  preset?: string
+  preset?: string,
+  modelOverride?: string
 ): Promise<IntentClassification> {
-  const modelFactory = createModelFactory(env, preset);
+  const modelFactory = createModelFactory(env, preset, modelOverride);
 
   const contextInfo = sessionContext?.previousQueries?.length
     ? `\n\nPrevious queries in this session:\n${sessionContext.previousQueries.map((q) => `- "${q.query}" (${q.intent})`).join('\n')}`
@@ -875,9 +876,10 @@ async function generateBlockContent(
   env: Env,
   preset?: string,
   intent?: IntentClassification,
-  query?: string
+  query?: string,
+  modelOverride?: string
 ): Promise<GeneratedBlock> {
-  const modelFactory = createModelFactory(env, preset);
+  const modelFactory = createModelFactory(env, preset, modelOverride);
 
   // Build context based on block type
   let dataContext = '';
@@ -1069,9 +1071,9 @@ function extractProductNamesFromBlocks(blocks: GeneratedBlock[]): string[] {
         const name = match.replace(/<h[23][^>]*>(?:<a[^>]*>)?/, '').trim();
         // Filter out generic headings
         if (name && !products.includes(name) &&
-            !name.includes('Specifications') &&
-            !name.includes('Continue') &&
-            !name.includes('Tips')) {
+          !name.includes('Specifications') &&
+          !name.includes('Continue') &&
+          !name.includes('Tips')) {
           products.push(name);
         }
       }
@@ -1086,7 +1088,7 @@ function extractProductNamesFromBlocks(blocks: GeneratedBlock[]): string[] {
         if (textMatch) {
           const name = textMatch[1].trim();
           if (name && !products.includes(name) && name.length > 2 &&
-              !['Price', 'Weight', 'Controls', 'Model', 'Lid'].includes(name)) {
+            !['Price', 'Weight', 'Controls', 'Model', 'Lid'].includes(name)) {
             products.push(name);
           }
         }
@@ -1207,7 +1209,8 @@ export async function orchestrate(
   env: Env,
   onEvent: SSECallback,
   sessionContext?: SessionContext,
-  preset?: string
+  preset?: string,
+  modelOverride?: string
 ): Promise<{
   blocks: GeneratedBlock[];
   reasoning: ReasoningResult;
@@ -1224,7 +1227,7 @@ export async function orchestrate(
     });
 
     // Stage 2: Fast intent classification
-    ctx.intent = await classifyIntent(query, env, sessionContext, preset);
+    ctx.intent = await classifyIntent(query, env, sessionContext, preset, modelOverride);
 
     // Stage 3: Get RAG context
     ctx.ragContext = await getRAGContext(query, ctx.intent, env);
@@ -1243,7 +1246,8 @@ export async function orchestrate(
       ctx.ragContext,
       env,
       sessionContext,
-      preset
+      preset,
+      modelOverride
     );
 
     // Stream reasoning steps
@@ -1280,7 +1284,7 @@ export async function orchestrate(
       } else if (blockSelection.type === 'follow-up') {
         block = generateFollowUpBlock(ctx.reasoningResult.userJourney);
       } else {
-        block = await generateBlockContent(blockSelection, ctx.ragContext, env, preset, ctx.intent, ctx.query);
+        block = await generateBlockContent(blockSelection, ctx.ragContext, env, preset, ctx.intent, ctx.query, modelOverride);
       }
 
       blocks.push(block);

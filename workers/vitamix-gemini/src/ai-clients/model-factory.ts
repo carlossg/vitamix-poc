@@ -209,6 +209,62 @@ const MODEL_PRESETS: Record<string, ModelPreset> = {
       temperature: 0.2,
     },
   },
+
+  // Local LMStudio - All roles use local Gemma/Llama model
+  'local-gemma': {
+    reasoning: {
+      provider: 'lmstudio',
+      model: 'gemma-2-9b-it',
+      maxTokens: 8192,
+      temperature: 0.7,
+    },
+    content: {
+      provider: 'lmstudio',
+      model: 'gemma-2-9b-it',
+      maxTokens: 8192,
+      temperature: 0.8,
+    },
+    classification: {
+      provider: 'lmstudio',
+      model: 'gemma-2-9b-it',
+      maxTokens: 1024,
+      temperature: 0.3,
+    },
+    validation: {
+      provider: 'lmstudio',
+      model: 'gemma-2-9b-it',
+      maxTokens: 512,
+      temperature: 0.2,
+    },
+  },
+
+  // Local Fast - Hybrid: Cerebras reasoning + LMStudio content (cost-optimized)
+  'local-fast': {
+    reasoning: {
+      provider: 'cerebras',
+      model: 'gpt-oss-120b',
+      maxTokens: 4096,
+      temperature: 0.7,
+    },
+    content: {
+      provider: 'lmstudio',
+      model: 'gemma-2-9b-it',
+      maxTokens: 8192,
+      temperature: 0.8,
+    },
+    classification: {
+      provider: 'lmstudio',
+      model: 'gemma-2-9b-it',
+      maxTokens: 1024,
+      temperature: 0.3,
+    },
+    validation: {
+      provider: 'lmstudio',
+      model: 'gemma-2-9b-it',
+      maxTokens: 512,
+      temperature: 0.2,
+    },
+  },
 };
 
 // ============================================
@@ -289,6 +345,9 @@ export class ModelFactory {
         break;
       case 'google':
         response = await this.callGoogle(config, messages, env);
+        break;
+      case 'lmstudio':
+        response = await this.callLMStudio(config, messages, env);
         break;
       default:
         throw new Error(`Unknown provider: ${config.provider}`);
@@ -471,6 +530,60 @@ export class ModelFactory {
         ? {
             inputTokens: data.usageMetadata.promptTokenCount,
             outputTokens: data.usageMetadata.candidatesTokenCount,
+          }
+        : undefined,
+    };
+  }
+
+  /**
+   * Call LMStudio local server (OpenAI-compatible API)
+   */
+  private async callLMStudio(
+    config: ModelConfig,
+    messages: Message[],
+    env: Env
+  ): Promise<ModelResponse> {
+    // LMStudio runs locally with OpenAI-compatible API
+    const baseUrl = env.LMSTUDIO_BASE_URL || 'http://localhost:1234/v1';
+    const model = env.LMSTUDIO_MODEL || config.model;
+
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // LMStudio doesn't require auth for local connections
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        temperature: config.temperature || 0.7,
+        max_tokens: config.maxTokens || 8192,
+        stream: false,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error(`[LMStudio] API error ${response.status}:`, error);
+      throw new Error(`LMStudio API error: ${response.status} - ${error}`);
+    }
+
+    const data = (await response.json()) as {
+      choices: { message: { content: string } }[];
+      model: string;
+      usage?: { prompt_tokens: number; completion_tokens: number };
+    };
+
+    return {
+      content: data.choices[0]?.message?.content || '',
+      model: data.model || model,
+      usage: data.usage
+        ? {
+            inputTokens: data.usage.prompt_tokens,
+            outputTokens: data.usage.completion_tokens,
           }
         : undefined,
     };

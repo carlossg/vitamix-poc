@@ -67,7 +67,8 @@ async function handleGenerate(request: Request, env: Env): Promise<Response> {
   const query = url.searchParams.get('query');
   const slug = url.searchParams.get('slug');
   const ctxParam = url.searchParams.get('ctx');
-  const preset = url.searchParams.get('preset') || undefined; // Optional preset override (e.g., 'all-cerebras')
+  const preset = url.searchParams.get('preset') || undefined; // Optional preset override (e.g., 'gemini-3-all')
+  const model = url.searchParams.get('model') || undefined; // Optional model version override (e.g., 'gemini-2.5-flash')
 
   if (!query) {
     return new Response(JSON.stringify({ error: 'Missing query parameter' }), {
@@ -96,7 +97,8 @@ async function handleGenerate(request: Request, env: Env): Promise<Response> {
     env,
     write,
     sessionContext,
-    preset
+    preset,
+    model
   )
     .catch((error) => {
       console.error('Orchestration error:', error);
@@ -277,6 +279,8 @@ export default {
         }
         return new Response('Method not allowed', { status: 405 });
       case '/health':
+      case '/healthz':
+      case '/healtz':
         return handleHealth();
       default:
         return new Response('Not Found', { status: 404 });
