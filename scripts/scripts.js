@@ -37,6 +37,44 @@ const FAST_WORKER_URL = 'https://vitamix-generative-fast.paolo-moz.workers.dev';
 const VITAMIX_RECOMMENDER_URL = 'https://vitamix-recommender.paolo-moz.workers.dev';
 
 /**
+ * Detect if the request is coming from a TV device (Android TV, Google TV, etc.)
+ */
+function isTVRequest() {
+	const ua = navigator.userAgent.toLowerCase();
+	// Check for TV-specific user agents
+	const isTVUserAgent = ua.includes('tv') 
+		|| ua.includes('googletv')
+		|| ua.includes('androidtv')
+		|| ua.includes('appletv')
+		|| ua.includes('webos')
+		|| ua.includes('tizen')
+		|| ua.includes('smarttv');
+	
+	// Check for URL parameter override
+	const urlParams = new URLSearchParams(window.location.search);
+	const tvParam = urlParams.has('tv') || urlParams.has('tvmode');
+	
+	return isTVUserAgent || tvParam;
+}
+
+/**
+ * Apply TV-specific mode to the page
+ */
+function applyTVMode() {
+	document.body.classList.add('tv-mode');
+	document.documentElement.classList.add('tv-mode');
+	
+	// Add meta tag to prevent zooming on TV
+	const viewport = document.querySelector('meta[name="viewport"]');
+	if (viewport) {
+		viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+	}
+	
+	// eslint-disable-next-line no-console
+	console.log('[TV Mode] Enabled - hiding header/footer, optimizing layout');
+}
+
+/**
  * Persist generated page to DA
  */
 async function persistToDA(query, blocks, intent) {
@@ -1131,8 +1169,11 @@ async function loadLazy(doc) {
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
   if (hash && element) element.scrollIntoView();
 
-  loadHeader(doc.querySelector('header'));
-  loadFooter(doc.querySelector('footer'));
+  // Skip header/footer loading in TV mode
+  if (!isTVRequest()) {
+    loadHeader(doc.querySelector('header'));
+    loadFooter(doc.querySelector('footer'));
+  }
 
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   loadFonts();
@@ -1149,13 +1190,22 @@ function loadDelayed() {
 }
 
 async function loadPage() {
+  // Check for TV mode first and apply before rendering anything
+  if (isTVRequest()) {
+    applyTVMode();
+    // Load TV-specific CSS
+    await loadCSS(`${window.hlx.codeBasePath}/styles/tv-mode.css`);
+  }
+
   // Check if this is a Cerebras request (?cerebras=query) - handled by cerebras-scripts.js
   if (isCerebrasRequest()) {
     // Dynamically import and run cerebras-scripts.js
     document.documentElement.lang = 'en';
     decorateTemplateAndTheme();
-    loadHeader(document.querySelector('header'));
-    loadFooter(document.querySelector('footer'));
+    if (!isTVRequest()) {
+      loadHeader(document.querySelector('header'));
+      loadFooter(document.querySelector('footer'));
+    }
     await import('./cerebras-scripts.js');
     return;
   }
@@ -1165,8 +1215,10 @@ async function loadPage() {
     document.documentElement.lang = 'en';
     decorateTemplateAndTheme();
     document.body.classList.add('appear', 'vitamix-recommender-mode');
-    loadHeader(document.querySelector('header'));
-    loadFooter(document.querySelector('footer'));
+    if (!isTVRequest()) {
+      loadHeader(document.querySelector('header'));
+      loadFooter(document.querySelector('footer'));
+    }
     await renderVitamixRecommenderPage();
     return;
   }
@@ -1182,8 +1234,10 @@ async function loadPage() {
     document.documentElement.lang = 'en';
     decorateTemplateAndTheme();
     document.body.classList.add('appear', 'fast-mode');
-    loadHeader(document.querySelector('header'));
-    loadFooter(document.querySelector('footer'));
+    if (!isTVRequest()) {
+      loadHeader(document.querySelector('header'));
+      loadFooter(document.querySelector('footer'));
+    }
     await renderFastGenerativePage();
     return;
   }
@@ -1193,8 +1247,10 @@ async function loadPage() {
     document.documentElement.lang = 'en';
     decorateTemplateAndTheme();
     document.body.classList.add('appear');
-    loadHeader(document.querySelector('header'));
-    loadFooter(document.querySelector('footer'));
+    if (!isTVRequest()) {
+      loadHeader(document.querySelector('header'));
+      loadFooter(document.querySelector('footer'));
+    }
     await renderGenerativePage();
     return;
   }
