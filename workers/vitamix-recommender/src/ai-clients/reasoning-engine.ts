@@ -74,7 +74,8 @@ CRITICAL - Your reasoning will be shown directly to users. Write like you're tal
 
 1. NEVER include 'reasoning' or 'reasoning-user' blocks - they are not displayed
 2. ALWAYS include 'follow-up' block at the end
-3. Match blocks to user journey stage:
+3. NEVER place 'hero', 'product-hero', 'product-recommendation', or 'best-pick' blocks consecutively - they use similar dark visual styling and must be separated by other content blocks
+4. Match blocks to user journey stage:
    - Exploring: hero, use-case-cards, feature-highlights, follow-up
    - Comparing: hero, comparison-table, product-cards, follow-up
    - Deciding: product-hero, product-recommendation, recipe-cards, cta, follow-up
@@ -490,6 +491,37 @@ function normalizeBlockType(type: string): string {
 }
 
 /**
+ * Prevent hero-like blocks from being consecutive
+ * These blocks all use similar dark styling, so they should be visually separated
+ */
+function separateHeroAndProductRecommendation(blocks: BlockSelection[]): BlockSelection[] {
+  const heroLikeBlocks = ['hero', 'product-hero', 'product-recommendation', 'best-pick'];
+  const result: BlockSelection[] = [];
+
+  for (let i = 0; i < blocks.length; i++) {
+    const currentBlock = blocks[i];
+    const prevBlock = result[result.length - 1];
+
+    // Check if current and previous are both hero-like blocks
+    if (prevBlock && heroLikeBlocks.includes(currentBlock.type) && heroLikeBlocks.includes(prevBlock.type)) {
+      // Insert a separator block between them
+      // Choose separator based on the context
+      const separatorType = 'feature-highlights';
+      result.push({
+        type: separatorType as BlockSelection['type'],
+        priority: result.length + 1,
+        rationale: 'Visual separator between hero-style blocks',
+        contentGuidance: 'Highlight key features relevant to the user query',
+      });
+    }
+
+    result.push(currentBlock);
+  }
+
+  return result;
+}
+
+/**
  * Ensure required blocks are present
  */
 function ensureRequiredBlocks(blocks: BlockSelection[]): BlockSelection[] {
@@ -500,6 +532,9 @@ function ensureRequiredBlocks(blocks: BlockSelection[]): BlockSelection[] {
   }));
   // Filter out any reasoning blocks - they should never be included
   blocks = blocks.filter((b) => b.type !== 'reasoning' && b.type !== 'reasoning-user');
+
+  // Prevent hero and product-recommendation from being consecutive
+  blocks = separateHeroAndProductRecommendation(blocks);
 
   const hasFollowUp = blocks.some((b) => b.type === 'follow-up');
 

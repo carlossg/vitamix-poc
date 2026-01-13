@@ -819,14 +819,12 @@ Generate allergen safety content. Structure:
 </div>`,
 
     'best-pick': `
-## HTML Template - Prominent "Our Top Pick" callout
+## HTML Template - Prominent "Our Top Pick" callout (TEXT ONLY - NO IMAGE)
 
 Generate a visually prominent "Best Pick" recommendation that appears BEFORE comparison tables.
 Use the best-matching product based on the user's specific use case.
 
-CRITICAL: THE IMAGE IS REQUIRED!
-You MUST include the product image from the context below. Look for the "Image:" field in the product data.
-Do NOT output an empty image div. The image URL must be included.
+DO NOT include any images. This block is text-only with centered content.
 
 Pick the BEST single product that matches the user's needs. Do NOT list multiple products.
 
@@ -862,13 +860,10 @@ OUTPUT THIS EXACT STRUCTURE (replace placeholders with actual values from contex
         <a href="[PRODUCT_URL_FROM_CONTEXT]" class="button primary" target="_blank">[VALUE-DRIVEN CTA - e.g., "Get the A3500 for Silky Smoothies"]</a>
       </div>
     </div>
-    <div class="best-pick-image">
-      <picture><img src="[PRODUCT_IMAGE_URL_FROM_CONTEXT]" alt="[Product Name]"></picture>
-    </div>
   </div>
 </div>
 
-REMEMBER: The rationale must explain WHY this specific product is best for their query.`,
+REMEMBER: The rationale must explain WHY this specific product is best for their query. NO IMAGES.`,
   };
 
   return templates[blockType] || '';
@@ -1023,13 +1018,11 @@ function wrapBlockHTML(type: string, content: string, variant?: string): string 
 }
 
 function getSectionStyle(blockType: string): string {
-  const darkBlocks = ['hero', 'product-hero'];
+  const darkBlocks = ['hero', 'product-hero', 'product-recommendation', 'best-pick'];
   const highlightBlocks = ['reasoning', 'reasoning-user', 'testimonials', 'recipe-cards'];
-  const accentBlocks = ['best-pick'];
 
   if (darkBlocks.includes(blockType)) return 'dark';
   if (highlightBlocks.includes(blockType)) return 'highlight';
-  if (accentBlocks.includes(blockType)) return 'accent';
   return 'default';
 }
 

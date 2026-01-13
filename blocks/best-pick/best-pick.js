@@ -36,9 +36,6 @@ export default function decorate(block) {
   const contentCol = document.createElement('div');
   contentCol.className = 'best-pick-content';
 
-  const imageCol = document.createElement('div');
-  imageCol.className = 'best-pick-image';
-
   // Parse rows
   rows.forEach((row, index) => {
     const cells = [...row.children];
@@ -49,9 +46,8 @@ export default function decorate(block) {
     const picture = firstCell.querySelector('picture');
     const link = firstCell.querySelector('a');
 
-    // Check for image
+    // Skip images - best-pick block no longer shows product images
     if (picture) {
-      imageCol.appendChild(picture.cloneNode(true));
       return;
     }
 
@@ -121,7 +117,7 @@ export default function decorate(block) {
   });
 
   container.appendChild(contentCol);
-  container.appendChild(imageCol);
+  // Image column removed - best-pick is now text-only
   wrapper.appendChild(container);
 
   block.textContent = '';

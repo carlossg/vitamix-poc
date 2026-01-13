@@ -1,87 +1,104 @@
 /**
  * Product Recommendation Block Styles
  *
- * 50/50 split layout for product recommendations.
- * Based on Split Content pattern from Vitamix design system.
+ * Hero-style 50/50 split layout for product recommendations.
+ * Visually matches the hero block design.
  */
+
+/* Container reset - match hero-container */
+main .section.dark.product-recommendation-container {
+  padding: 25px 0;
+}
+
+.product-recommendation-container .product-recommendation-wrapper {
+  max-width: unset;
+  padding: 0;
+}
 
 .product-recommendation {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: 500px;
-}
-
-/* Image side */
-.product-recommendation-image {
+  gap: var(--spacing-2xl, 3rem);
+  align-items: center;
+  max-width: var(--max-width-wide, 1400px);
+  margin: 0 auto;
+  min-height: 400px;
   position: relative;
-  overflow: hidden;
-  background: #f5f5f5;
 }
 
-.product-recommendation-image picture {
-  display: block;
-  height: 100%;
+.product-recommendation > div {
+  display: contents;
 }
 
-.product-recommendation-image img {
+/* Image side - match hero-image styling */
+.product-recommendation-image,
+.product-recommendation > div > div:first-child:has(picture) {
+  max-width: 100%;
+}
+
+.product-recommendation-image picture,
+.product-recommendation-image img,
+.product-recommendation > div > div:first-child picture,
+.product-recommendation > div > div:first-child img {
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: 500px;
   object-fit: cover;
+  border-radius: var(--radius-md, 8px);
 }
 
-/* Content side */
-.product-recommendation-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 4rem;
-  background: #fff;
+/* Content side - match hero-content styling */
+.product-recommendation-content,
+.product-recommendation > div > div:last-child {
+  padding: var(--spacing-xl, 2rem) 0;
 }
 
-/* Eyebrow */
-.product-recommendation-eyebrow {
-  font-size: 0.75rem;
-  font-weight: 500;
+/* Eyebrow - match hero eyebrow styling */
+.product-recommendation-eyebrow,
+.product-recommendation-content > p:first-child {
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: var(--font-weight-semibold, 500);
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: #c41230;
-  margin: 0 0 1rem;
+  color: var(--color-brand-red, #c41230);
+  margin-bottom: var(--spacing-md, 1rem);
 }
 
-/* Headline */
+/* Headline - match hero h1 styling */
 .product-recommendation-headline {
-  font-size: 2.25rem;
-  font-weight: 300;
-  color: #1a1a1a;
-  margin: 0 0 1.5rem;
-  line-height: 1.2;
+  font-size: var(--font-size-5xl, 3rem);
+  font-weight: var(--font-weight-light, 300);
+  letter-spacing: -0.025em;
+  color: var(--color-brand-dark, #1a1a1a);
+  margin-bottom: var(--spacing-lg, 1.5rem);
+  line-height: 1.1;
 }
 
-/* Body */
+/* Body - match hero p styling */
 .product-recommendation-body {
-  font-size: 1rem;
+  font-size: var(--font-size-lg, 1.125rem);
+  color: var(--color-charcoal, #333);
   line-height: 1.7;
-  color: #333;
-  margin: 0 0 1.5rem;
+  margin-bottom: var(--spacing-lg, 1.5rem);
 }
 
 /* Price section */
 .product-recommendation-price {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-lg, 1.5rem);
 }
 
 .product-recommendation-price .price {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #1a1a1a;
+  font-size: var(--font-size-2xl, 1.5rem);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--color-brand-dark, #1a1a1a);
   display: block;
 }
 
 .product-recommendation-price .price-note {
-  font-size: 0.875rem;
-  color: #666;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-dark-gray, #666);
   display: block;
-  margin-top: 0.25rem;
+  margin-top: var(--spacing-xs, 0.25rem);
 }
 
 /* CTAs */
@@ -131,7 +148,7 @@
 
 /* Section style variants */
 
-/* Highlight section */
+/* Highlight section - subtle background */
 .section.highlight .product-recommendation {
   background: transparent;
 }
@@ -140,50 +157,72 @@
   background: transparent;
 }
 
-/* Dark section */
-.section.dark .product-recommendation-content {
-  background: transparent;
-  color: #fff;
+/* Dark section - match hero.dark styling */
+.section.dark .product-recommendation {
+  background: var(--color-brand-dark, #1a1a1a);
 }
 
-.section.dark .product-recommendation-eyebrow {
-  color: #fff;
+.section.dark .product-recommendation-content {
+  background: transparent;
+  color: var(--color-white, #fff);
+}
+
+.section.dark .product-recommendation-eyebrow,
+.section.dark .product-recommendation-content > p:first-child {
+  color: var(--color-brand-red, #c41230);
 }
 
 .section.dark .product-recommendation-headline {
-  color: #fff;
+  color: var(--color-white, #fff);
 }
 
 .section.dark .product-recommendation-body {
-  color: rgb(255 255 255 / 80%);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .section.dark .product-recommendation-price .price {
-  color: #fff;
+  color: var(--color-white, #fff);
 }
 
 .section.dark .product-recommendation-price .price-note {
-  color: rgb(255 255 255 / 70%);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .section.dark .product-recommendation-ctas .button.secondary {
-  color: #fff;
-  border-color: #fff;
+  color: var(--color-white, #fff);
+  border-color: var(--color-white, #fff);
 }
 
 .section.dark .product-recommendation-ctas .button.secondary:hover {
-  background: #fff;
-  color: #1a1a1a;
+  background: var(--color-white, #fff);
+  color: var(--color-brand-dark, #1a1a1a);
 }
 
-/* Responsive */
-@media (width < 768px) {
+/* Desktop Styles - match hero */
+@media (width >= 900px) {
+  .product-recommendation {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2xl, 3rem);
+    align-items: center;
+    max-width: var(--max-width-wide, 1400px);
+    margin: 0 auto;
+  }
+
+  .product-recommendation-headline {
+    font-size: var(--font-size-hero, 4.5rem);
+  }
+}
+
+/* Tablet Styles */
+@media (width < 900px) {
   .product-recommendation {
     grid-template-columns: 1fr;
     min-height: auto;
   }
 
-  .product-recommendation-image {
+  .product-recommendation-image,
+  .product-recommendation > div > div:first-child:has(picture) {
     min-height: 300px;
   }
 
@@ -191,11 +230,23 @@
     order: 0;
   }
 
+  .product-recommendation-headline {
+    font-size: var(--font-size-5xl, 3rem);
+  }
+}
+
+/* Mobile Styles - match hero */
+@media (width < 600px) {
+  .product-recommendation {
+    padding: var(--spacing-xl, 2rem) var(--spacing-md, 1rem);
+    min-height: 300px;
+  }
+
   .product-recommendation-content {
-    padding: 2.5rem 1.5rem;
+    padding: var(--spacing-lg, 1.5rem) 0;
   }
 
   .product-recommendation-headline {
-    font-size: 1.75rem;
+    font-size: var(--font-size-4xl, 2.25rem);
   }
 }
