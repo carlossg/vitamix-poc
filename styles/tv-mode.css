@@ -1,12 +1,20 @@
 /**
  * TV Mode Styles
  * Optimizes the layout for TV viewing with no scrolling
- * Header is shown, footer is hidden
+ * Hides both header and footer completely
  */
 
-/* Hide only footer in TV mode, keep header visible */
+/* Hide header and footer in TV mode */
+body.tv-mode header,
 body.tv-mode footer {
 	display: none !important;
+	visibility: hidden !important;
+	height: 0 !important;
+	min-height: 0 !important;
+	max-height: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	overflow: hidden !important;
 }
 
 /* Full viewport height for TV mode */
@@ -18,9 +26,9 @@ body.tv-mode {
 	padding: 0;
 }
 
-/* Main content takes full viewport minus header */
+/* Main content takes full viewport */
 body.tv-mode main {
-	height: calc(100vh - var(--nav-height, 64px));
+	height: 100vh;
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
@@ -36,24 +44,24 @@ body.tv-mode main > .section {
 	max-height: 100vh;
 }
 
-/* Content within sections should not overflow - account for header */
+/* Content within sections should not overflow */
 body.tv-mode main > .section > div {
-	max-height: calc(100vh - var(--nav-height, 64px) - 4rem);
+	max-height: calc(100vh - 4rem);
 	overflow: hidden;
 	padding: 0 2rem;
 }
 
-/* Hero sections full height minus header */
+/* Hero sections full height */
 body.tv-mode main > .section.hero-video,
 body.tv-mode main > .section:first-of-type {
-	height: calc(100vh - var(--nav-height, 64px));
+	height: 100vh;
 	margin: 0;
 	padding: 0;
 }
 
-/* Generating container centered and sized for TV minus header */
+/* Generating container centered and sized for TV */
 body.tv-mode .generating-container {
-	height: calc(100vh - var(--nav-height, 64px));
+	height: 100vh;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -71,17 +79,17 @@ body.tv-mode .generating-query {
 	margin-bottom: 2rem;
 }
 
-/* Content sections sized for TV viewing minus header */
+/* Content sections sized for TV viewing */
 body.tv-mode #generation-content {
-	height: calc(100vh - var(--nav-height, 64px));
+	height: 100vh;
 	overflow: hidden;
 	display: flex;
 	flex-direction: column;
 }
 
 body.tv-mode #generation-content > .section {
-	flex: 0 0 calc(100vh - var(--nav-height, 64px));
-	height: calc(100vh - var(--nav-height, 64px));
+	flex: 0 0 100vh;
+	height: 100vh;
 	overflow: hidden;
 	scroll-snap-align: start;
 }
@@ -118,14 +126,14 @@ body.tv-mode .hero-video-content p {
 	margin-bottom: 2rem;
 }
 
-/* Product cards and grids optimized for TV minus header */
+/* Product cards and grids optimized for TV */
 body.tv-mode .product-cards,
 body.tv-mode .recipe-cards,
 body.tv-mode .cards {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 	gap: 2rem;
-	max-height: calc(100vh - var(--nav-height, 64px) - 8rem);
+	max-height: calc(100vh - 8rem);
 	overflow: hidden;
 }
 
@@ -181,22 +189,22 @@ body.tv-mode img {
 	object-fit: contain;
 }
 
-/* Product hero optimized for TV minus header */
+/* Product hero optimized for TV */
 body.tv-mode .product-hero {
-	height: calc(100vh - var(--nav-height, 64px));
+	height: 100vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	overflow: hidden;
 }
 
-/* Recipe grid limited to visible items minus header */
+/* Recipe grid limited to visible items */
 body.tv-mode .recipe-grid,
 body.tv-mode .product-grid {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	gap: 2rem;
-	max-height: calc(100vh - var(--nav-height, 64px) - 12rem);
+	max-height: calc(100vh - 12rem);
 	overflow: hidden;
 }
 
@@ -224,9 +232,9 @@ body.tv-mode select:focus {
 	box-shadow: 0 0 0 6px rgba(196, 18, 48, 0.3);
 }
 
-/* Comparison tables optimized for TV minus header */
+/* Comparison tables optimized for TV */
 body.tv-mode .comparison-table {
-	max-height: calc(100vh - var(--nav-height, 64px) - 8rem);
+	max-height: calc(100vh - 8rem);
 	overflow: hidden;
 	font-size: 1.1rem;
 }
@@ -236,9 +244,9 @@ body.tv-mode .comparison-table td {
 	padding: 1rem;
 }
 
-/* FAQ sections limited minus header */
+/* FAQ sections limited */
 body.tv-mode .faq {
-	max-height: calc(100vh - var(--nav-height, 64px) - 8rem);
+	max-height: calc(100vh - 8rem);
 	overflow: hidden;
 }
 
@@ -286,10 +294,10 @@ body.tv-mode [class*="-wrapper"] {
 	overflow: hidden;
 }
 
-/* Quick answer and reasoning blocks optimized minus header */
+/* Quick answer and reasoning blocks optimized */
 body.tv-mode .quick-answer,
 body.tv-mode .reasoning {
-	max-height: calc(100vh - var(--nav-height, 64px) - 10rem);
+	max-height: calc(100vh - 10rem);
 	overflow: hidden;
 	padding: 2rem;
 }
@@ -304,17 +312,17 @@ body.tv-mode .follow-up-container {
 	display: none;
 }
 
-/* Analytics/dashboard blocks optimized minus header */
+/* Analytics/dashboard blocks optimized */
 body.tv-mode .analytics-dashboard,
 body.tv-mode .analytics-metrics {
-	height: calc(100vh - var(--nav-height, 64px));
+	height: 100vh;
 	overflow: hidden;
 	padding: 3rem;
 }
 
-/* Recipe hero detail for TV minus header */
+/* Recipe hero detail for TV */
 body.tv-mode .recipe-hero-detail {
-	height: calc(100vh - var(--nav-height, 64px));
+	height: 100vh;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -332,10 +340,10 @@ body.tv-mode [style*="position: fixed"] {
 	position: relative !important;
 }
 
-/* Homepage hero for TV minus header */
+/* Homepage hero for TV */
 body.tv-mode .homepage-hero {
-	height: calc(100vh - var(--nav-height, 64px));
-	max-height: calc(100vh - var(--nav-height, 64px));
+	height: 100vh;
+	max-height: 100vh;
 }
 
 body.tv-mode .homepage-hero-content {

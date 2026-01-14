@@ -104,10 +104,24 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
 }
 
 /**
+ * Check if TV mode is active
+ */
+function isTVMode() {
+  return document.body.classList.contains('tv-mode') 
+    || document.documentElement.classList.contains('tv-mode');
+}
+
+/**
  * loads and decorates the header, mainly the nav
  * @param {Element} block The header block element
  */
 export default async function decorate(block) {
+  // Skip header rendering in TV mode
+  if (isTVMode()) {
+    block.style.display = 'none';
+    return;
+  }
+
   // load nav as fragment
   const navMeta = getMetadata('nav');
   const navPath = navMeta ? new URL(navMeta, window.location).pathname : '/nav';
