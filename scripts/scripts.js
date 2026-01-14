@@ -931,7 +931,11 @@ async function renderVitamixRecommenderPage() {
   eventSource.onerror = () => {
     if (eventSource.readyState === EventSource.CLOSED) {
       if (blockCount === 0) {
-        statusEl.textContent = 'Connection failed. Please try again.';
+        loadingState.innerHTML = `
+          <h1>Connection failed</h1>
+          <p style="color: #c00;">Unable to connect to the server. Please try again.</p>
+          <p><a href="/">Return to homepage</a></p>
+        `;
       }
     }
   };
