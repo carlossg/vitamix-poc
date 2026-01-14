@@ -724,27 +724,29 @@ async function renderFastGenerativePage() {
  * Uses the vitamix-recommender worker with Claude Opus reasoning
  */
 async function renderVitamixRecommenderPage() {
-  // Load skeleton/vitamix styles
-  await loadCSS(`${window.hlx.codeBasePath}/styles/vitamix.css`);
+	// Load skeleton/vitamix styles
+	await loadCSS(`${window.hlx.codeBasePath}/styles/vitamix.css`);
 
-  const main = document.querySelector('main');
-  if (!main) return;
+	const main = document.querySelector('main');
+	if (!main) return;
 
-  const params = new URLSearchParams(window.location.search);
-  const query = params.get('q') || params.get('query');
-  const preset = params.get('preset') || 'production'; // Default to production (Claude reasoning)
-  const slug = generateSlug(query);
+	const params = new URLSearchParams(window.location.search);
+	const query = params.get('q') || params.get('query');
+	const preset = params.get('preset') || 'production'; // Default to production (Claude reasoning)
+	const slug = generateSlug(query);
+	const isTVMode = isTVRequest();
 
-  // Clear main and show loading state
-  main.innerHTML = `
-    <div class="section generating-container vitamix-recommender">
-      <span class="generating-query">"${query}"</span>
-    </div>
-    <div id="generation-content"></div>
-  `;
+	// Clear main and show loading state
+	// Hide query text in TV mode for cleaner display
+	main.innerHTML = `
+		<div class="section generating-container vitamix-recommender">
+			${isTVMode ? '' : `<span class="generating-query">"${query}"</span>`}
+		</div>
+		<div id="generation-content"></div>
+	`;
 
-  const loadingState = main.querySelector('.generating-container');
-  const content = main.querySelector('#generation-content');
+	const loadingState = main.querySelector('.generating-container');
+	const content = main.querySelector('#generation-content');
 
   // Connect to SSE stream with preset parameter and session context
   const contextParam = SessionContextManager.buildEncodedContextParam();
