@@ -10,6 +10,48 @@ The app is designed for a **10-foot UI** experience, allowing users to compare b
 - **Voice-Activated Intent**: Integrated with Google Assistant via `shortcuts.xml`.
 - **Comparison Engine**: Fetches real-time specifications and pricing.
 - **Compose for TV**: Modern, high-performance UI using Jetpack Compose for TV.
+- **Configurable Base URL**: Easy switching between development, preview, and production environments.
+
+## Configuration
+
+### Changing the Base URL
+
+The app includes a built-in settings screen to configure which server to connect to.
+
+**To Access Settings:**
+1. Launch the Vitamix app on your TV
+2. Press the **MENU** button on your remote
+3. Select an environment or enter a custom URL
+4. Press **Save** to apply changes
+
+**Available Environments:**
+- **Default (Production)**: `https://carlos--vitamix-poc--carlossg.aem.page/`
+- **Custom URL**: Enter any valid HTTP/HTTPS URL
+
+**Test Connection:**
+Use the **Test** button to verify connectivity before saving. This will attempt to load the URL and show any connection issues.
+
+### Default URL
+
+If no custom URL is configured, the app defaults to:
+```
+https://carlos--vitamix-poc--carlossg.aem.page/
+```
+
+### Programmatic Configuration
+
+You can also set the URL via ADB for automated testing:
+
+```bash
+# Set a custom URL
+adb shell "am broadcast -a com.example.comparetv.SET_URL --es url 'http://192.168.1.100:3000/'"
+
+# Set to localhost
+adb shell "am broadcast -a com.example.comparetv.SET_URL --es url 'http://localhost:3000/'"
+
+# Reset to default
+adb shell "am broadcast -a com.example.comparetv.SET_URL --es url 'https://main--materialised-web--paolomoz.aem.page/'"
+```
 
 ## Prerequisites
 

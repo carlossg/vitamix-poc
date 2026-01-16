@@ -10,6 +10,10 @@ import java.net.URLEncoder
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.webkit.WebSettings
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.SslErrorHandler
+import android.net.http.SslError
 
 class DiscoveryActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -21,16 +25,45 @@ class DiscoveryActivity : ComponentActivity() {
         webView = WebView(this)
         setContentView(webView)
 
-        webView.webViewClient = WebViewClient()
+        webView.webViewClient = object : WebViewClient() {
+            override fun onReceivedError(
+                view: WebView?,
+                request: WebResourceRequest?,
+                error: WebResourceError?
+            ) {
+                super.onReceivedError(view, request, error)
+                // Log errors to help diagnose web page issues
+                Log.e(TAG, "WebView Error: ${error?.description} for URL: ${request?.url}")
+            }
+
+            override fun onReceivedSslError(
+                view: WebView?,
+                handler: SslErrorHandler?,
+                error: SslError?
+            ) {
+                // For development/testing: Accept SSL certificates
+                // WARNING: In production, you should handle this more carefully
+                Log.w(TAG, "SSL Error ignored: ${error?.toString()}")
+                handler?.proceed()
+            }
+        }
         val settings: WebSettings = webView.settings
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
         settings.useWideViewPort = true
         settings.loadWithOverviewMode = true
         
+        // Allow mixed content for development
+        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        
         // Set custom user agent to identify as TV
         val defaultUserAgent = settings.userAgentString
         settings.userAgentString = "$defaultUserAgent AndroidTV VitamixTV/1.0"
+
+        // Show current base URL on startup
+        val sharedPref = getSharedPreferences("vitamix_prefs", android.content.Context.MODE_PRIVATE)
+        val baseUrl = sharedPref.getString("vitamix_url", "https://main--materialised-web--paolomoz.aem.page/")
+        Log.d(TAG, "Using base URL: $baseUrl")
 
         handleIntent(intent)
     }
@@ -46,24 +79,33 @@ class DiscoveryActivity : ComponentActivity() {
         val uri = intent.data
         Log.d(TAG, "Handling intent with URI: $uri")
         
+        // Read URL from SharedPreferences
+        val sharedPref = getSharedPreferences("vitamix_prefs", android.content.Context.MODE_PRIVATE)
+        val baseUrl = sharedPref.getString("vitamix_url", "https://carlos--vitamix-poc--carlossg.aem.page/")
+        
+        // Check if there's a query parameter from a deep link
         val query = uri?.getQueryParameter("q") 
             ?: intent.getStringExtra("q") 
             ?: intent.getStringExtra("query")
-            ?: "the Ascent Series blenders"
         
-        Log.d(TAG, "Extracted query: $query")
-        
-        val prompt = "Show me $query"
-        val encodedPrompt = URLEncoder.encode(prompt, "UTF-8")
-        
-        // Read URL from SharedPreferences
-        val sharedPref = getSharedPreferences("vitamix_prefs", android.content.Context.MODE_PRIVATE)
-        val baseUrl = sharedPref.getString("vitamix_url", "https://main--materialised-web--paolomoz.aem.page/")
-        
-        val url = if (baseUrl?.contains("?") == true) {
-            "${baseUrl}&cerebras=$encodedPrompt&tv=1"
+        val url = if (query != null) {
+            // Voice search or deep link with query - use ?q= parameter
+            Log.d(TAG, "Extracted query: $query")
+            val encodedQuery = URLEncoder.encode(query, "UTF-8")
+            
+            if (baseUrl?.contains("?") == true) {
+                "${baseUrl}&q=$encodedQuery&tv=1"
+            } else {
+                "${baseUrl}?q=$encodedQuery&tv=1"
+            }
         } else {
-            "${baseUrl}?cerebras=$encodedPrompt&tv=1"
+            // Normal app launch - just load homepage with TV mode
+            Log.d(TAG, "No query parameter, loading homepage")
+            if (baseUrl?.contains("?") == true) {
+                "${baseUrl}&tv=1"
+            } else {
+                "${baseUrl}?tv=1"
+            }
         }
 
         Log.d(TAG, "Loading URL: $url")
