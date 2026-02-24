@@ -350,8 +350,10 @@ export interface UserJourneyPlan {
 // ============================================
 
 export interface SessionContext {
-  previousQueries: QueryHistoryItem[];
-  profile?: UserProfile;
+	sessionId?: string;
+	sessionStart?: number;
+	previousQueries: QueryHistoryItem[];
+	profile?: UserProfile;
 }
 
 export interface QueryHistoryItem {
@@ -414,6 +416,7 @@ export type SSEEvent =
   | { event: 'block-rationale'; data: { blockType: BlockType; rationale: string } }
   | { event: 'image-ready'; data: { imageId: string; url: string } }
   | { event: 'generation-complete'; data: GenerationCompleteData }
+  | { event: 'complete'; data: { message?: string } }
   | { event: 'error'; data: { message: string; code?: string } };
 
 // Enriched generation-complete event data
@@ -440,7 +443,7 @@ export interface GenerationCompleteData {
 
 export type ModelRole = 'reasoning' | 'content' | 'classification' | 'validation';
 
-export type ModelProvider = 'anthropic' | 'cerebras' | 'google' | 'lmstudio';
+export type ModelProvider = 'anthropic' | 'cerebras' | 'google' | 'lmstudio' | 'model-garden';
 
 export interface ModelConfig {
   provider: ModelProvider;
@@ -461,31 +464,22 @@ export interface ModelPreset {
 // ============================================
 
 export interface Env {
-  // AI Services
-  ANTHROPIC_API_KEY: string;
-  CEREBRAS_API_KEY?: string;
-  CEREBRAS_KEY?: string;  // Alternative name used in some deployments
-  GOOGLE_API_KEY?: string;
+	// Google Cloud Services (passwordless via ADC)
+	GCP_PROJECT_ID?: string;
+	GCP_LOCATION?: string;
 
-  // Cloudflare Bindings
-  AI: Ai;
-  VECTORIZE?: VectorizeIndex;
-  SESSIONS?: KVNamespace;
+	// DA (Document Authoring) Configuration
+	DA_ORG: string;
+	DA_REPO: string;
+	// S2S Authentication (stored in Secret Manager)
+	DA_CLIENT_ID?: string;
+	DA_CLIENT_SECRET?: string;
+	DA_SERVICE_TOKEN?: string;
+	// Legacy static token (fallback)
+	DA_TOKEN?: string;
 
-  // DA (Document Authoring) Configuration
-  DA_ORG: string;
-  DA_REPO: string;
-  // S2S Authentication (preferred)
-  DA_CLIENT_ID?: string;
-  DA_CLIENT_SECRET?: string;
-  DA_SERVICE_TOKEN?: string;
-  // Legacy static token (fallback)
-  DA_TOKEN?: string;
-
-  // Configuration
-  MODEL_PRESET?: string;
-  GEMINI_MODEL_VERSION?: string;
-  LMSTUDIO_BASE_URL?: string;
-  LMSTUDIO_MODEL?: string;
-  DEBUG?: string;
+	// Configuration
+	MODEL_PRESET?: string;
+	GEMINI_MODEL_VERSION?: string;
+	DEBUG?: string;
 }

@@ -4,10 +4,12 @@
  * Provides access to local JSON content for products, recipes, use cases,
  * features, reviews, personas, and product profiles.
  *
- * In production, this loads from bundled JSON or KV storage.
- * Content is imported at build time for Cloudflare Workers.
+ * For Cloud Run: Loads JSON files at runtime from the content directory
+ * For Cloudflare Workers: Would use static imports (not used anymore)
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
 import type {
   Product,
   Recipe,
@@ -18,18 +20,6 @@ import type {
   ProductProfile,
   Accessory,
 } from '../types';
-
-// Import content at build time
-import productsData from '../../../../content/products/products.json';
-import recipesData from '../../../../content/recipes/recipes.json';
-import accessoriesData from '../../../../content/accessories/accessories.json';
-import useCasesData from '../../../../content/metadata/use-cases.json';
-import featuresData from '../../../../content/metadata/features.json';
-import reviewsData from '../../../../content/metadata/reviews.json';
-import personasData from '../../../../content/metadata/personas.json';
-import productProfilesData from '../../../../content/metadata/product-profiles.json';
-import recipeAssociationsData from '../../../../content/metadata/recipe-associations.json';
-import faqsData from '../../../../content/metadata/faqs.json';
 
 // Type the imported data
 interface ProductsFile {
@@ -92,12 +82,34 @@ interface FAQsFile {
   faqs: FAQ[];
 }
 
-// Cast imported data
-const products = (productsData as ProductsFile).products;
-const recipes = (recipesData as RecipesFile).recipes;
-const recipeCategories = (recipesData as RecipesFile).categories;
-const accessories = (accessoriesData as AccessoriesFile).accessories;
-const useCases = (useCasesData as UseCasesFile).useCases;
+// Content directory path - works in Docker (/app/content) and local dev
+const CONTENT_DIR = path.join(__dirname, '../../content');
+
+// Helper to load JSON files
+function loadJSON<T>(relativePath: string): T {
+  const filePath = path.join(CONTENT_DIR, relativePath);
+  const content = fs.readFileSync(filePath, 'utf-8');
+  return JSON.parse(content) as T;
+}
+
+// Load all content files at module initialization
+const productsData = loadJSON<ProductsFile>('products/products.json');
+const recipesData = loadJSON<RecipesFile>('recipes/recipes.json');
+const accessoriesData = loadJSON<AccessoriesFile>('accessories/accessories.json');
+const useCasesData = loadJSON<UseCasesFile>('metadata/use-cases.json');
+const featuresData = loadJSON<FeaturesFile>('metadata/features.json');
+const reviewsData = loadJSON<ReviewsFile>('metadata/reviews.json');
+const personasData = loadJSON<PersonasFile>('metadata/personas.json');
+const productProfilesData = loadJSON<ProductProfilesFile>('metadata/product-profiles.json');
+const recipeAssociationsData = loadJSON<RecipeAssociationsFile>('metadata/recipe-associations.json');
+const faqsData = loadJSON<FAQsFile>('metadata/faqs.json');
+
+// Extract data from loaded files
+const products = productsData.products;
+const recipes = recipesData.recipes;
+const recipeCategories = recipesData.categories;
+const accessories = accessoriesData.accessories;
+const useCases = useCasesData.useCases;
 const features = (featuresData as FeaturesFile).features;
 const reviews = (reviewsData as ReviewsFile).reviews;
 const personas = (personasData as PersonasFile).personas;

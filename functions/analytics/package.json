@@ -1,0 +1,27 @@
+{
+  "name": "vitamix-analytics",
+  "version": "2.0.0",
+  "description": "Vitamix Analytics Cloud Function - Gemini-only",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npx @google-cloud/functions-framework --target=trackEvent --source=lib/index.js",
+    "deploy": "npm run build && firebase deploy --only functions",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^7.10.0",
+    "@google-cloud/functions-framework": "^3.4.0",
+    "@google-cloud/vertexai": "^1.9.0",
+    "firebase-admin": "^13.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": "20"
+  }
+}

@@ -24,17 +24,16 @@ import { SessionContextManager } from './session-context.js';
 // Analytics tracker
 import { getAnalyticsTracker } from './analytics-tracker.js';
 
+// API endpoints (Google Cloud Run / Cloud Functions or override via window.VITAMIX_CONFIG)
+import { getAPIEndpoint, VITAMIX_RECOMMENDER_URL, VITAMIX_ANALYTICS_URL } from './api-config.js';
+
+const GENERATIVE_WORKER_URL = VITAMIX_RECOMMENDER_URL;
+const FAST_WORKER_URL = VITAMIX_RECOMMENDER_URL;
+
 // Initialize analytics tracker globally for conversion tracking in cta-utils.js
-const analyticsTracker = getAnalyticsTracker({
-  endpoint: 'https://vitamix-analytics.paolo-moz.workers.dev',
-});
+const analyticsTracker = getAnalyticsTracker({ endpoint: VITAMIX_ANALYTICS_URL });
 analyticsTracker.init();
 window.analyticsTracker = analyticsTracker;
-
-// Worker URLs
-const GENERATIVE_WORKER_URL = 'https://vitamix-generative.paolo-moz.workers.dev';
-const FAST_WORKER_URL = 'https://vitamix-generative-fast.paolo-moz.workers.dev';
-const VITAMIX_RECOMMENDER_URL = 'https://vitamix-recommender.paolo-moz.workers.dev';
 
 /**
  * Detect if the request is coming from a TV device (Android TV, Google TV, etc.)

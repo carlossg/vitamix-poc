@@ -1,0 +1,92 @@
+# Cloud Build configuration for Vitamix POC
+# Builds and deploys to Cloud Run with vitamix labels
+
+steps:
+  # Step 1: Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-image'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/vitamix-recommender:${_BUILD_TAG}'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/vitamix-recommender:latest'
+      - '--label'
+      - 'app=vitamix'
+      - '--label'
+      - 'component=recommender'
+      - '--label'
+      - 'build-id=$BUILD_ID'
+      - '.'
+    timeout: 600s
+
+  # Step 2: Push the image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-image'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'gcr.io/$PROJECT_ID/vitamix-recommender'
+    waitFor: ['build-image']
+
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-cloud-run'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'vitamix-recommender'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/vitamix-recommender:${_BUILD_TAG}'
+      - '--service-account'
+      - 'vitamix-recommender-sa@$PROJECT_ID.iam.gserviceaccount.com'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--timeout'
+      - '3600'
+      - '--max-instances'
+      - '10'
+      - '--min-instances'
+      - '0'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--labels'
+      - 'app=vitamix,component=recommender,environment=${_ENVIRONMENT},managed-by=cloudbuild'
+      - '--set-env-vars'
+      - 'NODE_ENV=production,GCP_PROJECT_ID=$PROJECT_ID,GCP_LOCATION=${_REGION},MODEL_PRESET=${_MODEL_PRESET},DA_ORG=aem-growth-adoption,DA_REPO=vitamix-poc'
+      - '--set-secrets'
+      - 'DA_TOKEN=DA_TOKEN:latest'
+    waitFor: ['push-image']
+
+# Substitution variables (can be overridden at build time)
+substitutions:
+  _REGION: us-central1
+  _ENVIRONMENT: production
+  _MODEL_PRESET: production
+  _BUILD_TAG: latest  # Default to 'latest', override at build time with timestamp
+
+# Store images in GCR
+images:
+  - 'gcr.io/$PROJECT_ID/vitamix-recommender:${_BUILD_TAG}'
+  - 'gcr.io/$PROJECT_ID/vitamix-recommender:latest'
+
+# Build options
+options:
+  machineType: 'E2_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+  logStreamingOption: STREAM_ON
+
+# Tags for build tracking
+tags:
+  - 'vitamix'
+  - 'recommender'
+  - 'cloud-run'
+  - 'google-native'
+
+timeout: 1200s

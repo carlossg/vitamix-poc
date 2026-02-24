@@ -1,0 +1,66 @@
+# Google Cloud Build ignore file
+# Similar to .dockerignore
+
+# Node modules
+node_modules/
+npm-debug.log
+
+# Testing
+coverage/
+test-results/
+*.test.ts
+*.spec.ts
+**/__tests__/
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build artifacts (will be built in Cloud Build)
+dist/
+build/
+*.log
+
+# Environment files
+.env
+.env.*
+
+# Cloudflare specific (not needed for Google Cloud)
+wrangler.toml
+.wrangler/
+
+# Development only
+.eslintrc*
+.prettierrc*
+# tsconfig.json is needed for Cloud Build compilation
+
+# Cursor/AI
+.cursor/
+.claude/
+
+# Test files
+test-blocks/
+test-results/
+
+# Google TV app (separate deployment)
+google-tv/
+
+# Content (should be in Cloud Storage)
+content/images/
+
+# Workers (being migrated)
+workers/vitamix-analytics/
+workers/embed-recipes/

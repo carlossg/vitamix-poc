@@ -1,0 +1,78 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: vitamix-recommender
+  labels:
+    app: vitamix
+    component: recommender
+    environment: production
+    managed-by: gcloud
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+spec:
+  template:
+    metadata:
+      labels:
+        app: vitamix
+        component: recommender
+        environment: production
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/startup-cpu-boost: "true"
+    spec:
+      serviceAccountName: vitamix-recommender-sa
+      timeoutSeconds: 3600  # 1 hour for SSE long-lived connections
+      containerConcurrency: 80
+      containers:
+      - name: vitamix-recommender
+        image: gcr.io/api-project-642841493686/vitamix-recommender:latest
+        ports:
+        - name: http1
+          containerPort: 8080
+        resources:
+          limits:
+            cpu: "2"
+            memory: 2Gi
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: GCP_api-project-642841493686
+          value: "api-project-642841493686"
+        - name: GCP_LOCATION
+          value: "us-central1"
+        - name: MODEL_PRESET
+          value: "production"
+        # AEM Document Authoring credentials (from Secret Manager)
+        - name: DA_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: DA_CLIENT_ID
+              key: latest
+        - name: DA_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: DA_CLIENT_SECRET
+              key: latest
+        - name: DA_ORG
+          value: "paolomoz"
+        - name: DA_REPO
+          value: "vitamix-poc"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6

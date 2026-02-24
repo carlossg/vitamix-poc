@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+	match /databases/{database}/documents {
+		// Sessions collection - allow read/write from vitamix services only
+		match /sessions/{sessionId} {
+			// Allow service accounts to read/write
+			allow read, write: if request.auth != null;
+			
+			// Validate session document structure
+			allow create, update: if request.resource.data.keys().hasAll(['sessionId', 'sessionStart', 'expiresAt']);
+		}
+		
+		// Analytics events - write only from vitamix services
+		match /analytics_events/{eventId} {
+			allow read: if request.auth != null;
+			allow create: if request.auth != null 
+				&& request.resource.data.keys().hasAll(['type', 'sessionId', 'createdAt']);
+			allow update, delete: if false; // Events are immutable
+		}
+		
+		// Analytics sessions - read/write from vitamix services
+		match /analytics_sessions/{sessionId} {
+			allow read, write: if request.auth != null;
+		}
+		
+		// Recipes collection - read by all, write by embeddings service only
+		match /recipes/{recipeId} {
+			allow read: if true; // Public read access for recipe search
+			allow create, update: if request.auth != null; // Service accounts only
+			allow delete: if false; // Recipes should not be deleted
+			
+			// Validate recipe document structure
+			allow create, update: if request.resource.data.keys().hasAll(['name', 'description', 'ingredients', 'embedding'])
+				&& request.resource.data.embedding is list
+				&& request.resource.data.embedding.size() == 768;
+		}
+		
+		// Default deny
+		match /{document=**} {
+			allow read, write: if false;
+		}
+	}
+}

@@ -1,0 +1,57 @@
+{
+	"indexes": [
+		{
+			"collectionGroup": "sessions",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{ "fieldPath": "sessionId", "order": "ASCENDING" },
+				{ "fieldPath": "expiresAt", "order": "ASCENDING" }
+			]
+		},
+		{
+			"collectionGroup": "analytics_events",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{ "fieldPath": "sessionId", "order": "ASCENDING" },
+				{ "fieldPath": "createdAt", "order": "DESCENDING" }
+			]
+		},
+		{
+			"collectionGroup": "analytics_events",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{ "fieldPath": "type", "order": "ASCENDING" },
+				{ "fieldPath": "createdAt", "order": "DESCENDING" }
+			]
+		},
+		{
+			"collectionGroup": "analytics_sessions",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{ "fieldPath": "startedAt", "order": "DESCENDING" }
+			]
+		},
+		{
+			"collectionGroup": "recipes",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{
+					"fieldPath": "embedding",
+					"vectorConfig": {
+						"dimension": 768,
+						"flat": {}
+					}
+				}
+			]
+		},
+		{
+			"collectionGroup": "recipes",
+			"queryScope": "COLLECTION",
+			"fields": [
+				{ "fieldPath": "categories", "arrayConfig": "CONTAINS" },
+				{ "fieldPath": "updatedAt", "order": "DESCENDING" }
+			]
+		}
+	],
+	"fieldOverrides": []
+}

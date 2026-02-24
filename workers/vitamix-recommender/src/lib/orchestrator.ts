@@ -20,7 +20,7 @@ import type {
   Recipe,
   Review,
 } from '../types';
-import { createModelFactory, type Message } from '../ai-clients/model-factory';
+import { createGoogleModelFactory as createModelFactory, type Message } from '../ai-clients/model-factory-google';
 import { analyzeAndSelectBlocks, formatReasoningForDisplay } from '../ai-clients/reasoning-engine';
 import {
   buildRAGContext,
@@ -90,7 +90,11 @@ async function classifyIntent(
   preset?: string,
   modelOverride?: string
 ): Promise<IntentClassification> {
-  const modelFactory = createModelFactory(env, preset, modelOverride);
+  const modelFactory = createModelFactory(
+		preset,
+		env.GCP_PROJECT_ID || process.env.GCP_PROJECT_ID,
+		env.GCP_LOCATION || process.env.GCP_LOCATION
+	);
 
   const contextInfo = sessionContext?.previousQueries?.length
     ? `\n\nPrevious queries in this session:\n${sessionContext.previousQueries.map((q) => `- "${q.query}" (${q.intent})`).join('\n')}`
@@ -102,7 +106,7 @@ async function classifyIntent(
   ];
 
   try {
-    const response = await modelFactory.call('classification', messages, env);
+    const response = await modelFactory.call('classification', messages);
     const jsonMatch = response.content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
@@ -879,7 +883,11 @@ async function generateBlockContent(
   query?: string,
   modelOverride?: string
 ): Promise<GeneratedBlock> {
-  const modelFactory = createModelFactory(env, preset, modelOverride);
+  const modelFactory = createModelFactory(
+		preset,
+		env.GCP_PROJECT_ID || process.env.GCP_PROJECT_ID,
+		env.GCP_LOCATION || process.env.GCP_LOCATION
+	);
 
   // Build context based on block type
   let dataContext = '';
@@ -977,7 +985,7 @@ Rationale: ${block.rationale}`,
   ];
 
   try {
-    const response = await modelFactory.call('content', messages, env);
+    const response = await modelFactory.call('content', messages);
     let html = wrapBlockHTML(block.type, response.content, block.variant);
 
     // For specs-table, add product name as data attribute for client-side title injection
@@ -1232,13 +1240,13 @@ export async function orchestrate(
     // Stage 3: Get RAG context
     ctx.ragContext = await getRAGContext(query, ctx.intent, env);
 
-    // Stage 4: Deep reasoning (model depends on preset)
-    const effectivePreset = preset || env.MODEL_PRESET || 'production';
-    const reasoningModel = effectivePreset === 'all-cerebras' ? 'cerebras-gpt-oss-120b' : 'claude-opus-4-5';
-    onEvent({
-      event: 'reasoning-start',
-      data: { model: reasoningModel, preset: effectivePreset },
-    });
+  // Stage 4: Deep reasoning (model depends on preset)
+  const effectivePreset = preset || env.MODEL_PRESET || 'production';
+  const reasoningModel = 'gemini-3-pro-preview'; // Google-only: Gemini 3 for reasoning
+  onEvent({
+    event: 'reasoning-start',
+    data: { model: reasoningModel, preset: effectivePreset },
+  });
 
     ctx.reasoningResult = await analyzeAndSelectBlocks(
       query,

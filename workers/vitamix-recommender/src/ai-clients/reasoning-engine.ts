@@ -19,7 +19,7 @@ import type {
   UserJourneyPlan,
 } from '../types';
 import type { RAGContext } from '../content/content-service';
-import { createModelFactory, type Message } from './model-factory';
+import { createGoogleModelFactory as createModelFactory, type Message } from './model-factory-google';
 
 // ============================================
 // Reasoning System Prompt
@@ -567,7 +567,11 @@ export async function analyzeAndSelectBlocks(
   preset?: string,
   modelOverride?: string
 ): Promise<ReasoningResult> {
-  const modelFactory = createModelFactory(env, preset, modelOverride);
+  const modelFactory = createModelFactory(
+		preset,
+		env.GCP_PROJECT_ID || process.env.GCP_PROJECT_ID,
+		env.GCP_LOCATION || process.env.GCP_LOCATION
+	);
 
   // Debug: Log session context
   const lastQuery = sessionContext?.previousQueries?.slice(-1)[0];
@@ -594,7 +598,7 @@ export async function analyzeAndSelectBlocks(
   ];
 
   try {
-    const response = await modelFactory.call('reasoning', messages, env);
+    const response = await modelFactory.call('reasoning', messages);
     const result = parseReasoningResponse(response.content);
 
     // Ensure required blocks are present
