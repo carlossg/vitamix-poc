@@ -211,6 +211,118 @@ const MODEL_PRESETS: Record<string, ModelPreset> = {
 		},
 	},
 
+	// Gemma 3 4B: Smallest/fastest Google open model for all roles
+	'gemma-3-4b': {
+		reasoning: {
+			provider: 'google',
+			model: 'gemma-3-4b-it',
+			maxTokens: 2048,
+			temperature: 0.7,
+		},
+		content: {
+			provider: 'google',
+			model: 'gemma-3-4b-it',
+			maxTokens: 1536,
+			temperature: 0.8,
+		},
+		classification: {
+			provider: 'google',
+			model: 'gemma-3-4b-it',
+			maxTokens: 512,
+			temperature: 0.3,
+		},
+		validation: {
+			provider: 'google',
+			model: 'gemma-3-4b-it',
+			maxTokens: 256,
+			temperature: 0.2,
+		},
+	},
+
+	// Gemma 3 12B: Balanced Google open model -- 12B reasoning, 4B content
+	'gemma-3-12b': {
+		reasoning: {
+			provider: 'google',
+			model: 'gemma-3-12b-it',
+			maxTokens: 2048,
+			temperature: 0.7,
+		},
+		content: {
+			provider: 'google',
+			model: 'gemma-3-4b-it',
+			maxTokens: 1536,
+			temperature: 0.8,
+		},
+		classification: {
+			provider: 'google',
+			model: 'gemma-3-4b-it',
+			maxTokens: 512,
+			temperature: 0.3,
+		},
+		validation: {
+			provider: 'google',
+			model: 'gemma-3-4b-it',
+			maxTokens: 256,
+			temperature: 0.2,
+		},
+	},
+
+	// Llama 3.2 3B: Smallest Llama via Model Garden MaaS
+	'llama-3.2-3b': {
+		reasoning: {
+			provider: 'google',
+			model: 'gemini-2.0-flash',
+			maxTokens: 2048,
+			temperature: 0.7,
+		},
+		content: {
+			provider: 'model-garden',
+			model: 'llama-3.2-3b-instruct-maas',
+			maxTokens: 1536,
+			temperature: 0.8,
+		},
+		classification: {
+			provider: 'google',
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 512,
+			temperature: 0.3,
+		},
+		validation: {
+			provider: 'google',
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 256,
+			temperature: 0.2,
+		},
+	},
+
+	// Mistral Small 3.1 24B: Fast Mistral via Model Garden MaaS
+	'mistral-small': {
+		reasoning: {
+			provider: 'google',
+			model: 'gemini-2.0-flash',
+			maxTokens: 2048,
+			temperature: 0.7,
+		},
+		content: {
+			provider: 'model-garden',
+			model: 'mistral-small-2503',
+			maxTokens: 1536,
+			temperature: 0.8,
+		},
+		classification: {
+			provider: 'google',
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 512,
+			temperature: 0.3,
+		},
+		validation: {
+			provider: 'google',
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 256,
+			temperature: 0.2,
+		},
+	},
+
 };
 
 // ============================================
