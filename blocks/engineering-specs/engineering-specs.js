@@ -46,37 +46,37 @@ export default function decorate(block) {
   table.className = 'engineering-specs-table';
 
   // Process spec rows
-  for (let i = 1; i < rows.length; i++) {
+  for (let i = 1; i < rows.length; i += 1) {
     const row = rows[i];
     const cells = [...row.children];
 
-    if (cells.length < 2) continue;
+    if (cells.length >= 2) {
+      const label = cells[0]?.textContent?.trim() || '';
+      const value = cells[1]?.textContent?.trim() || '';
+      const notes = cells[2]?.textContent?.trim() || '';
 
-    const label = cells[0]?.textContent?.trim() || '';
-    const value = cells[1]?.textContent?.trim() || '';
-    const notes = cells[2]?.textContent?.trim() || '';
+      const specRow = document.createElement('div');
+      specRow.className = 'spec-row';
 
-    const specRow = document.createElement('div');
-    specRow.className = 'spec-row';
+      const labelEl = document.createElement('div');
+      labelEl.className = 'spec-label';
+      labelEl.textContent = label;
+      specRow.appendChild(labelEl);
 
-    const labelEl = document.createElement('div');
-    labelEl.className = 'spec-label';
-    labelEl.textContent = label;
-    specRow.appendChild(labelEl);
+      const valueEl = document.createElement('div');
+      valueEl.className = 'spec-value';
+      valueEl.textContent = value;
+      specRow.appendChild(valueEl);
 
-    const valueEl = document.createElement('div');
-    valueEl.className = 'spec-value';
-    valueEl.textContent = value;
-    specRow.appendChild(valueEl);
+      if (notes) {
+        const notesEl = document.createElement('div');
+        notesEl.className = 'spec-notes';
+        notesEl.textContent = notes;
+        specRow.appendChild(notesEl);
+      }
 
-    if (notes) {
-      const notesEl = document.createElement('div');
-      notesEl.className = 'spec-notes';
-      notesEl.textContent = notes;
-      specRow.appendChild(notesEl);
+      table.appendChild(specRow);
     }
-
-    table.appendChild(specRow);
   }
 
   block.appendChild(table);

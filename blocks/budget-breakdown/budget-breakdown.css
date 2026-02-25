@@ -42,13 +42,13 @@
 .budget-tier {
   background: var(--color-white, #fff);
   border: 1px solid var(--color-light-gray, #e5e5e5);
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.08));
+  box-shadow: var(--shadow-sm, 0 1px 3px rgb(0 0 0 / 8%));
   transition: all var(--transition-normal, 0.2s ease);
   overflow: hidden;
 }
 
 .budget-tier:hover {
-  box-shadow: var(--shadow-md, 0 4px 12px rgba(0, 0, 0, 0.1));
+  box-shadow: var(--shadow-md, 0 4px 12px rgb(0 0 0 / 10%));
   transform: translateY(-2px);
 }
 
@@ -179,7 +179,7 @@
 }
 
 .refurb-badge {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgb(255 255 255 / 20%);
   padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
   font-size: var(--font-size-xs, 0.75rem);
   font-weight: 500;

@@ -1,1 +1,7 @@
 helix-importer-ui
+functions/analytics/lib
+functions/embeddings/lib
+services/recommender/dist
+conductor
+node_modules
+tools/crawler

@@ -11,44 +11,6 @@
  */
 
 /**
- * Generate a URL-safe slug from a query
- * @param {string} query - The user's query
- * @returns {string} - URL-safe slug
- */
-function generateSlug(query) {
-  // Create a readable slug from the query
-  let slug = query
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .substring(0, 80);
-
-  // Add a short hash for uniqueness
-  const hash = simpleHash(query + Date.now()).slice(0, 6);
-  return `${slug}-${hash}`;
-}
-
-/**
- * Simple hash function
- * @param {string} str - String to hash
- * @returns {string} - Hash string
- */
-function simpleHash(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i += 1) {
-    const char = str.charCodeAt(i);
-    // eslint-disable-next-line no-bitwise
-    hash = ((hash << 5) - hash) + char;
-    // eslint-disable-next-line no-bitwise
-    hash &= hash;
-  }
-  return Math.abs(hash).toString(36);
-}
-
-/**
  * Handle form submission
  * @param {Event} event - Submit event
  * @param {HTMLFormElement} form - The form element

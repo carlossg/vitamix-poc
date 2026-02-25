@@ -6,7 +6,7 @@
   background: linear-gradient(135deg, #fefefe 0%, #f8f9fa 100%);
   border-radius: 16px;
   margin: 24px 0;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgb(0 0 0 / 6%);
 }
 
 .reasoning-user-wrapper {
@@ -76,7 +76,7 @@
 
 .reasoning-user-step:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 8%);
 }
 
 .step-emoji {
@@ -131,7 +131,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .reasoning-user-wrapper {
     padding: 24px 20px;
   }

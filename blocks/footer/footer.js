@@ -5,7 +5,7 @@ import { loadFragment } from '../fragment/fragment.js';
  * Check if TV mode is active
  */
 function isTVMode() {
-  return document.body.classList.contains('tv-mode') 
+  return document.body.classList.contains('tv-mode')
     || document.documentElement.classList.contains('tv-mode');
 }
 

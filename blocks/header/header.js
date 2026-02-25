@@ -107,7 +107,7 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
  * Check if TV mode is active
  */
 function isTVMode() {
-  return document.body.classList.contains('tv-mode') 
+  return document.body.classList.contains('tv-mode')
     || document.documentElement.classList.contains('tv-mode');
 }
 

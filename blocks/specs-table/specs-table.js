@@ -44,7 +44,7 @@ export default function decorate(block) {
         // Look for Vitamix model patterns like A3500, E310, 5200, etc.
         const modelMatch = heroText.match(/(?:Vitamix\s+)?([A-Z]?\d{3,4}[A-Za-z]*|Quiet One|Ascent|Explorian)/i);
         if (modelMatch) {
-          productName = modelMatch[0];
+          [productName] = modelMatch;
         }
       }
     }
@@ -54,7 +54,7 @@ export default function decorate(block) {
       const pageTitle = document.title || '';
       const titleMatch = pageTitle.match(/(?:Vitamix\s+)?([A-Z]?\d{3,4}[A-Za-z]*|Quiet One|Ascent|Explorian)/i);
       if (titleMatch) {
-        productName = titleMatch[0];
+        [productName] = titleMatch;
       }
     }
 

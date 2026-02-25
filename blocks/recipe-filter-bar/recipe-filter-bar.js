@@ -73,7 +73,7 @@ export default function decorate(block) {
     5: 'All levels',
   };
 
-  let currentFilters = {
+  const currentFilters = {
     maxDifficulty: 5,
     maxTime: 'all',
   };

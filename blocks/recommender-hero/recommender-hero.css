@@ -49,7 +49,7 @@ body:has(.recommender-hero) {
 .recommender-hero-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(20, 35, 50, 0.6);
+  background: rgb(20 35 50 / 60%);
   z-index: 1;
 }
 
@@ -66,7 +66,7 @@ body:has(.recommender-hero) {
 /* Icon */
 .recommender-hero-icon {
   margin-bottom: var(--spacing-lg);
-  color: rgba(255, 255, 255, 0.9);
+  color: rgb(255 255 255 / 90%);
 }
 
 .recommender-hero-icon svg {
@@ -98,7 +98,7 @@ body:has(.recommender-hero) {
   background: #fff;
   border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgb(0 0 0 / 30%);
 }
 
 .recommender-hero textarea {
@@ -149,7 +149,7 @@ body:has(.recommender-hero) {
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .recommender-hero {
     min-height: 80vh;
   }
@@ -170,7 +170,7 @@ body:has(.recommender-hero) {
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .recommender-hero {
     min-height: 70vh;
   }

@@ -149,7 +149,7 @@ export default function decorate(block) {
 
   // Focus textarea after a short delay
   setTimeout(() => {
-    const textarea = form.querySelector('textarea');
-    textarea.focus();
+    const textareaEl = form.querySelector('textarea');
+    if (textareaEl) textareaEl.focus();
   }, 100);
 }

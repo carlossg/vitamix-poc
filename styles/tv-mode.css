@@ -214,7 +214,7 @@ body.tv-mode .tv-navigation-hint {
 	bottom: 2rem;
 	left: 50%;
 	transform: translateX(-50%);
-	background: rgba(0, 0, 0, 0.7);
+	background: rgb(0 0 0 / 70%);
 	color: white;
 	padding: 1rem 2rem;
 	border-radius: 8px;
@@ -229,7 +229,7 @@ body.tv-mode input:focus,
 body.tv-mode select:focus {
 	outline: 3px solid var(--color-brand-red, #C41230);
 	outline-offset: 4px;
-	box-shadow: 0 0 0 6px rgba(196, 18, 48, 0.3);
+	box-shadow: 0 0 0 6px rgb(196 18 48 / 30%);
 }
 
 /* Comparison tables optimized for TV */

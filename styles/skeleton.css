@@ -199,6 +199,7 @@ img[data-gen-image] {
   background: linear-gradient(90deg, #e8e8e8 25%, #d8d8d8 50%, #e8e8e8 75%);
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
+
   /* Maintain aspect ratio while loading */
   min-height: 200px;
   width: 100%;
@@ -209,6 +210,7 @@ img[data-gen-image] {
 img[data-gen-image]:not(.loaded) {
   /* Hide broken image icon while loading */
   color: transparent;
+
   /* Force visibility even with transparent/placeholder src */
   opacity: 1;
 }

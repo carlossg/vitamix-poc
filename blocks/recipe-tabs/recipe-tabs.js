@@ -22,6 +22,8 @@
  * </div>
  */
 
+/* eslint-disable no-unused-vars */
+
 const DEFAULT_TABS = [
   { id: 'recipe', label: 'THE RECIPE' },
   { id: 'nutrition', label: 'NUTRITIONAL FACTS' },
@@ -29,7 +31,7 @@ const DEFAULT_TABS = [
 ];
 
 const ICONS = {
-  help: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  help: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
 };
 
 export default function decorate(block) {
@@ -39,7 +41,7 @@ export default function decorate(block) {
   let tabs = [];
   if (rows[0]) {
     const cells = [...rows[0].children];
-    cells.forEach((cell, index) => {
+    cells.forEach((cell) => {
       const text = cell.textContent.trim();
       if (text) {
         tabs.push({
@@ -99,18 +101,17 @@ export default function decorate(block) {
   // Add keyboard navigation
   const tablist = block.querySelector('.recipe-tabs-nav');
   tablist.addEventListener('keydown', (e) => {
-    const tabs = [...tablist.querySelectorAll('.recipe-tab')];
-    const currentIndex = tabs.findIndex((t) => t === document.activeElement);
+    const tabEls = [...tablist.querySelectorAll('.recipe-tab')];
+    const currentIndex = tabEls.findIndex((t) => t === document.activeElement);
 
     if (e.key === 'ArrowRight') {
-      const nextIndex = (currentIndex + 1) % tabs.length;
-      tabs[nextIndex].focus();
-      tabs[nextIndex].click();
+      const nextIndex = (currentIndex + 1) % tabEls.length;
+      tabEls[nextIndex].focus();
+      tabEls[nextIndex].click();
     } else if (e.key === 'ArrowLeft') {
-      const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-      tabs[prevIndex].focus();
-      tabs[prevIndex].click();
+      const prevIndex = (currentIndex - 1 + tabEls.length) % tabEls.length;
+      tabEls[prevIndex].focus();
+      tabEls[prevIndex].click();
     }
   });
-
 }

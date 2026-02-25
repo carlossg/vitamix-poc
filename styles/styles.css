@@ -15,12 +15,12 @@
   --color-brand-red: #C41230;
   --color-brand-red-dark: #a30f28;
   --color-brand-dark: #1A1A1A;
-  --color-charcoal: #333333;
-  --color-dark-gray: #666666;
-  --color-medium-gray: #999999;
+  --color-charcoal: #333;
+  --color-dark-gray: #666;
+  --color-medium-gray: #999;
   --color-light-gray: #E5E5E5;
   --color-off-white: #F5F5F5;
-  --color-white: #FFFFFF;
+  --color-white: #FFF;
   --color-star-gold: #FFD700;
 
   /* Legacy color mappings */
@@ -78,10 +78,10 @@
   --spacing-section-lg: 8rem;
 
   /* ===== Shadows ===== */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 8%);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 10%);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 12%);
+  --shadow-xl: 0 12px 32px rgb(0 0 0 / 15%);
 
   /* ===== Transitions ===== */
   --transition-fast: 0.15s ease;
@@ -370,6 +370,7 @@ a.button.secondary .cta-icon-ai-generated::before {
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.7;
     transform: scale(1.1);
@@ -475,7 +476,9 @@ main .section.accent h2 {
 }
 
 /* ===== Recipe Content Layout ===== */
+
 /* Two-column layout: nutrition sidebar on left, ingredients/directions on right */
+
 /* Each block is in its own section, so we use grid on the parent container */
 
 main > div:has(.recipe-sidebar-container) {
@@ -572,7 +575,7 @@ main .section.hero-video .hero-video-bg {
 main .section.hero-video .hero-video-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgb(0 0 0 / 65%);
   z-index: 1;
   max-width: none;
   padding: 0;
@@ -596,7 +599,7 @@ main .section.hero-video .hero-video-content {
   padding: 60px 40px;
   max-width: 700px;
   margin: 0 auto;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgb(0 0 0 / 65%);
   border-radius: 8px;
 }
 
@@ -605,16 +608,16 @@ main .section.hero-video .hero-video-content h1 {
   margin-bottom: 16px;
   margin-top: 0;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 30%);
   font-weight: 300;
 }
 
 main .section.hero-video .hero-video-content > .default-content-wrapper > p:first-of-type {
   font-size: var(--body-font-size-m);
-  color: rgba(255, 255, 255, 0.9);
+  color: rgb(255 255 255 / 90%);
   max-width: 600px;
   margin: 0 auto 32px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
 }
 
 /* 4. Two columns for Personalized Recipes and Product Guidance */
@@ -636,7 +639,7 @@ main .section.hero-video .hero-video-content h3 {
 
 main .section.hero-video .hero-video-content p {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.85);
+  color: rgb(255 255 255 / 85%);
   margin: 0;
   line-height: 1.5;
   text-align: left;
@@ -697,22 +700,22 @@ main .section.hero-video .query-form-cerebras-examples {
 }
 
 main .section.hero-video .query-form-cerebras-examples .examples-label {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255 255 255 / 70%);
   white-space: nowrap;
 }
 
 main .section.hero-video .query-form-cerebras-examples button {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.9);
+  background: rgb(255 255 255 / 10%);
+  border-color: rgb(255 255 255 / 20%);
+  color: rgb(255 255 255 / 90%);
   white-space: nowrap;
   padding: 6px 12px;
   font-size: var(--font-size-xs);
 }
 
 main .section.hero-video .query-form-cerebras-examples button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgb(255 255 255 / 20%);
+  border-color: rgb(255 255 255 / 30%);
 }
 
 /* Responsive hero-video */
@@ -770,7 +773,7 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
 .homepage-hero-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgb(0 0 0 / 40%);
   z-index: 1;
 }
 
@@ -785,7 +788,7 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
   padding: 40px 60px;
   min-width: 600px;
   max-width: 800px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgb(0 0 0 / 50%);
   border-radius: 16px;
   backdrop-filter: blur(8px);
 }
@@ -795,16 +798,16 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
   margin-bottom: 24px;
   margin-top: 0;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 30%);
   font-weight: 300;
 }
 
 .homepage-hero-content p {
   font-size: var(--body-font-size-m);
-  color: rgba(255, 255, 255, 0.9);
+  color: rgb(255 255 255 / 90%);
   max-width: 600px;
   margin: 0 auto 32px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
 }
 
 /* Homepage Search Form */
@@ -830,13 +833,13 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
   outline: none;
   padding: 16px 20px;
   font-size: var(--body-font-size-s);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(255 255 255 / 10%);
   color: white;
   min-width: 0;
 }
 
 .homepage-search-container input::placeholder {
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255 255 255 / 70%);
 }
 
 .homepage-search-container button {
@@ -873,7 +876,7 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
 .generating-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -894,7 +897,7 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
 
 .image-quality-toggle .toggle-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255 255 255 / 70%);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -904,8 +907,8 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
   font-size: 12px;
   font-weight: 500;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgb(255 255 255 / 30%);
+  color: rgb(255 255 255 / 70%);
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: none;
@@ -922,13 +925,13 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
 }
 
 .image-quality-toggle .toggle-option:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(255 255 255 / 10%);
   color: white;
 }
 
 .image-quality-toggle .toggle-option.active {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgb(255 255 255 / 20%);
+  border-color: rgb(255 255 255 / 50%);
   color: white;
 }
 
@@ -943,7 +946,7 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
 
 .suggestions-label {
   font-size: var(--body-font-size-xs);
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255 255 255 / 70%);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -956,8 +959,8 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
 }
 
 .suggestion-chip {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgb(255 255 255 / 15%);
+  border: 1px solid rgb(255 255 255 / 30%);
   border-radius: 20px;
   padding: 8px 16px;
   margin: 4px 0;
@@ -973,8 +976,8 @@ main .section.hero-video .query-form-cerebras-examples button:hover {
 }
 
 .suggestion-chip:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgb(255 255 255 / 25%);
+  border-color: rgb(255 255 255 / 50%);
 }
 
 /* Mobile adjustments for homepage hero */

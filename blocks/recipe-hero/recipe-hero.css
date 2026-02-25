@@ -122,13 +122,13 @@
 .recipe-hero.dark .hero-subtitle,
 .recipe-hero.dark .hero-content > p,
 .dark .recipe-hero p {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgb(255 255 255 / 80%);
 }
 
 .recipe-hero.dark .hero-stats li,
 .recipe-hero.dark ul li,
 .dark .recipe-hero ul li {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgb(255 255 255 / 90%);
 }
 
 /* ===== Desktop Styles ===== */

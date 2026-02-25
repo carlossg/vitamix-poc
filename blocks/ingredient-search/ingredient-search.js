@@ -90,6 +90,77 @@ export default function decorate(block) {
 
   const ingredients = new Set();
 
+  // Display results
+  function displayResults(recipes) {
+    resultsGrid.innerHTML = '';
+
+    if (recipes.length === 0) {
+      resultsGrid.innerHTML = `
+        <div class="no-results">
+          <p>No exact matches found. Try different ingredients or we can create a custom recipe for you!</p>
+          <button class="generate-recipe-btn">Generate Custom Recipe</button>
+        </div>
+      `;
+      resultsSection.hidden = false;
+      return;
+    }
+
+    recipes.forEach((recipe) => {
+      const card = document.createElement('div');
+      card.className = 'result-card';
+
+      let missingHtml = '';
+      if (recipe.missingIngredients && recipe.missingIngredients.length > 0) {
+        missingHtml = `
+          <div class="result-card-missing">
+            <span class="missing-label">You might need:</span>
+            ${recipe.missingIngredients.map((ing) => `<span class="missing-item">${ing}</span>`).join('')}
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="result-card-body">
+          <div class="result-card-header">
+            <h4>${recipe.title}</h4>
+            <span class="match-badge">${recipe.matchPercent || 100}%</span>
+          </div>
+          ${recipe.description ? `<p class="result-card-description">${recipe.description}</p>` : ''}
+          <div class="result-card-meta">
+            <span class="difficulty">${recipe.difficulty || 'Easy'}</span>
+            <span class="time">${recipe.time || '10 min'}</span>
+          </div>
+          ${missingHtml}
+        </div>
+      `;
+      resultsGrid.appendChild(card);
+    });
+
+    resultsSection.hidden = false;
+  }
+
+  // Fallback results for demo/offline
+  function displayFallbackResults() {
+    const ingredientList = [...ingredients];
+    const fallbackRecipes = [
+      {
+        title: `${ingredientList[0] || 'Green'} Power Smoothie`,
+        difficulty: 'Easy',
+        time: '5 min',
+        matchPercent: 85,
+        image: '',
+      },
+      {
+        title: 'Morning Energy Blend',
+        difficulty: 'Easy',
+        time: '5 min',
+        matchPercent: 70,
+        image: '',
+      },
+    ];
+    displayResults(fallbackRecipes);
+  }
+
   // Add ingredient tag
   function addIngredient(ingredient) {
     const normalized = ingredient.toLowerCase().trim();
@@ -172,78 +243,6 @@ export default function decorate(block) {
       searchBtn.disabled = false;
     }
   });
-
-  // Display results
-  function displayResults(recipes) {
-    resultsGrid.innerHTML = '';
-
-    if (recipes.length === 0) {
-      resultsGrid.innerHTML = `
-        <div class="no-results">
-          <p>No exact matches found. Try different ingredients or we can create a custom recipe for you!</p>
-          <button class="generate-recipe-btn">Generate Custom Recipe</button>
-        </div>
-      `;
-      resultsSection.hidden = false;
-      return;
-    }
-
-    recipes.forEach((recipe) => {
-      const card = document.createElement('div');
-      card.className = 'result-card';
-
-      // Build missing ingredients HTML
-      let missingHtml = '';
-      if (recipe.missingIngredients && recipe.missingIngredients.length > 0) {
-        missingHtml = `
-          <div class="result-card-missing">
-            <span class="missing-label">You might need:</span>
-            ${recipe.missingIngredients.map((ing) => `<span class="missing-item">${ing}</span>`).join('')}
-          </div>
-        `;
-      }
-
-      card.innerHTML = `
-        <div class="result-card-body">
-          <div class="result-card-header">
-            <h4>${recipe.title}</h4>
-            <span class="match-badge">${recipe.matchPercent || 100}%</span>
-          </div>
-          ${recipe.description ? `<p class="result-card-description">${recipe.description}</p>` : ''}
-          <div class="result-card-meta">
-            <span class="difficulty">${recipe.difficulty || 'Easy'}</span>
-            <span class="time">${recipe.time || '10 min'}</span>
-          </div>
-          ${missingHtml}
-        </div>
-      `;
-      resultsGrid.appendChild(card);
-    });
-
-    resultsSection.hidden = false;
-  }
-
-  // Fallback results for demo/offline
-  function displayFallbackResults() {
-    const ingredientList = [...ingredients];
-    const fallbackRecipes = [
-      {
-        title: `${ingredientList[0] || 'Green'} Power Smoothie`,
-        difficulty: 'Easy',
-        time: '5 min',
-        matchPercent: 85,
-        image: '',
-      },
-      {
-        title: 'Morning Energy Blend',
-        difficulty: 'Easy',
-        time: '5 min',
-        matchPercent: 70,
-        image: '',
-      },
-    ];
-    displayResults(fallbackRecipes);
-  }
 
   // Clear results
   clearBtn.addEventListener('click', () => {

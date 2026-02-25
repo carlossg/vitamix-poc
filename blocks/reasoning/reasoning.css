@@ -22,7 +22,7 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(204, 0, 0, 0.15);
+  border-bottom: 1px solid rgb(204 0 0 / 15%);
 }
 
 .reasoning-title {
@@ -92,7 +92,7 @@
 .step-line {
   width: 2px;
   flex: 1;
-  background: rgba(204, 0, 0, 0.2);
+  background: rgb(204 0 0 / 20%);
   min-height: 24px;
   margin: 8px 0;
 }
@@ -135,7 +135,7 @@
 .reasoning-confidence {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid rgba(204, 0, 0, 0.15);
+  border-top: 1px solid rgb(204 0 0 / 15%);
   font-size: 13px;
   color: #666;
   display: flex;
@@ -149,7 +149,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .reasoning-wrapper {
     padding: 24px 20px;
   }

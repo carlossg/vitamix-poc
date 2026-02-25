@@ -4,6 +4,7 @@
  * Handles SSE connection to the generative worker and renders
  * blocks progressively as they arrive.
  */
+/* eslint-disable no-use-before-define, consistent-return */
 
 import {
   decorateBlock,
@@ -148,7 +149,7 @@ export function initStreamRenderer(streamUrl, container) {
   });
 
   // Handle beforeunload
-  window.addEventListener('beforeunload', (event) => {
+  window.addEventListener('beforeunload', () => {
     if (state.status === 'generating') {
       state.persist();
     }
@@ -166,8 +167,8 @@ function connectToStream(streamUrl, state, container) {
   state.status = 'generating';
 
   // Layout event - receive block layout
-  eventSource.addEventListener('layout', (event) => {
-    const data = JSON.parse(event.data);
+  eventSource.addEventListener('layout', (ev) => {
+    const data = JSON.parse(ev.data);
     handleLayoutEvent(data, state, container);
   });
 
@@ -283,8 +284,8 @@ async function handleBlockContent(data, state, container) {
     blockContainer.innerHTML = html;
 
     // Decorate the block using EDS patterns
-    const blockElement = blockContainer.querySelector('[class^="block"]') ||
-                        blockContainer.firstElementChild;
+    const blockElement = blockContainer.querySelector('[class^="block"]')
+                        || blockContainer.firstElementChild;
 
     if (blockElement) {
       // Add block class if not present
@@ -443,7 +444,7 @@ function handleConnectionError(streamUrl, state, container, eventSource) {
   eventSource.close();
 
   if (state.reconnectAttempts < 3) {
-    state.reconnectAttempts++;
+    state.reconnectAttempts += 1;
     console.log(`Reconnecting (attempt ${state.reconnectAttempts})...`);
 
     setTimeout(() => {

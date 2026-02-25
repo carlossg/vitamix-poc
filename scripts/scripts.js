@@ -22,7 +22,7 @@ import { SessionContextManager } from './session-context.js';
 import { getAnalyticsTracker } from './analytics-tracker.js';
 
 // API endpoints (Google Cloud Run / Cloud Functions or override via window.VITAMIX_CONFIG)
-import { getAPIEndpoint, VITAMIX_RECOMMENDER_URL, VITAMIX_ANALYTICS_URL } from './api-config.js';
+import { VITAMIX_RECOMMENDER_URL, VITAMIX_ANALYTICS_URL } from './api-config.js';
 
 // Initialize analytics tracker globally for conversion tracking in cta-utils.js
 const analyticsTracker = getAnalyticsTracker({ endpoint: VITAMIX_ANALYTICS_URL });
@@ -33,38 +33,38 @@ window.analyticsTracker = analyticsTracker;
  * Detect if the request is coming from a TV device (Android TV, Google TV, etc.)
  */
 function isTVRequest() {
-	const ua = navigator.userAgent.toLowerCase();
-	// Check for TV-specific user agents
-	const isTVUserAgent = ua.includes('tv') 
-		|| ua.includes('googletv')
-		|| ua.includes('androidtv')
-		|| ua.includes('appletv')
-		|| ua.includes('webos')
-		|| ua.includes('tizen')
-		|| ua.includes('smarttv');
-	
-	// Check for URL parameter override
-	const urlParams = new URLSearchParams(window.location.search);
-	const tvParam = urlParams.has('tv') || urlParams.has('tvmode');
-	
-	return isTVUserAgent || tvParam;
+  const ua = navigator.userAgent.toLowerCase();
+  // Check for TV-specific user agents
+  const isTVUserAgent = ua.includes('tv')
+    || ua.includes('googletv')
+    || ua.includes('androidtv')
+    || ua.includes('appletv')
+    || ua.includes('webos')
+    || ua.includes('tizen')
+    || ua.includes('smarttv');
+
+  // Check for URL parameter override
+  const urlParams = new URLSearchParams(window.location.search);
+  const tvParam = urlParams.has('tv') || urlParams.has('tvmode');
+
+  return isTVUserAgent || tvParam;
 }
 
 /**
  * Apply TV-specific mode to the page
  */
 function applyTVMode() {
-	document.body.classList.add('tv-mode');
-	document.documentElement.classList.add('tv-mode');
-	
-	// Add meta tag to prevent zooming on TV
-	const viewport = document.querySelector('meta[name="viewport"]');
-	if (viewport) {
-		viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
-	}
-	
-	// eslint-disable-next-line no-console
-	console.log('[TV Mode] Enabled - hiding header/footer, optimizing layout');
+  document.body.classList.add('tv-mode');
+  document.documentElement.classList.add('tv-mode');
+
+  // Add meta tag to prevent zooming on TV
+  const viewport = document.querySelector('meta[name="viewport"]');
+  if (viewport) {
+    viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+  }
+
+  // eslint-disable-next-line no-console
+  console.log('[TV Mode] Enabled - hiding header/footer, optimizing layout');
 }
 
 /**
@@ -140,7 +140,7 @@ function isVitamixRecommenderRequest() {
  * Generate a URL-safe slug from a query
  */
 function generateSlug(query) {
-  let slug = query
+  const slug = query
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, '')
@@ -200,7 +200,7 @@ async function renderGenerativePage() {
   const streamUrl = `${VITAMIX_RECOMMENDER_URL}/api/stream?slug=${encodeURIComponent(slug)}&query=${encodeURIComponent(query)}`;
   const eventSource = new EventSource(streamUrl);
   let blockCount = 0;
-  let generatedBlocks = []; // Array of { html, sectionStyle }
+  const generatedBlocks = []; // Array of { html, sectionStyle }
 
   eventSource.onopen = () => {
     statusEl.textContent = 'Generating content...';
@@ -335,6 +335,7 @@ async function renderGenerativePage() {
     }
   });
 
+  // eslint-disable-next-line no-unused-vars
   eventSource.addEventListener('generation-complete', (e) => {
     eventSource.close();
 
@@ -707,29 +708,29 @@ async function renderFastGenerativePage() {
  * Uses the recommender service with Gemini reasoning
  */
 async function renderVitamixRecommenderPage() {
-	// Load skeleton/vitamix styles
-	await loadCSS(`${window.hlx.codeBasePath}/styles/vitamix.css`);
+  // Load skeleton/vitamix styles
+  await loadCSS(`${window.hlx.codeBasePath}/styles/vitamix.css`);
 
-	const main = document.querySelector('main');
-	if (!main) return;
+  const main = document.querySelector('main');
+  if (!main) return;
 
-	const params = new URLSearchParams(window.location.search);
-	const query = params.get('q') || params.get('query');
-	const preset = params.get('preset') || 'production'; // Default to production (Claude reasoning)
-	const slug = generateSlug(query);
-	const isTVMode = isTVRequest();
+  const params = new URLSearchParams(window.location.search);
+  const query = params.get('q') || params.get('query');
+  const preset = params.get('preset') || 'production'; // Default to production (Claude reasoning)
+  const slug = generateSlug(query);
+  const isTVMode = isTVRequest();
 
-	// Clear main and show loading state
-	// Hide query text in TV mode for cleaner display
-	main.innerHTML = `
-		<div class="section generating-container vitamix-recommender">
-			${isTVMode ? '' : `<span class="generating-query">"${query}"</span>`}
-		</div>
-		<div id="generation-content"></div>
-	`;
+  // Clear main and show loading state
+  // Hide query text in TV mode for cleaner display
+  main.innerHTML = `
+    <div class="section generating-container vitamix-recommender">
+      ${isTVMode ? '' : `<span class="generating-query">"${query}"</span>`}
+    </div>
+    <div id="generation-content"></div>
+  `;
 
-	const loadingState = main.querySelector('.generating-container');
-	const content = main.querySelector('#generation-content');
+  const loadingState = main.querySelector('.generating-container');
+  const content = main.querySelector('#generation-content');
 
   // Connect to SSE stream with preset parameter and session context
   const contextParam = SessionContextManager.buildEncodedContextParam();
@@ -883,9 +884,9 @@ async function renderVitamixRecommenderPage() {
         intent: data.intent?.intentType || 'general',
         journeyStage: data.reasoning?.journeyStage || 'exploring',
       });
-    } catch (e) {
+    } catch (err) {
       // Analytics tracking failure should not break the app
-      console.warn('[Recommender] Analytics tracking failed:', e);
+      console.warn('[Recommender] Analytics tracking failed:', err);
     }
 
     // eslint-disable-next-line no-console
@@ -928,7 +929,10 @@ async function renderVitamixRecommenderPage() {
 
 /**
  * Get icon for reasoning step stage
+ * @param {string} stage - Reasoning stage key
+ * @returns {string} Icon character
  */
+// eslint-disable-next-line no-unused-vars
 function getReasoningIcon(stage) {
   const icons = {
     understanding: '🔍',
@@ -946,6 +950,7 @@ function getReasoningIcon(stage) {
  * If a .hero block already exists, this function does nothing.
  * @param {Element} main The container element
  */
+// eslint-disable-next-line no-unused-vars
 function buildHeroBlock(main) {
   // Skip if there's already an explicit hero block
   if (main.querySelector('.hero')) {

@@ -96,6 +96,7 @@ export class AnalyticsTracker {
    * Save session to sessionStorage
    * @param {AnalyticsSession} session
    */
+  // eslint-disable-next-line class-methods-use-this
   saveSession(session) {
     try {
       const { isNew, ...sessionData } = session;
@@ -189,7 +190,7 @@ export class AnalyticsTracker {
       },
     });
 
-    console.log('[Analytics] Tracked query:', queryData.query, '(#' + this.session.queryCount + ')');
+    console.log('[Analytics] Tracked query:', queryData.query, `(#${this.session.queryCount})`);
   }
 
   /**

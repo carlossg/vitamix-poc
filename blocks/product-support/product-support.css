@@ -27,12 +27,12 @@
 
 .product-support-link {
   font-size: 0.9375rem;
-  color: #0066cc;
+  color: #06c;
   text-decoration: underline;
 }
 
 .product-support-link:hover {
-  color: #004499;
+  color: #049;
 }
 
 .product-support-divider {
@@ -41,7 +41,7 @@
   background: #e5e5e5;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .product-support-inner {
     flex-direction: column;
     gap: 1.5rem;

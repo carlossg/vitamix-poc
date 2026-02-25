@@ -7,7 +7,7 @@
 /* Vitamix brand colors */
 :root {
   --vitamix-primary: #c00;
-  --vitamix-dark: #990000;
+  --vitamix-dark: #900;
   --vitamix-light: #fff5f5;
   --vitamix-text: #333;
   --vitamix-muted: #666;
@@ -63,7 +63,7 @@
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(204, 0, 0, 0.15);
+  border-bottom: 1px solid rgb(204 0 0 / 15%);
 }
 
 .reasoning-title {
@@ -132,7 +132,7 @@
 .step-line {
   width: 2px;
   flex: 1;
-  background: rgba(204, 0, 0, 0.2);
+  background: rgb(204 0 0 / 20%);
   min-height: 20px;
 }
 
@@ -162,7 +162,7 @@
 .reasoning-confidence {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid rgba(204, 0, 0, 0.15);
+  border-top: 1px solid rgb(204 0 0 / 15%);
   font-size: 13px;
   color: var(--vitamix-muted);
 }
@@ -174,7 +174,7 @@
 
 /* Reasoning completion animation */
 .reasoning-container.complete .reasoning-header {
-  border-bottom-color: rgba(204, 0, 0, 0.25);
+  border-bottom-color: rgb(204 0 0 / 25%);
 }
 
 /* ===== SKELETON LOADING ===== */
@@ -293,7 +293,6 @@
   border-radius: 8px;
   background: linear-gradient(90deg, #333 0%, #333 30%, #bbb 50%, #333 70%, #333 100%);
   background-size: 300% 100%;
-  -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shimmer 3s linear infinite;
@@ -410,7 +409,7 @@
 .header-search-spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -419,7 +418,7 @@
 .generating-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -480,7 +479,7 @@
   color: var(--vitamix-text);
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(204, 0, 0, 0.15);
+  border-bottom: 1px solid rgb(204 0 0 / 15%);
 }
 
 .reasoning-block .reasoning-steps {
@@ -493,7 +492,7 @@
   background: white;
   padding: 16px 20px;
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 6%);
   animation: step-appear 0.3s ease-out;
 }
 
@@ -502,6 +501,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -560,7 +560,7 @@
 
 /* ===== RESPONSIVE ===== */
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .reasoning-wrapper {
     padding: 20px;
   }

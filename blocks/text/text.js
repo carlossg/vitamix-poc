@@ -26,7 +26,7 @@
  * </div>
  */
 
+// eslint-disable-next-line no-unused-vars -- text block needs no decoration
 export default function decorate(block) {
-  // The text block needs minimal decoration
   // Content is already properly structured from EDS
 }

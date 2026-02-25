@@ -14,14 +14,14 @@
  */
 export default function decorate(block) {
   const rows = [...block.children];
-  
+
   const title = rows[0]?.textContent?.trim() || 'What comes in the box';
-  const items = rows.slice(1).map(row => row.textContent?.trim()).filter(Boolean);
-  
-  block.innerHTML = \`
-    <h3 class="product-includes-title">\${title}</h3>
+  const items = rows.slice(1).map((row) => row.textContent?.trim()).filter(Boolean);
+
+  block.innerHTML = `
+    <h3 class="product-includes-title">${title}</h3>
     <ul class="product-includes-list">
-      \${items.map(item => \`<li>\${item}</li>\`).join('')}
+      ${items.map((item) => `<li>${item}</li>`).join('')}
     </ul>
-  \`;
+  `;
 }

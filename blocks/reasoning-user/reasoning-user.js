@@ -3,6 +3,31 @@
  * Displays empathetic, user-focused insights that demonstrate understanding
  * and show how content is tailored to their specific needs
  */
+
+function getUserFriendlyTitle(stage) {
+  const titles = {
+    understanding: 'I Hear You',
+    assessment: 'What Matters',
+    decision: 'My Plan',
+    analysis: 'Quick Insight',
+    recommendation: 'My Pick',
+    insight: 'Good to Know',
+  };
+  return titles[stage] || 'Here\'s What I Found';
+}
+
+function getStageEmoji(stage) {
+  const emojis = {
+    understanding: '💭',
+    assessment: '🎯',
+    decision: '💡',
+    analysis: '🔍',
+    recommendation: '⭐',
+    insight: '✨',
+  };
+  return emojis[stage] || '💬';
+}
+
 export default function decorate(block) {
   const rows = [...block.children];
   if (rows.length === 0) return;
@@ -75,28 +100,4 @@ export default function decorate(block) {
     <span class="footer-text">Everything below is tailored to help you find the perfect solution.</span>
   `;
   block.appendChild(footer);
-}
-
-function getUserFriendlyTitle(stage) {
-  const titles = {
-    understanding: 'I Hear You',
-    assessment: 'What Matters',
-    decision: 'My Plan',
-    analysis: 'Quick Insight',
-    recommendation: 'My Pick',
-    insight: 'Good to Know',
-  };
-  return titles[stage] || 'Here\'s What I Found';
-}
-
-function getStageEmoji(stage) {
-  const emojis = {
-    understanding: '💭',
-    assessment: '🎯',
-    decision: '💡',
-    analysis: '🔍',
-    recommendation: '⭐',
-    insight: '✨',
-  };
-  return emojis[stage] || '💬';
 }

@@ -15,7 +15,8 @@
  * | banana,spinach,milk            | tomato,basil,garlic   | acai,banana,berries   |
  * | /recipes/green-smoothie        | /recipes/tomato-soup  | /recipes/acai-bowl    |
  *
- * Row structure: images, titles, meta (difficulty • time), difficulty level (1-5), ingredients, links
+ * Row structure: images, titles, meta (difficulty • time),
+ * difficulty level (1-5), ingredients, links
  */
 
 const STORAGE_KEY = 'vitamix-favorites';
@@ -54,7 +55,7 @@ export default function decorate(block) {
   }
 
   // Parse each row
-  rows.forEach((row, rowIndex) => {
+  rows.forEach((row) => {
     const cells = [...row.children];
     cells.forEach((cell, colIndex) => {
       if (colIndex >= columnCount) return;
@@ -75,9 +76,9 @@ export default function decorate(block) {
         recipe.title = strong.textContent;
       } else if (text.includes('•')) {
         // Meta: "Easy • 5 min"
-        const parts = text.split('•').map((p) => p.trim());
-        if (parts[0]) recipe.difficulty = parts[0];
-        if (parts[1]) recipe.time = parts[1];
+        const [diffPart, timePart] = text.split('•').map((p) => p.trim());
+        if (diffPart) recipe.difficulty = diffPart;
+        if (timePart) recipe.time = timePart;
       } else if (/^[1-5]$/.test(text)) {
         // Difficulty level 1-5
         recipe.difficultyLevel = parseInt(text, 10);

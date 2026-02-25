@@ -46,7 +46,7 @@
 
 .cerebras-query-form input[type="text"]:focus {
   border-color: var(--cerebras-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 20%);
 }
 
 .cerebras-btn {
@@ -250,6 +250,7 @@ picture:has(img[data-gen-image].loaded) {
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
@@ -273,7 +274,7 @@ picture:has(img[data-gen-image].loaded) {
 }
 
 .publish-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(255 255 255 / 10%);
   color: #e5e7eb;
   border-color: #9ca3af;
 }
@@ -284,13 +285,13 @@ picture:has(img[data-gen-image].loaded) {
 }
 
 .publish-btn.published {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.5);
+  background: rgb(16 185 129 / 15%);
+  border-color: rgb(16 185 129 / 50%);
   color: #34d399;
 }
 
 .publish-btn.published:hover {
-  background: rgba(16, 185, 129, 0.25);
+  background: rgb(16 185 129 / 25%);
   color: #4ade80;
 }
 
@@ -303,7 +304,7 @@ picture:has(img[data-gen-image].loaded) {
 .publish-btn .generating-spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -330,7 +331,7 @@ picture:has(img[data-gen-image].loaded) {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
   opacity: 0;
   transition: transform 0.3s ease, opacity 0.3s ease;
   z-index: 10000;
@@ -359,7 +360,7 @@ a.button[data-cta-type="explore"].generating {
 a.button.generating .generating-spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
   border-top-color: white;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -377,7 +378,7 @@ a.button.generating .generating-spinner {
 }
 
 /* Responsive */
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .query-input-wrapper {
     flex-direction: column;
   }

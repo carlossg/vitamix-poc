@@ -4,10 +4,22 @@
  * Provides functions to look up real Vitamix recipes by title.
  * Uses the recipe URLs from the Vitamix sitemap as the source of truth.
  */
+/* eslint-disable no-restricted-syntax */
 
 // Cache for loaded recipe data
 let recipeIndex = null;
 let loadPromise = null;
+
+/**
+ * Convert a URL slug to a display title
+ * "creamy-oatmeal" -> "Creamy Oatmeal"
+ */
+function slugToTitle(slug) {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
 /**
  * Load the recipe index from the crawler data
@@ -58,17 +70,6 @@ async function loadRecipeIndex() {
 }
 
 /**
- * Convert a URL slug to a display title
- * "creamy-oatmeal" -> "Creamy Oatmeal"
- */
-function slugToTitle(slug) {
-  return slug
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-/**
  * Convert a title to a URL slug
  * "Creamy Oatmeal Recipe" -> "creamy-oatmeal"
  */
@@ -81,20 +82,6 @@ function titleToSlug(title) {
     .replace(/-+/g, '-') // Remove duplicate hyphens
     .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
     .trim();
-}
-
-/**
- * Calculate similarity between two strings (Levenshtein-based)
- * Returns a score from 0 to 1, where 1 is an exact match
- */
-function similarity(s1, s2) {
-  const longer = s1.length > s2.length ? s1 : s2;
-  const shorter = s1.length > s2.length ? s2 : s1;
-
-  if (longer.length === 0) return 1.0;
-
-  const editDistance = levenshteinDistance(longer, shorter);
-  return (longer.length - editDistance) / longer.length;
 }
 
 /**
@@ -119,6 +106,20 @@ function levenshteinDistance(s1, s2) {
     if (i > 0) costs[s2.length] = lastValue;
   }
   return costs[s2.length];
+}
+
+/**
+ * Calculate similarity between two strings (Levenshtein-based)
+ * Returns a score from 0 to 1, where 1 is an exact match
+ */
+function similarity(s1, s2) {
+  const longer = s1.length > s2.length ? s1 : s2;
+  const shorter = s1.length > s2.length ? s2 : s1;
+
+  if (longer.length === 0) return 1.0;
+
+  const editDistance = levenshteinDistance(longer, shorter);
+  return (longer.length - editDistance) / longer.length;
 }
 
 /**

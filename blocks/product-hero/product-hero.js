@@ -37,8 +37,7 @@ export default function decorate(block) {
 
     // Check if image is in col2 instead
     if (cols[1]?.querySelector('picture, img') && !cols[0]?.querySelector('picture, img')) {
-      imageCol = cols[1];
-      contentCol = cols[0];
+      [imageCol, contentCol] = [cols[1], cols[0]];
     }
 
     picture = imageCol?.querySelector('picture');

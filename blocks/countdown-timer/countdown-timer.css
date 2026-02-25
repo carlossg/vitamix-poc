@@ -26,7 +26,7 @@
 
 .countdown-timer-display > div,
 .countdown-unit {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgb(255 255 255 / 15%);
   border-radius: 8px;
   padding: 16px 20px;
   min-width: 80px;

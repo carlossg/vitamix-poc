@@ -13,7 +13,7 @@
   font-size: 2rem;
   font-weight: 300;
   color: var(--color-brand-dark, #1a1a1a);
-  margin: 0 0 24px 0;
+  margin: 0 0 24px;
   letter-spacing: -0.02em;
 }
 
@@ -37,7 +37,7 @@
 }
 
 .recipe-directions .direction-step.highlighted {
-  background: rgba(196, 18, 48, 0.05);
+  background: rgb(196 18 48 / 5%);
   margin: 0 -16px;
   padding: 24px 16px;
   border-radius: 8px;

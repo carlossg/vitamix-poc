@@ -315,7 +315,7 @@
 }
 
 .pages-list a {
-  color: var(--link-color, #0066cc);
+  color: var(--link-color, #06c);
   text-decoration: none;
   font-weight: 500;
   display: block;
@@ -353,7 +353,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .analytics-dashboard {
     padding: 1rem;
   }

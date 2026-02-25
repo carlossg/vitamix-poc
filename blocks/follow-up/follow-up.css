@@ -75,7 +75,7 @@
   background: var(--vitamix-light, #fff5f5);
   color: var(--vitamix-primary, #c00);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(204, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgb(204 0 0 / 15%);
 }
 
 .follow-up-chip:active {
@@ -101,7 +101,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .follow-up-wrapper {
     padding: 32px 20px;
   }
@@ -116,7 +116,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .follow-up-chip {
     width: 100%;
     justify-content: space-between;

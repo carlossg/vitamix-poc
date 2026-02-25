@@ -7,6 +7,7 @@
  * - Session context for contextual browsing
  * - Progressive loading with skeleton states
  */
+/* eslint-disable no-use-before-define */
 
 import {
   decorateBlock,
@@ -26,8 +27,20 @@ let originalBlocksData = [];
 // Store published page URL
 let publishedPageUrl = null;
 
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i += 1) {
+    const char = str.charCodeAt(i);
+    // eslint-disable-next-line no-bitwise
+    hash = ((hash << 5) - hash) + char;
+    // eslint-disable-next-line no-bitwise
+    hash &= hash;
+  }
+  return Math.abs(hash).toString(36);
+}
+
 function generateSlug(query) {
-  let slug = query
+  const slug = query
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, '')
@@ -36,17 +49,7 @@ function generateSlug(query) {
     .replace(/^-|-$/g, '')
     .substring(0, 80);
   const hash = simpleHash(query + Date.now()).slice(0, 6);
-  return slug + '-' + hash;
-}
-
-function simpleHash(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i += 1) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash &= hash;
-  }
-  return Math.abs(hash).toString(36);
+  return `${slug}-${hash}`;
 }
 
 function escapeRegExp(string) {
@@ -62,25 +65,25 @@ function createSkeletonBlock(blockType) {
   const section = document.createElement('div');
   section.className = 'section skeleton-section';
   section.dataset.blockType = blockType;
-  
+
   const skeletonHTML = {
     reasoning: '<div class="reasoning skeleton"><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line" style="width:80%"></div></div>',
     hero: '<div class="hero skeleton"><div class="skeleton-image"></div><div class="skeleton-line" style="width:70%"></div></div>',
-    default: '<div class="block skeleton"><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line" style="width:90%"></div></div>'
+    default: '<div class="block skeleton"><div class="skeleton-line" style="width:60%"></div><div class="skeleton-line" style="width:90%"></div></div>',
   };
-  
+
   section.innerHTML = skeletonHTML[blockType] || skeletonHTML.default;
   return section;
 }
 
 function showSkeletonState(container, expectedBlocks) {
-  (expectedBlocks || ['reasoning', 'hero']).forEach(function(blockType) {
+  (expectedBlocks || ['reasoning', 'hero']).forEach((blockType) => {
     container.appendChild(createSkeletonBlock(blockType));
   });
 }
 
 function removeSkeletonForBlock(container, blockType) {
-  const skeleton = container.querySelector('.skeleton-section[data-block-type="' + blockType + '"]');
+  const skeleton = container.querySelector(`.skeleton-section[data-block-type="${blockType}"]`);
   if (skeleton) skeleton.remove();
 }
 
@@ -96,9 +99,9 @@ async function renderBlockSection(blockData, container) {
   section.dataset.sectionStatus = 'initialized';
   section.innerHTML = blockData.html;
 
-  section.querySelectorAll('img[data-gen-image]').forEach(function(img) {
+  section.querySelectorAll('img[data-gen-image]').forEach((img) => {
     img.dataset.originalSrc = img.getAttribute('src');
-    img.onload = function() { img.classList.add('loaded'); };
+    img.onload = function () { img.classList.add('loaded'); };
     if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
   });
 
@@ -106,11 +109,11 @@ async function renderBlockSection(blockData, container) {
   if (blockEl) {
     const blockName = blockEl.classList[0];
     const wrapper = document.createElement('div');
-    wrapper.className = blockName + '-wrapper';
+    wrapper.className = `${blockName}-wrapper`;
     blockEl.parentNode.insertBefore(wrapper, blockEl);
     wrapper.appendChild(blockEl);
     decorateBlock(blockEl);
-    section.classList.add(blockName + '-container');
+    section.classList.add(`${blockName}-container`);
   }
 
   decorateButtons(section);
@@ -128,19 +131,19 @@ function getStepIcon(step) {
   const icons = {
     understanding: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
     analysis: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>',
-    recommendation: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+    recommendation: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
   };
   return icons[step] || icons.understanding;
 }
 
 function renderReasoningStep(stepData, reasoningContainer) {
-  let stepEl = reasoningContainer.querySelector('[data-step="' + stepData.step + '"]');
+  let stepEl = reasoningContainer.querySelector(`[data-step="${stepData.step}"]`);
 
   if (!stepEl) {
     stepEl = document.createElement('div');
     stepEl.className = 'reasoning-step';
     stepEl.dataset.step = stepData.step;
-    stepEl.innerHTML = '<div class="step-indicator"><div class="step-icon">' + getStepIcon(stepData.step) + '</div><div class="step-line"></div></div><div class="step-content"><div class="step-title">' + stepData.title + '</div><div class="step-text"></div></div>';
+    stepEl.innerHTML = `<div class="step-indicator"><div class="step-icon">${getStepIcon(stepData.step)}</div><div class="step-line"></div></div><div class="step-content"><div class="step-title">${stepData.title}</div><div class="step-text"></div></div>`;
     reasoningContainer.appendChild(stepEl);
   }
 
@@ -169,45 +172,45 @@ async function renderGenerationPage() {
   const slug = generateSlug(query);
   const startTime = Date.now();
 
-  main.innerHTML = '<div id="generation-content"><div class="generating-container"><span class="generating-query">"' + query + '"</span></div></div>';
+  main.innerHTML = `<div id="generation-content"><div class="generating-container"><span class="generating-query">"${query}"</span></div></div>`;
   const content = main.querySelector('#generation-content');
 
   originalBlocksData = [];
   const contextParam = SessionContextManager.buildEncodedContextParam();
-  const streamUrl = VITAMIX_WORKER_URL + '/generate?query=' + encodeURIComponent(query) + '&slug=' + encodeURIComponent(slug) + '&ctx=' + contextParam;
+  const streamUrl = `${VITAMIX_WORKER_URL}/generate?query=${encodeURIComponent(query)}&slug=${encodeURIComponent(slug)}&ctx=${contextParam}`;
   const eventSource = new EventSource(streamUrl);
 
-  console.log('[Vitamix] Starting SSE stream for: ' + query);
+  console.log(`[Vitamix] Starting SSE stream for: ${query}`);
 
   let firstBlockReceived = false;
   let reasoningContainer = null;
 
-  eventSource.addEventListener('reasoning-start', function() {
+  eventSource.addEventListener('reasoning-start', () => {
     const loadingContainer = content.querySelector('.generating-container');
     if (loadingContainer) loadingContainer.classList.add('done');
     reasoningContainer = createReasoningBlock(content);
   });
 
-  eventSource.addEventListener('reasoning-step', function(e) {
+  eventSource.addEventListener('reasoning-step', (e) => {
     const data = JSON.parse(e.data);
     if (reasoningContainer) renderReasoningStep(data, reasoningContainer);
   });
 
-  eventSource.addEventListener('reasoning-complete', function(e) {
+  eventSource.addEventListener('reasoning-complete', (e) => {
     const data = JSON.parse(e.data);
     if (reasoningContainer) {
       reasoningContainer.parentElement.classList.add('complete');
       if (data.confidence) {
         const confidenceEl = document.createElement('div');
         confidenceEl.className = 'reasoning-confidence';
-        confidenceEl.innerHTML = 'Confidence: <span class="confidence-value">' + Math.round(data.confidence * 100) + '%</span>';
+        confidenceEl.innerHTML = `Confidence: <span class="confidence-value">${Math.round(data.confidence * 100)}%</span>`;
         reasoningContainer.appendChild(confidenceEl);
       }
     }
     showSkeletonState(content, data.expectedBlocks || ['hero', 'product-cards']);
   });
 
-  eventSource.addEventListener('block-content', async function(e) {
+  eventSource.addEventListener('block-content', async (e) => {
     if (!firstBlockReceived) {
       firstBlockReceived = true;
       const loadingContainer = content.querySelector('.generating-container');
@@ -221,17 +224,17 @@ async function renderGenerationPage() {
   const pendingImages = new Map();
 
   function applyImageUpdate(imageId, url, cropNeeded) {
-    const img = content.querySelector('img[data-gen-image="' + imageId + '"]');
+    const img = content.querySelector(`img[data-gen-image="${imageId}"]`);
     if (img && url) {
       let resolvedUrl = url;
       if (url.startsWith('/')) resolvedUrl = VITAMIX_WORKER_URL + url;
-      const cacheBustUrl = resolvedUrl + (resolvedUrl.includes('?') ? '&' : '?') + '_t=' + Date.now();
+      const cacheBustUrl = `${resolvedUrl + (resolvedUrl.includes('?') ? '&' : '?')}_t=${Date.now()}`;
       img.src = cacheBustUrl;
       if (cropNeeded) img.dataset.crop = 'true';
       img.classList.add('loaded');
       const originalUrl = img.dataset.originalSrc;
       if (originalUrl) {
-        originalBlocksData.forEach(function(block) {
+        originalBlocksData.forEach((block) => {
           block.html = block.html.replace(new RegExp(escapeRegExp(originalUrl), 'g'), resolvedUrl);
         });
       }
@@ -240,51 +243,59 @@ async function renderGenerationPage() {
     return false;
   }
 
-  const retryInterval = setInterval(function() {
+  const retryInterval = setInterval(() => {
     if (pendingImages.size === 0) return;
-    pendingImages.forEach(function(data, imageId) {
+    pendingImages.forEach((data, imageId) => {
       if (applyImageUpdate(imageId, data.url, data.cropNeeded)) {
-        console.log('[Vitamix] Image applied (retry): ' + imageId);
+        console.log(`[Vitamix] Image applied (retry): ${imageId}`);
         pendingImages.delete(imageId);
       } else if (data.attempts >= 20) {
-        console.warn('[Vitamix] Image not found after retries: ' + imageId);
+        console.warn(`[Vitamix] Image not found after retries: ${imageId}`);
         pendingImages.delete(imageId);
       } else {
-        pendingImages.set(imageId, { url: data.url, cropNeeded: data.cropNeeded, attempts: data.attempts + 1 });
+        pendingImages.set(imageId, {
+          url: data.url,
+          cropNeeded: data.cropNeeded,
+          attempts: data.attempts + 1,
+        });
       }
     });
   }, 100);
 
-  eventSource.addEventListener('image-ready', function(e) {
+  eventSource.addEventListener('image-ready', (e) => {
     const data = JSON.parse(e.data);
-    console.log('[Vitamix] Image ready: ' + data.imageId);
+    console.log(`[Vitamix] Image ready: ${data.imageId}`);
     if (!applyImageUpdate(data.imageId, data.url, data.cropNeeded)) {
       pendingImages.set(data.imageId, { url: data.url, cropNeeded: data.cropNeeded, attempts: 0 });
     }
   });
 
-  eventSource.addEventListener('generation-complete', function(e) {
+  eventSource.addEventListener('generation-complete', (e) => {
     eventSource.close();
     const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
-    setTimeout(function() { clearInterval(retryInterval); }, 2000);
-    content.querySelectorAll('.skeleton-section').forEach(function(s) { s.remove(); });
-    console.log('[Vitamix] Complete in ' + totalTime + 's');
+    setTimeout(() => { clearInterval(retryInterval); }, 2000);
+    content.querySelectorAll('.skeleton-section').forEach((s) => { s.remove(); });
+    console.log(`[Vitamix] Complete in ${totalTime}s`);
 
     let intent = null;
     if (e.data) {
-      try { intent = JSON.parse(e.data).intent; } catch(err) {}
+      try {
+        intent = JSON.parse(e.data).intent;
+      } catch (_err) {
+        // ignore parse error
+      }
     }
 
     SessionContextManager.addQuery({
-      query: query,
+      query,
       timestamp: Date.now(),
       intent: intent?.intentType || 'general',
       entities: intent?.entities || { products: [], ingredients: [], goals: [] },
-      generatedPath: '/discover/' + slug
+      generatedPath: `/discover/${slug}`,
     });
 
     const h1 = content.querySelector('h1');
-    if (h1) document.title = h1.textContent + ' | Vitamix Recommender';
+    if (h1) document.title = `${h1.textContent} | Vitamix Recommender`;
     enableHeaderSearch();
 
     // Auto-persist to DA
@@ -293,15 +304,15 @@ async function renderGenerationPage() {
     }
   });
 
-  eventSource.addEventListener('error', function(e) {
+  eventSource.addEventListener('error', (e) => {
     if (e.data) {
       const data = JSON.parse(e.data);
-      main.innerHTML = '<div class="section error-container"><h1>Something went wrong</h1><p style="color:#c00;">' + data.message + '</p><p><a href="/">Try again</a></p></div>';
+      main.innerHTML = `<div class="section error-container"><h1>Something went wrong</h1><p style="color:#c00;">${data.message}</p><p><a href="/">Try again</a></p></div>`;
     }
     eventSource.close();
   });
 
-  eventSource.onerror = function() {
+  eventSource.onerror = function () {
     if (eventSource.readyState === EventSource.CLOSED) {
       console.log('[Vitamix] SSE connection closed');
     }
@@ -327,13 +338,13 @@ async function persistToDA(query, blocks, intent) {
   try {
     console.log('[Vitamix] Persisting page to DA...');
 
-    const response = await fetch(VITAMIX_WORKER_URL + '/api/persist', {
+    const response = await fetch(`${VITAMIX_WORKER_URL}/api/persist`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        query: query,
-        blocks: blocks,
-        intent: intent,
+        query,
+        blocks,
+        intent,
       }),
     });
 
@@ -341,7 +352,7 @@ async function persistToDA(query, blocks, intent) {
 
     if (result.success && result.urls) {
       publishedPageUrl = result.urls.live;
-      console.log('[Vitamix] Page published: ' + publishedPageUrl);
+      console.log(`[Vitamix] Page published: ${publishedPageUrl}`);
 
       // Dispatch custom event for header Share button
       window.dispatchEvent(new CustomEvent('page-published', {
@@ -352,10 +363,9 @@ async function persistToDA(query, blocks, intent) {
       }));
 
       return result;
-    } else {
-      console.error('[Vitamix] Persist failed:', result.error);
-      return null;
     }
+    console.error('[Vitamix] Persist failed:', result.error);
+    return null;
   } catch (error) {
     console.error('[Vitamix] Persist error:', error);
     return null;
@@ -373,14 +383,14 @@ function startGeneration(query) {
   }
   if (headerInput) headerInput.disabled = true;
 
-  document.querySelectorAll('.suggestion-chip').forEach(function(chip) {
+  document.querySelectorAll('.suggestion-chip').forEach((chip) => {
     chip.disabled = true;
     chip.style.pointerEvents = 'none';
     chip.style.opacity = '0.5';
   });
 
-  console.log('[Vitamix] Starting generation for: "' + query + '"');
-  window.location.href = '/?q=' + encodeURIComponent(query);
+  console.log(`[Vitamix] Starting generation for: "${query}"`);
+  window.location.href = `/?q=${encodeURIComponent(query)}`;
 }
 
 function setupQueryForm() {
@@ -388,22 +398,22 @@ function setupQueryForm() {
   if (!form) return;
   const input = form.querySelector('input');
 
-  form.addEventListener('submit', function(e) {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
     const query = input.value.trim();
     if (!query) { input.focus(); return; }
     startGeneration(query);
   });
 
-  document.querySelectorAll('.suggestion-chip').forEach(function(chip) {
-    chip.addEventListener('click', function() {
+  document.querySelectorAll('.suggestion-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
       startGeneration(chip.dataset.query || chip.textContent);
     });
   });
 }
 
 function setupHeaderSearch() {
-  document.addEventListener('submit', function(e) {
+  document.addEventListener('submit', (e) => {
     const header = e.target.closest('header');
     if (!header) return;
     const input = e.target.querySelector('input');
@@ -416,7 +426,7 @@ function setupHeaderSearch() {
     }
   }, true);
 
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     const input = e.target;
     if (!input.matches || !input.matches('input')) return;
@@ -434,7 +444,7 @@ function setupHeaderSearch() {
 }
 
 function setupFollowUpHandlers() {
-  document.addEventListener('click', function(e) {
+  document.addEventListener('click', (e) => {
     const followUpChip = e.target.closest('.follow-up-chip');
     if (followUpChip) {
       e.preventDefault();
@@ -465,7 +475,7 @@ async function init() {
   }
 }
 
-document.addEventListener('load', function(e) {
+document.addEventListener('load', (e) => {
   if (e.target.tagName === 'IMG' && e.target.dataset.genImage) {
     e.target.classList.add('loaded');
   }

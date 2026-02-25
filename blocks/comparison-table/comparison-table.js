@@ -11,6 +11,7 @@
  * | **Price**        | $649  | $549  | $349  |  <- Spec rows
  * | **Motor**        | 2.2HP | 2.2HP | 2.0HP |
  */
+/* eslint-disable no-restricted-syntax, no-loop-func */
 
 /**
  * Generate a Vitamix product URL from a product name
@@ -163,7 +164,9 @@ export default function decorate(block) {
     // Only treat as recommendation if it's a single-cell format with colon
     // (e.g., "Best for smoothies: A3500") OR if other cells are empty.
     // If other cells have content, it's a multi-column spec row showing "Best For" per product.
-    const hasContentInOtherCells = cells.slice(1).some((cell) => cell.textContent.trim().length > 0);
+    const hasContentInOtherCells = cells.slice(1).some(
+      (cell) => cell.textContent.trim().length > 0,
+    );
     const hasColonFormat = firstCellText.includes(':');
 
     if (isRecommendationKeyword && (hasColonFormat || !hasContentInOtherCells)) {

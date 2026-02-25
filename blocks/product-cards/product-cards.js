@@ -270,7 +270,9 @@ export default function decorate(block) {
     let imageSet = false;
     let nameSet = false;
     let ratingSet = false;
-    let priceInfo = { current: '', original: '', savings: '', isSale: false };
+    const priceInfo = {
+      current: '', original: '', savings: '', isSale: false,
+    };
 
     // Create structure
     const imageDiv = document.createElement('div');

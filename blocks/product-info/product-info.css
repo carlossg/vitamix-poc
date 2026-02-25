@@ -121,6 +121,6 @@
   margin: 0;
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .product-info { grid-template-columns: 1fr; gap: 2rem; }
 }

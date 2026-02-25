@@ -27,7 +27,7 @@ export default function decorate(block) {
 
   const cells = [...row.children];
 
-  cells.forEach((cell, index) => {
+  cells.forEach((cell) => {
     const pic = cell.querySelector('picture');
 
     if (pic) {

@@ -67,35 +67,35 @@ export default function decorate(block) {
   comparisons.className = 'noise-comparisons';
 
   // Process comparison rows
-  for (let i = 1; i < rows.length; i++) {
+  for (let i = 1; i < rows.length; i += 1) {
     const row = rows[i];
     const cells = [...row.children];
 
-    if (cells.length < 2) continue;
+    if (cells.length >= 2) {
+      const item = cells[0]?.textContent?.trim() || '';
+      const db = cells[1]?.textContent?.trim() || '';
+      const context = cells[2]?.textContent?.trim() || '';
 
-    const item = cells[0]?.textContent?.trim() || '';
-    const db = cells[1]?.textContent?.trim() || '';
-    const context = cells[2]?.textContent?.trim() || '';
+      const comparison = document.createElement('div');
+      comparison.className = 'noise-comparison';
 
-    const comparison = document.createElement('div');
-    comparison.className = 'noise-comparison';
+      // Determine color based on dB level
+      const dbNum = parseInt(db, 10);
+      let levelClass = 'quiet';
+      if (dbNum >= 85) levelClass = 'very-loud';
+      else if (dbNum >= 70) levelClass = 'loud';
+      else if (dbNum >= 50) levelClass = 'moderate';
 
-    // Determine color based on dB level
-    const dbNum = parseInt(db, 10);
-    let levelClass = 'quiet';
-    if (dbNum >= 85) levelClass = 'very-loud';
-    else if (dbNum >= 70) levelClass = 'loud';
-    else if (dbNum >= 50) levelClass = 'moderate';
+      comparison.classList.add(levelClass);
 
-    comparison.classList.add(levelClass);
-
-    comparison.innerHTML = `
+      comparison.innerHTML = `
       <div class="comparison-item">${item}</div>
       <div class="comparison-db">${db}</div>
       <div class="comparison-context">${context}</div>
     `;
 
-    comparisons.appendChild(comparison);
+      comparisons.appendChild(comparison);
+    }
   }
 
   block.appendChild(comparisons);

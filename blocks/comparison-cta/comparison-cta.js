@@ -6,7 +6,8 @@
  * Content Model (DA Table):
  * | Comparison CTA |
  * |----------------|
- * | A3500 | $649 | [View Details](/products/a3500) | A2500 | $549 | [View Details](/products/a2500) |
+ * | A3500 | $649 | [View Details](/products/a3500) | A2500 | $549 |
+ * | [View Details](/products/a2500) |
  * | All models include free shipping |
  */
 

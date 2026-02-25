@@ -26,16 +26,18 @@
  *   </div>
  * </div>
  */
+/* eslint-disable no-unused-vars, prefer-destructuring */
 
 // SVG icons for metadata
 const ICONS = {
-  clock: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
-  yield: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>`,
-  difficulty: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>`,
-  star: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
-  starEmpty: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  clock: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  yield: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/></svg>',
+  difficulty: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+  star: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  starEmpty: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
 };
 
+// eslint-disable-next-line no-unused-vars
 function createStarRating(rating, reviewCount) {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 >= 0.5;
@@ -94,7 +96,7 @@ export default function decorate(block) {
 
   // Extract image from first row
   let imageCell = null;
-  let contentCells = [];
+  const contentCells = [];
 
   if (rows[0]) {
     const cells = [...rows[0].children];
@@ -139,27 +141,27 @@ export default function decorate(block) {
 
     // Check for rating pattern (e.g., "5|0" for rating|reviewCount)
     if (text.match(/^\d(\.\d)?[|,]\d+$/)) {
-      const parts = text.split(/[|,]/);
-      rating = parseFloat(parts[0]);
-      reviewCount = parseInt(parts[1], 10);
+      const [r, c] = text.split(/[|,]/);
+      rating = parseFloat(r, 10) || 0;
+      reviewCount = parseInt(c, 10);
       return;
     }
 
     // Check for metadata pattern (time|yield|difficulty)
     if (text.includes('|') && (text.toLowerCase().includes('minute') || text.toLowerCase().includes('serving'))) {
-      const parts = text.split('|').map((p) => p.trim());
-      if (parts[0]) totalTime = parts[0];
-      if (parts[1]) yieldText = parts[1];
-      if (parts[2]) difficulty = parts[2];
+      const [t, y, d] = text.split('|').map((p) => p.trim());
+      if (t) totalTime = t;
+      if (y) yieldText = y;
+      if (d) difficulty = d;
       return;
     }
 
     // Check for attribution pattern (dietary|submittedBy)
     if (text.toLowerCase().includes('submitted') || text.includes('VITAMIX')) {
-      const parts = text.split('|').map((p) => p.trim());
-      if (parts.length === 2) {
-        dietaryInterests = parts[0];
-        submittedBy = parts[1].replace(/submitted by:?\s*/i, '');
+      const [dietary, submitted] = text.split('|').map((p) => p.trim());
+      if (dietary && submitted) {
+        dietaryInterests = dietary;
+        submittedBy = submitted.replace(/submitted by:?\s*/i, '');
       } else {
         submittedBy = text.replace(/submitted by:?\s*/i, '');
       }

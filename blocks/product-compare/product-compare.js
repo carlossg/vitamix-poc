@@ -4,6 +4,7 @@
  * Displays selectable product cards with a "Compare" button
  * that opens an overlay modal with side-by-side comparison.
  */
+/* eslint-disable no-use-before-define, no-unused-vars */
 
 // Store selected products globally
 const selectedProducts = new Map();

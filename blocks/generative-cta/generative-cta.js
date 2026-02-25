@@ -56,7 +56,6 @@ async function handleGenerativeClick(event, link) {
   event.preventDefault();
 
   link.classList.add('generating');
-  const originalContent = link.innerHTML;
   link.innerHTML = `
     <span class="generating-text">Generating page...</span>
     <span class="generating-spinner"></span>

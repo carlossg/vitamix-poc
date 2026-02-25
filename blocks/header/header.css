@@ -246,7 +246,7 @@ header nav .nav-search {
   display: block;
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgb(255 255 255 / 30%);
   border-top-color: white;
   border-radius: 50%;
   animation: header-spin 0.8s linear infinite;
@@ -291,7 +291,7 @@ header nav .nav-search {
 .nav-ai-toggle .ai-toggle-option.active {
   background: white;
   color: var(--color-charcoal);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 
 /* Image quality toggle - subtle, right side of header */
@@ -359,7 +359,7 @@ header nav .nav-search {
   font-family: var(--body-font-family);
 }
 
-.nav-save-da .save-da-btn:hover:not(:disabled):not(.saved) {
+.nav-save-da .save-da-btn:hover:not(:disabled, .saved) {
   border-color: var(--color-medium-gray);
   color: var(--color-dark-gray);
 }
@@ -380,7 +380,7 @@ header nav .nav-search {
   width: 12px;
   height: 12px;
   border-width: 1.5px;
-  border-color: rgba(102, 102, 102, 0.3);
+  border-color: rgb(102 102 102 / 30%);
   border-top-color: var(--color-medium-gray);
 }
 
@@ -550,7 +550,7 @@ header nav .nav-search {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
   opacity: 0;
   transition: opacity 0.3s ease, transform 0.3s ease;
   z-index: 9999;

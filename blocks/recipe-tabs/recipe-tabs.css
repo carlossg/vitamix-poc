@@ -34,7 +34,7 @@
 .recipe-tab {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255 255 255 / 70%);
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -47,12 +47,12 @@
 
 .recipe-tab:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(255 255 255 / 5%);
 }
 
 .recipe-tab.active {
   color: #fff;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgb(255 255 255 / 10%);
 }
 
 .recipe-tab:focus-visible {
@@ -72,7 +72,7 @@
 .cook-mode-help {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgb(255 255 255 / 60%);
   padding: 4px;
   cursor: pointer;
   display: flex;
@@ -88,7 +88,7 @@
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgb(255 255 255 / 70%);
 }
 
 .cook-mode-toggle {
@@ -102,7 +102,7 @@
   display: block;
   width: 44px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgb(255 255 255 / 20%);
   border-radius: 12px;
   position: relative;
   transition: background 0.2s ease;
@@ -153,7 +153,7 @@
     width: 100%;
     justify-content: flex-end;
     padding: 12px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgb(255 255 255 / 10%);
   }
 }
 
