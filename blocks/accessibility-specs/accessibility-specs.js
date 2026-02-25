@@ -57,34 +57,33 @@ export default function decorate(block) {
   let bestForArthritis = null;
   let lightest = { name: '', weight: Infinity };
 
-  for (let i = 1; i < rows.length; i++) {
+  for (let i = 1; i < rows.length; i += 1) {
     const row = rows[i];
     const cells = [...row.children];
 
-    if (cells.length < 4) continue;
+    if (cells.length >= 4) {
+      const productName = cells[0]?.textContent?.trim() || '';
+      const weight = cells[1]?.textContent?.trim() || '';
+      const lid = cells[2]?.textContent?.trim() || '';
+      const controls = cells[3]?.textContent?.trim() || '';
+      const productUrl = cells[0]?.querySelector('a')?.href || '#';
 
-    const productName = cells[0]?.textContent?.trim() || '';
-    const weight = cells[1]?.textContent?.trim() || '';
-    const lid = cells[2]?.textContent?.trim() || '';
-    const controls = cells[3]?.textContent?.trim() || '';
-    const productUrl = cells[0]?.querySelector('a')?.href || '#';
+      // Track lightest for recommendation
+      const weightNum = parseFloat(weight.replace(/[^\d.]/g, ''));
+      if (weightNum && weightNum < lightest.weight) {
+        lightest = { name: productName, weight: weightNum };
+      }
 
-    // Track lightest for recommendation
-    const weightNum = parseFloat(weight.replace(/[^\d.]/g, ''));
-    if (weightNum && weightNum < lightest.weight) {
-      lightest = { name: productName, weight: weightNum };
-    }
+      // Check for arthritis-friendly (dial controls, lighter weight)
+      if (/dial/i.test(controls) && weightNum < 12) {
+        bestForArthritis = productName;
+      }
 
-    // Check for arthritis-friendly (dial controls, lighter weight)
-    if (/dial/i.test(controls) && weightNum < 12) {
-      bestForArthritis = productName;
-    }
+      const dataRow = document.createElement('div');
+      dataRow.className = 'specs-row';
+      dataRow.setAttribute('role', 'row');
 
-    const dataRow = document.createElement('div');
-    dataRow.className = 'specs-row';
-    dataRow.setAttribute('role', 'row');
-
-    dataRow.innerHTML = `
+      dataRow.innerHTML = `
       <div class="specs-cell product-name" role="cell">
         <a href="${productUrl}" target="_blank">${productName}</a>
       </div>
@@ -99,7 +98,8 @@ export default function decorate(block) {
       </div>
     `;
 
-    table.appendChild(dataRow);
+      table.appendChild(dataRow);
+    }
   }
 
   block.appendChild(table);

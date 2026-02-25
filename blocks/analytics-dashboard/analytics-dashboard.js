@@ -59,7 +59,9 @@ function createScoreGauge(score, label) {
   const gauge = document.createElement('div');
   gauge.className = 'score-gauge';
 
-  const color = score >= 70 ? '#22c55e' : score >= 40 ? '#eab308' : '#ef4444';
+  let color = '#ef4444';
+  if (score >= 70) color = '#22c55e';
+  else if (score >= 40) color = '#eab308';
 
   gauge.innerHTML = `
     <div class="gauge-circle" style="--score: ${score}; --color: ${color}">
@@ -68,21 +70,6 @@ function createScoreGauge(score, label) {
     <div class="gauge-label">${label}</div>
   `;
   return gauge;
-}
-
-/**
- * Create suggestions list
- */
-function createSuggestionsList(title, suggestions) {
-  const container = document.createElement('div');
-  container.className = 'suggestions-section';
-  container.innerHTML = `
-    <h4>${title}</h4>
-    <ul class="suggestions-list">
-      ${suggestions.map((s) => `<li>${s}</li>`).join('')}
-    </ul>
-  `;
-  return container;
 }
 
 /**
@@ -184,14 +171,13 @@ async function runAnalysis(block) {
       throw new Error(error.error || 'Analysis failed');
     }
 
-    const data = await response.json();
-    const analysis = data.analysis;
+    const { analysis, cached, nextAvailable } = await response.json();
 
     // Update analysis info
     analysisInfo.innerHTML = `
-      <p>Analysis ${data.cached ? 'from cache' : 'completed'}: ${formatRelativeTime(analysis.timestamp)}
+      <p>Analysis ${cached ? 'from cache' : 'completed'}: ${formatRelativeTime(analysis.timestamp)}
       (${analysis.pagesAnalyzed} pages analyzed)</p>
-      ${data.cached ? `<p class="cache-notice">Next analysis available: ${new Date(data.nextAvailable).toLocaleTimeString()}</p>` : ''}
+      ${cached ? `<p class="cache-notice">Next analysis available: ${new Date(nextAvailable).toLocaleTimeString()}</p>` : ''}
     `;
 
     // Build results

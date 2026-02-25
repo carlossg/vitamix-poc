@@ -77,7 +77,7 @@ async function handleImprovementExecute(button, query, pageUrl, container) {
   button.classList.add('loading');
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => { setTimeout(resolve, 300); });
 
     const prompt = generateImprovementPrompt(query, pageUrl, selectedImprovements);
     await navigator.clipboard.writeText(prompt);
@@ -130,7 +130,9 @@ function formatRelativeTime(timestamp) {
 function createScoreBadge(score, label) {
   const badge = document.createElement('span');
   badge.className = 'score-badge';
-  const color = score >= 70 ? 'good' : score >= 40 ? 'medium' : 'poor';
+  let color = 'poor';
+  if (score >= 70) color = 'good';
+  else if (score >= 40) color = 'medium';
   badge.classList.add(`score-${color}`);
   badge.innerHTML = `<span class="score-value">${score}</span><span class="score-label">${label}</span>`;
   return badge;
@@ -336,7 +338,9 @@ function createQueryRow(queryData) {
     if (queryData.analysis) {
       analyzeBtn.textContent = 'Analyzed';
       analyzeBtn.classList.add('analyzed');
-      resultsContainer.appendChild(createAnalysisResults(queryData.analysis, queryData.query, queryData.generatedPageUrl));
+      resultsContainer.appendChild(
+        createAnalysisResults(queryData.analysis, queryData.query, queryData.generatedPageUrl),
+      );
       resultsContainer.classList.add('expanded');
     } else {
       analyzeBtn.textContent = 'Analyse';

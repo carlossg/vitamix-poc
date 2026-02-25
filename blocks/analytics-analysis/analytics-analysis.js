@@ -126,7 +126,7 @@ async function handleExecuteClick(button, suggestion, category, problematicPages
 
   try {
     // Simulate a brief delay for prompt generation
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => { setTimeout(resolve, 500); });
 
     const prompt = await generatePrompt(suggestion, category, problematicPages);
 
@@ -433,7 +433,9 @@ function createScoreGauge(score, label) {
   const gauge = document.createElement('div');
   gauge.className = 'score-gauge';
 
-  const color = score >= 70 ? '#22c55e' : score >= 40 ? '#eab308' : '#ef4444';
+  let color = '#ef4444';
+  if (score >= 70) color = '#22c55e';
+  else if (score >= 40) color = '#eab308';
 
   gauge.innerHTML = `
     <div class="gauge-circle" style="--score: ${score}; --color: ${color}">
@@ -447,6 +449,7 @@ function createScoreGauge(score, label) {
 /**
  * Display analysis results
  */
+// eslint-disable-next-line no-unused-vars
 function displayAnalysisResults(block, analysis, cached = false) {
   const analysisResults = block.querySelector('.analysis-results');
   const analysisInfo = block.querySelector('.analysis-info');
