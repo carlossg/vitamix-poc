@@ -59,7 +59,7 @@ steps:
       - '--labels'
       - 'app=vitamix,component=recommender,environment=${_ENVIRONMENT},managed-by=cloudbuild'
       - '--set-env-vars'
-      - 'NODE_ENV=production,GCP_PROJECT_ID=$PROJECT_ID,GCP_LOCATION=${_REGION},MODEL_PRESET=${_MODEL_PRESET},DA_ORG=aem-growth-adoption,DA_REPO=vitamix-poc'
+      - 'NODE_ENV=production,GCP_PROJECT_ID=$PROJECT_ID,GCP_LOCATION=${_REGION},MODEL_PRESET=${_MODEL_PRESET},DA_ORG=carlossg,DA_REPO=vitamix-poc'
       - '--set-secrets'
       - 'DA_TOKEN=DA_TOKEN:latest'
     waitFor: ['push-image']

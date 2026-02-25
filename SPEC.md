@@ -110,8 +110,8 @@ Response:
   "success": true,
   "path": "/smoothies/blender-smoothies-6stn8y",
   "urls": {
-    "preview": "https://main--vitamix-poc--aem-growth-adoption.aem.page/smoothies/...",
-    "live": "https://main--vitamix-poc--aem-growth-adoption.aem.live/smoothies/..."
+    "preview": "https://main--vitamix-poc--carlossg.aem.page/smoothies/...",
+    "live": "https://main--vitamix-poc--carlossg.aem.live/smoothies/..."
   }
 }
 ```
@@ -172,7 +172,7 @@ All AI calls go through Vertex AI using the **global** endpoint (`aiplatform.goo
 
 | Setting | Value |
 |---------|-------|
-| DA Org | `aem-growth-adoption` |
+| DA Org | `carlossg` |
 | DA Repo | `vitamix-poc` |
 | DA API | `https://admin.da.live` |
 | Admin API | `https://admin.hlx.page` |
@@ -180,8 +180,8 @@ All AI calls go through Vertex AI using the **global** endpoint (`aiplatform.goo
 
 ### Published URLs
 
-- **Preview:** `https://main--vitamix-poc--aem-growth-adoption.aem.page/{path}`
-- **Live:** `https://main--vitamix-poc--aem-growth-adoption.aem.live/{path}`
+- **Preview:** `https://main--vitamix-poc--carlossg.aem.page/{path}`
+- **Live:** `https://main--vitamix-poc--carlossg.aem.live/{path}`
 
 ### URL Category Paths
 
@@ -259,7 +259,7 @@ Override at runtime via `window.VITAMIX_CONFIG` before scripts load.
 | `GCP_PROJECT_ID` | env var | `api-project-642841493686` |
 | `GCP_LOCATION` | env var | `us-central1` |
 | `MODEL_PRESET` | env var | `production` |
-| `DA_ORG` | env var | `aem-growth-adoption` |
+| `DA_ORG` | env var | `carlossg` |
 | `DA_REPO` | env var | `vitamix-poc` |
 | `DA_TOKEN` | Secret Manager | IMS access token (rotates ~24h) |
 

@@ -26,7 +26,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // DA (Document Authoring) env for persist operations
 const daEnv = {
-	DA_ORG: process.env.DA_ORG || 'aem-growth-adoption',
+	DA_ORG: process.env.DA_ORG || 'carlossg',
 	DA_REPO: process.env.DA_REPO || 'vitamix-poc',
 	DA_TOKEN: process.env.DA_TOKEN || process.env.TOKEN || '',
 	DA_CLIENT_ID: process.env.DA_CLIENT_ID,
