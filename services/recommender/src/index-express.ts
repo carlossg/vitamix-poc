@@ -16,6 +16,7 @@ import type { SessionContext, SSEEvent, IntentClassification } from './types';
 import { orchestrate } from './lib/orchestrator';
 import { persistAndPublish, buildPageHtml, unescapeHtml } from './lib/da-client';
 import { classifyCategory, generateSemanticSlug, buildCategorizedPath } from './lib/category-classifier';
+import { GoogleModelFactory } from './ai-clients/model-factory-google';
 
 // ============================================
 // Configuration
@@ -81,6 +82,17 @@ app.get('/generate', async (req: Request, res: Response) => {
 
 	if (!query) {
 		return res.status(400).json({ error: 'Missing query parameter' });
+	}
+
+	// Validate preset if provided
+	if (preset) {
+		const available = GoogleModelFactory.getAvailablePresets();
+		if (!available.includes(preset)) {
+			return res.status(400).json({
+				error: `Invalid preset: "${preset}"`,
+				availablePresets: available,
+			});
+		}
 	}
 
 	// Parse session context if provided
