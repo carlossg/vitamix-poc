@@ -1275,26 +1275,37 @@ export async function orchestrate(
       },
     });
 
-    // Stage 5: Generate blocks in parallel
-    const blocks: GeneratedBlock[] = [];
+    // Stage 5: Generate all blocks in parallel, emit SSE events in order
+    const selectedBlocks = ctx.reasoningResult.selectedBlocks;
 
-    for (const blockSelection of ctx.reasoningResult.selectedBlocks) {
-      onEvent({
-        event: 'block-start',
-        data: { blockType: blockSelection.type, index: blocks.length },
+    // Launch all block generation concurrently
+    const blockPromises: Promise<{ block: GeneratedBlock; index: number; selection: BlockSelection }>[] =
+      selectedBlocks.map((blockSelection, index) => {
+        onEvent({
+          event: 'block-start',
+          data: { blockType: blockSelection.type, index },
+        });
+
+        let blockPromise: Promise<GeneratedBlock>;
+
+        // Special handling for reasoning-user and follow-up blocks (sync, no LLM call)
+        if (blockSelection.type === 'reasoning-user') {
+          blockPromise = Promise.resolve(generateReasoningUserBlock(ctx.reasoningResult!));
+        } else if (blockSelection.type === 'follow-up') {
+          blockPromise = Promise.resolve(generateFollowUpBlock(ctx.reasoningResult!.userJourney));
+        } else {
+          blockPromise = generateBlockContent(blockSelection, ctx.ragContext!, env, preset, ctx.intent, ctx.query, modelOverride);
+        }
+
+        return blockPromise.then((block) => ({ block, index, selection: blockSelection }));
       });
 
-      let block: GeneratedBlock;
+    // Collect results and emit in original order
+    const results = await Promise.all(blockPromises);
+    results.sort((a, b) => a.index - b.index);
 
-      // Special handling for reasoning-user and follow-up blocks
-      if (blockSelection.type === 'reasoning-user') {
-        block = generateReasoningUserBlock(ctx.reasoningResult);
-      } else if (blockSelection.type === 'follow-up') {
-        block = generateFollowUpBlock(ctx.reasoningResult.userJourney);
-      } else {
-        block = await generateBlockContent(blockSelection, ctx.ragContext, env, preset, ctx.intent, ctx.query, modelOverride);
-      }
-
+    const blocks: GeneratedBlock[] = [];
+    for (const { block, selection } of results) {
       blocks.push(block);
 
       onEvent({
@@ -1302,10 +1313,9 @@ export async function orchestrate(
         data: { html: block.html, sectionStyle: block.sectionStyle },
       });
 
-      // Emit rationale for transparency
       onEvent({
         event: 'block-rationale',
-        data: { blockType: blockSelection.type, rationale: blockSelection.rationale },
+        data: { blockType: selection.type, rationale: selection.rationale },
       });
     }
 

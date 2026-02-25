@@ -46,26 +46,35 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 # ============================================
+# Step 0: Enable Required APIs
+# ============================================
+
+echo ""
+echo "Step 0/11: Enabling required Google Cloud APIs..."
+
+gcloud services enable \
+  run.googleapis.com \
+  cloudbuild.googleapis.com \
+  cloudfunctions.googleapis.com \
+  eventarc.googleapis.com \
+  aiplatform.googleapis.com \
+  firestore.googleapis.com \
+  secretmanager.googleapis.com \
+  cloudcommerceconsumerprocurement.googleapis.com \
+  --project="$PROJECT_ID" --quiet 2>/dev/null
+echo "✓ APIs enabled"
+
+# ============================================
 # Step 1: Service Accounts & IAM
 # ============================================
 
 echo ""
 echo "Step 1/11: Setting up service accounts and IAM..."
 
-# Create service accounts with proper roles
 cd infrastructure/cloudrun
 chmod +x setup-service-accounts.sh
 ./setup-service-accounts.sh
 cd ../..
-
-# Grant Cloud Run Admin to Cloud Build service account (needed for deployment)
-echo "Granting Cloud Run permissions to Cloud Build service account..."
-CLOUDBUILD_SA="${PROJECT_ID//-/_}@cloudbuild.gserviceaccount.com"
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:${CLOUDBUILD_SA}" \
-  --role="roles/run.admin" \
-  --condition=None \
-  --no-user-output-enabled 2>/dev/null || echo "  Role may already exist"
 
 # ============================================
 # Step 2: Firestore Setup
@@ -114,7 +123,7 @@ fi
 echo ""
 echo "Step 4/11: Setting up secrets..."
 
-# Create placeholder secrets if they don't exist (required for Cloud Run deployment)
+# DA_TOKEN: IMS Bearer token for AEM Document Authoring (required for persist)
 if ! gcloud secrets describe DA_TOKEN --project=$PROJECT_ID &>/dev/null; then
   echo "Creating DA_TOKEN secret with placeholder..."
   echo -n 'placeholder_da_token' | gcloud secrets create DA_TOKEN \
@@ -122,34 +131,17 @@ if ! gcloud secrets describe DA_TOKEN --project=$PROJECT_ID &>/dev/null; then
     --labels=app=vitamix \
     --project=$PROJECT_ID \
     --quiet
-  echo "⚠️  Replace placeholder: echo -n 'YOUR_TOKEN' | gcloud secrets versions add DA_TOKEN --data-file=- --project=$PROJECT_ID"
+  echo "⚠️  Set real token: echo -n 'YOUR_IMS_TOKEN' | gcloud secrets versions add DA_TOKEN --data-file=- --project=$PROJECT_ID"
 else
   echo "✓ DA_TOKEN secret exists"
 fi
 
-if ! gcloud secrets describe DA_CLIENT_ID --project=$PROJECT_ID &>/dev/null; then
-  echo "Creating DA_CLIENT_ID secret with placeholder..."
-  echo -n 'placeholder_client_id' | gcloud secrets create DA_CLIENT_ID \
-    --data-file=- \
-    --labels=app=vitamix \
-    --project=$PROJECT_ID \
-    --quiet
-  echo "⚠️  Replace placeholder: echo -n 'YOUR_CLIENT_ID' | gcloud secrets versions add DA_CLIENT_ID --data-file=- --project=$PROJECT_ID"
-else
-  echo "✓ DA_CLIENT_ID secret exists"
-fi
-
-if ! gcloud secrets describe DA_CLIENT_SECRET --project=$PROJECT_ID &>/dev/null; then
-  echo "Creating DA_CLIENT_SECRET secret with placeholder..."
-  echo -n 'placeholder_client_secret' | gcloud secrets create DA_CLIENT_SECRET \
-    --data-file=- \
-    --labels=app=vitamix \
-    --project=$PROJECT_ID \
-    --quiet
-  echo "⚠️  Replace placeholder: echo -n 'YOUR_SECRET' | gcloud secrets versions add DA_CLIENT_SECRET --data-file=- --project=$PROJECT_ID"
-else
-  echo "✓ DA_CLIENT_SECRET secret exists"
-fi
+# Grant Cloud Run SA access to DA_TOKEN
+gcloud secrets add-iam-policy-binding DA_TOKEN \
+  --member="serviceAccount:vitamix-recommender-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor" \
+  --project=$PROJECT_ID --quiet 2>/dev/null || true
+echo "✓ Secret access granted to recommender SA"
 
 # ============================================
 # Step 5: Vertex AI Model Garden
@@ -218,10 +210,6 @@ fi
 
 echo ""
 echo "Step 8/11: Deploying Cloud Functions..."
-
-# Eventarc API required for storage-triggered functions (onRecipeUpload)
-echo "Enabling Eventarc API (required for storage triggers)..."
-gcloud services enable eventarc.googleapis.com --project="$PROJECT_ID" --quiet 2>/dev/null || true
 
 # Analytics function
 echo "Deploying analytics function..."
@@ -403,11 +391,15 @@ echo "  - GCR: gcr.io/${PROJECT_ID}/vitamix-recommender:${BUILD_TAG}"
 echo "  - Latest: gcr.io/${PROJECT_ID}/vitamix-recommender:latest"
 echo ""
 echo "Next steps:"
-echo "1. Update frontend configuration with Cloud Run URL"
-echo "2. Test SSE streaming: curl -N '${CLOUD_RUN_URL}/generate?query=best+blender+for+smoothies'"
-echo "3. Update DA secrets if needed:"
-echo "   echo -n 'YOUR_CLIENT_ID' | gcloud secrets versions add DA_CLIENT_ID --data-file=- --project=$PROJECT_ID"
-echo "   echo -n 'YOUR_CLIENT_SECRET' | gcloud secrets versions add DA_CLIENT_SECRET --data-file=- --project=$PROJECT_ID"
+echo "1. Update frontend: set RECOMMENDER_URL in scripts/api-config.js to: $CLOUD_RUN_URL"
+echo "2. Test presets:"
+echo "   curl -N '${CLOUD_RUN_URL}/generate?query=best+blender+for+smoothies&preset=production'  # Gemini 3 Pro+Flash (~75s)"
+echo "   curl -N '${CLOUD_RUN_URL}/generate?query=best+blender+for+smoothies&preset=gemini-2.0'  # Fastest (~23s)"
+echo "   curl -N '${CLOUD_RUN_URL}/generate?query=best+blender+for+smoothies&preset=llama'       # Llama 3.3 70B (requires Model Garden enable)"
+echo "3. Set DA token for page persist (IMS Bearer token, expires ~24h):"
+echo "   echo -n 'YOUR_IMS_TOKEN' | gcloud secrets versions add DA_TOKEN --data-file=- --project=$PROJECT_ID"
+echo "4. Enable Llama 3.3 (optional):"
+echo "   https://console.cloud.google.com/vertex-ai/publishers/meta/model-garden/llama-3.3-70b-instruct-maas?project=$PROJECT_ID"
 echo ""
 if [ $RECIPE_COUNT -gt 0 ]; then
 	echo "RAG Database:"

@@ -15,142 +15,170 @@ import { ModelGardenClient } from './model-garden-client';
 // ============================================
 
 const MODEL_PRESETS: Record<string, ModelPreset> = {
-	// Production: Gemini 3 Pro for reasoning, Gemini 3 Flash for content/classification
+	// Production: Gemini 3 Pro reasoning, Flash-Lite for content/classification (fast + quality)
 	production: {
 		reasoning: {
 			provider: 'google',
 			model: 'gemini-3-pro-preview',
-			maxTokens: 8192,
+			maxTokens: 2048,
 			temperature: 0.7,
 		},
 		content: {
 			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 8192,
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 1536,
 			temperature: 0.8,
 		},
 		classification: {
 			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 1024,
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 512,
 			temperature: 0.3,
 		},
 		validation: {
 			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 512,
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 256,
 			temperature: 0.2,
 		},
 	},
 
-	// Gemini-only: Pro for reasoning, Flash for content
-	'gemini-only': {
-		reasoning: {
-			provider: 'google',
-			model: 'gemini-3-pro-preview',
-			maxTokens: 8192,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 8192,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 1024,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 512,
-			temperature: 0.2,
-		},
-	},
-
-	// Fast: All Gemini 3 Flash for speed
-	fast: {
+	// Gemini 3 Flash: Gemini 3 Flash reasoning, Flash-Lite for content
+	'gemini-3-flash': {
 		reasoning: {
 			provider: 'google',
 			model: 'gemini-3-flash-preview',
-			maxTokens: 4096,
+			maxTokens: 2048,
 			temperature: 0.7,
 		},
 		content: {
 			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 4096,
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 1536,
 			temperature: 0.8,
 		},
 		classification: {
 			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 1024,
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 512,
 			temperature: 0.3,
 		},
 		validation: {
 			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 512,
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 256,
 			temperature: 0.2,
 		},
 	},
 
-	// Llama: Content via Model Garden Llama; reasoning/classification via Gemini 3
+	// Gemini 2.5: Stable GA models -- Pro for reasoning, Flash-Lite for content
+	'gemini-2.5': {
+		reasoning: {
+			provider: 'google',
+			model: 'gemini-2.5-pro',
+			maxTokens: 2048,
+			temperature: 0.7,
+		},
+		content: {
+			provider: 'google',
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 1536,
+			temperature: 0.8,
+		},
+		classification: {
+			provider: 'google',
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 512,
+			temperature: 0.3,
+		},
+		validation: {
+			provider: 'google',
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 256,
+			temperature: 0.2,
+		},
+	},
+
+	// Gemini 2.0: Fastest stable models -- Flash for reasoning, Flash-Lite for content
+	'gemini-2.0': {
+		reasoning: {
+			provider: 'google',
+			model: 'gemini-2.0-flash',
+			maxTokens: 2048,
+			temperature: 0.7,
+		},
+		content: {
+			provider: 'google',
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 1536,
+			temperature: 0.8,
+		},
+		classification: {
+			provider: 'google',
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 512,
+			temperature: 0.3,
+		},
+		validation: {
+			provider: 'google',
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 256,
+			temperature: 0.2,
+		},
+	},
+
+	// Llama 3.3 70B via Vertex AI Model Garden (all roles)
 	llama: {
 		reasoning: {
-			provider: 'google',
-			model: 'gemini-3-pro-preview',
-			maxTokens: 8192,
+			provider: 'model-garden',
+			model: 'llama-3.3-70b-instruct-maas',
+			maxTokens: 2048,
 			temperature: 0.7,
 		},
 		content: {
 			provider: 'model-garden',
-			model: 'llama-3-3-70b-instruct-maas',
-			maxTokens: 4096,
+			model: 'llama-3.3-70b-instruct-maas',
+			maxTokens: 1536,
 			temperature: 0.8,
 		},
 		classification: {
-			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 1024,
+			provider: 'model-garden',
+			model: 'llama-3.3-70b-instruct-maas',
+			maxTokens: 512,
 			temperature: 0.3,
 		},
 		validation: {
-			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 512,
+			provider: 'model-garden',
+			model: 'llama-3.3-70b-instruct-maas',
+			maxTokens: 256,
 			temperature: 0.2,
 		},
 	},
 
-	// Development: Gemini 3 Flash for fast iteration
+	// Development: Gemini 3 Flash reasoning, Flash-Lite for content
 	development: {
 		reasoning: {
 			provider: 'google',
 			model: 'gemini-3-flash-preview',
-			maxTokens: 4096,
+			maxTokens: 2048,
 			temperature: 0.7,
 		},
 		content: {
 			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 4096,
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 1536,
 			temperature: 0.8,
 		},
 		classification: {
 			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 1024,
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 512,
 			temperature: 0.3,
 		},
 		validation: {
 			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 512,
+			model: 'gemini-2.0-flash-lite',
+			maxTokens: 256,
 			temperature: 0.2,
 		},
 	},
@@ -159,29 +187,30 @@ const MODEL_PRESETS: Record<string, ModelPreset> = {
 	'model-garden-llama': {
 		reasoning: {
 			provider: 'model-garden',
-			model: 'llama-3-3-70b-instruct-maas',
-			maxTokens: 4096,
+			model: 'llama-3.3-70b-instruct-maas',
+			maxTokens: 2048,
 			temperature: 0.7,
 		},
 		content: {
 			provider: 'model-garden',
-			model: 'llama-3-3-70b-instruct-maas',
-			maxTokens: 4096,
+			model: 'llama-3.3-70b-instruct-maas',
+			maxTokens: 1536,
 			temperature: 0.8,
 		},
 		classification: {
 			provider: 'model-garden',
-			model: 'llama-3-3-70b-instruct-maas',
-			maxTokens: 1024,
+			model: 'llama-3.3-70b-instruct-maas',
+			maxTokens: 512,
 			temperature: 0.3,
 		},
 		validation: {
 			provider: 'model-garden',
-			model: 'llama-3-3-70b-instruct-maas',
-			maxTokens: 512,
+			model: 'llama-3.3-70b-instruct-maas',
+			maxTokens: 256,
 			temperature: 0.2,
 		},
 	},
+
 };
 
 // ============================================
@@ -286,36 +315,29 @@ export class GoogleModelFactory {
 	}
 
 	/**
-	 * Call Model Garden (Llama, Mistral) via Vertex AI (passwordless)
+	 * Call Model Garden (Llama MaaS) via Vertex AI generateContent API.
+	 * Llama on MaaS supports the same generateContent endpoint as Gemini,
+	 * routed through publishers/meta/models/{model-id}.
 	 */
 	private async callModelGarden(
 		config: ModelConfig,
 		messages: Message[]
 	): Promise<ModelResponse> {
 		try {
-			// Convert messages to a single prompt (Model Garden typically uses single-turn)
-			const systemMessage = messages.find(m => m.role === 'system');
-			const userMessages = messages.filter(m => m.role === 'user');
-
-			let prompt = '';
-			if (systemMessage) {
-				prompt += `${systemMessage.content}\n\n`;
-			}
-			for (const msg of userMessages) {
-				prompt += `${msg.content}\n`;
-			}
-
-			// Call Llama 3.3 70B
-			const content = await this.modelGardenClient.generateWithLlama(prompt, {
-				temperature: config.temperature,
-				maxTokens: config.maxTokens,
-			});
+			const response = await this.vertexAIClient.generateContent(
+				config.model,
+				messages,
+				{
+					temperature: config.temperature,
+					maxTokens: config.maxTokens,
+					stream: false,
+				}
+			);
 
 			return {
-				content,
-				model: config.model,
-				// Model Garden doesn't return token usage
-				usage: undefined,
+				content: response.content,
+				model: response.model,
+				usage: response.usage,
 			};
 		} catch (error) {
 			console.error('[GoogleModelFactory] Model Garden error:', error);

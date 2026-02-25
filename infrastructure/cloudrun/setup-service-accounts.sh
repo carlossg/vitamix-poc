@@ -11,28 +11,35 @@ LOCATION="${GCP_LOCATION:-us-central1}"
 echo "Setting up Vitamix POC service accounts in project: $PROJECT_ID"
 
 # ============================================
-# Create Service Accounts with vitamix labels
+# Create Service Accounts (idempotent)
 # ============================================
 
 echo "Creating service accounts..."
 
-# Vitamix Recommender Service Account
 gcloud iam service-accounts create vitamix-recommender-sa \
 	--display-name="Vitamix Recommender Service" \
-	--project="$PROJECT_ID" \
-	|| echo "Service account vitamix-recommender-sa already exists"
+	--project="$PROJECT_ID" 2>/dev/null \
+	|| echo "  vitamix-recommender-sa already exists"
 
-# Vitamix Analytics Service Account
 gcloud iam service-accounts create vitamix-analytics-sa \
 	--display-name="Vitamix Analytics Service" \
-	--project="$PROJECT_ID" \
-	|| echo "Service account vitamix-analytics-sa already exists"
+	--project="$PROJECT_ID" 2>/dev/null \
+	|| echo "  vitamix-analytics-sa already exists"
 
-# Vitamix Embeddings Service Account
 gcloud iam service-accounts create vitamix-embeddings-sa \
 	--display-name="Vitamix Embeddings Service" \
-	--project="$PROJECT_ID" \
-	|| echo "Service account vitamix-embeddings-sa already exists"
+	--project="$PROJECT_ID" 2>/dev/null \
+	|| echo "  vitamix-embeddings-sa already exists"
+
+# Helper to grant a role idempotently (suppress "already exists" noise)
+grant_role() {
+	local sa=$1 role=$2
+	gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+		--member="serviceAccount:${sa}@${PROJECT_ID}.iam.gserviceaccount.com" \
+		--role="$role" \
+		--condition=None \
+		--no-user-output-enabled 2>/dev/null || true
+}
 
 # ============================================
 # Grant IAM Roles - Vitamix Recommender
@@ -40,29 +47,11 @@ gcloud iam service-accounts create vitamix-embeddings-sa \
 
 echo "Granting IAM roles to vitamix-recommender-sa..."
 
-# Firestore access (sessions, analytics)
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-	--member="serviceAccount:vitamix-recommender-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
-	--role="roles/datastore.user" \
-	--condition=None
-
-# Vertex AI access (Gemini + Model Garden)
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-	--member="serviceAccount:vitamix-recommender-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
-	--role="roles/aiplatform.user" \
-	--condition=None
-
-# Secret Manager access (AEM DA credentials only)
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-	--member="serviceAccount:vitamix-recommender-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
-	--role="roles/secretmanager.secretAccessor" \
-	--condition=None
-
-# Cloud Storage access (media assets)
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-	--member="serviceAccount:vitamix-recommender-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
-	--role="roles/storage.objectViewer" \
-	--condition=None
+grant_role vitamix-recommender-sa roles/datastore.user          # Firestore (sessions, analytics)
+grant_role vitamix-recommender-sa roles/aiplatform.user          # Vertex AI (Gemini + Model Garden)
+grant_role vitamix-recommender-sa roles/secretmanager.secretAccessor  # Secret Manager (DA_TOKEN)
+grant_role vitamix-recommender-sa roles/storage.objectViewer     # Cloud Storage (media assets)
+grant_role vitamix-recommender-sa roles/consumerprocurement.entitlementManager  # Model Garden open models (Llama)
 
 # ============================================
 # Grant IAM Roles - Vitamix Analytics
@@ -70,23 +59,8 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
 
 echo "Granting IAM roles to vitamix-analytics-sa..."
 
-# Firestore access
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-	--member="serviceAccount:vitamix-analytics-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
-	--role="roles/datastore.user" \
-	--condition=None
-
-# Vertex AI access (Gemini for analysis)
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-	--member="serviceAccount:vitamix-analytics-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
-	--role="roles/aiplatform.user" \
-	--condition=None
-
-# BigQuery access (analytics export)
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-	--member="serviceAccount:vitamix-analytics-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
-	--role="roles/bigquery.dataEditor" \
-	--condition=None
+grant_role vitamix-analytics-sa roles/datastore.user     # Firestore
+grant_role vitamix-analytics-sa roles/aiplatform.user     # Vertex AI (Gemini for analysis)
 
 # ============================================
 # Grant IAM Roles - Vitamix Embeddings
@@ -94,35 +68,23 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
 
 echo "Granting IAM roles to vitamix-embeddings-sa..."
 
-# Firestore access (recipes collection with vectors)
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-	--member="serviceAccount:vitamix-embeddings-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
-	--role="roles/datastore.user" \
-	--condition=None
+grant_role vitamix-embeddings-sa roles/datastore.user     # Firestore (recipes + vectors)
+grant_role vitamix-embeddings-sa roles/aiplatform.user     # Vertex AI (embeddings)
+grant_role vitamix-embeddings-sa roles/storage.objectViewer # Cloud Storage (recipe JSONs)
 
-# Vertex AI access (embeddings generation)
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-	--member="serviceAccount:vitamix-embeddings-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
-	--role="roles/aiplatform.user" \
-	--condition=None
+# ============================================
+# Grant Cloud Build SA permissions
+# ============================================
 
-# Cloud Storage access (recipe JSONs)
+echo "Granting Cloud Run deploy permissions to Cloud Build..."
+
+CLOUDBUILD_SA="${PROJECT_ID}@cloudbuild.gserviceaccount.com"
+grant_role "$PROJECT_ID" roles/run.admin 2>/dev/null || true
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-	--member="serviceAccount:vitamix-embeddings-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
-	--role="roles/storage.objectViewer" \
-	--condition=None
+	--member="serviceAccount:${CLOUDBUILD_SA}" \
+	--role="roles/run.admin" \
+	--condition=None \
+	--no-user-output-enabled 2>/dev/null || true
 
 echo ""
 echo "✅ Service accounts created and configured successfully!"
-echo ""
-echo "Next steps:"
-echo "1. Store AEM DA credentials in Secret Manager:"
-echo "   gcloud secrets create DA_CLIENT_ID --data-file=- --labels=app=vitamix"
-echo "   gcloud secrets create DA_CLIENT_SECRET --data-file=- --labels=app=vitamix"
-echo ""
-echo "2. Deploy Cloud Run service:"
-echo "   gcloud run deploy vitamix-recommender \\"
-echo "     --image=gcr.io/$PROJECT_ID/vitamix-recommender:latest \\"
-echo "     --service-account=vitamix-recommender-sa@${PROJECT_ID}.iam.gserviceaccount.com \\"
-echo "     --region=$LOCATION \\"
-echo "     --labels=app=vitamix,component=recommender,environment=production"

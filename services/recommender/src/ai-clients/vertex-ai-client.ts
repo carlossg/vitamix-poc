@@ -36,6 +36,12 @@ export class VertexAIClient {
 		this.location = location;
 	}
 
+	/** Known Model Garden MaaS publishers (non-Google) */
+	private static readonly MAAS_PUBLISHERS: Record<string, string> = {
+		'llama': 'meta',
+		'mistral': 'mistralai',
+	};
+
 	/**
 	 * Determine the correct Vertex AI location for a model.
 	 * Gemini 3 models (preview) are only available in the "global" region.
@@ -45,6 +51,21 @@ export class VertexAIClient {
 			return 'global';
 		}
 		return this.location;
+	}
+
+	/**
+	 * Build the model resource name.
+	 * Google models use short IDs (e.g. "gemini-3-pro-preview").
+	 * Model Garden MaaS models need the full resource path with their publisher
+	 * (e.g. "projects/.../publishers/meta/models/llama-3.3-70b-instruct-maas").
+	 */
+	private getModelResourceName(model: string, location: string): string {
+		for (const [prefix, publisher] of Object.entries(VertexAIClient.MAAS_PUBLISHERS)) {
+			if (model.startsWith(prefix)) {
+				return `projects/${this.projectId}/locations/${location}/publishers/${publisher}/models/${model}`;
+			}
+		}
+		return model;
 	}
 
 	/**
@@ -72,9 +93,11 @@ export class VertexAIClient {
 			...(isGlobal ? { apiEndpoint: 'aiplatform.googleapis.com' } : {}),
 		});
 
-		// Get the generative model
+		// Model Garden MaaS models (e.g. Llama) need the full resource path with publisher
+		const modelId = this.getModelResourceName(model, location);
+
 		const generativeModel = vertexAI.getGenerativeModel({
-			model: model,
+			model: modelId,
 			generationConfig: {
 				temperature: options.temperature ?? 0.7,
 				maxOutputTokens: options.maxTokens ?? 4096,
