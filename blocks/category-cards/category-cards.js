@@ -28,36 +28,6 @@
  * - large: larger images and text
  */
 
-export default function decorate(block) {
-  const ul = document.createElement('ul');
-  const rows = [...block.children];
-
-  // Check if this is multi-column (all content in one row) or multi-row format
-  const firstRow = rows[0];
-  const isMultiColumn = firstRow && [...firstRow.children].length > 1;
-
-  if (isMultiColumn) {
-    // Multi-column format: each column is a category
-    const cells = [...firstRow.children];
-    cells.forEach((cell) => {
-      const li = createCategoryCard(cell);
-      if (li) ul.appendChild(li);
-    });
-  } else {
-    // Multi-row format: each row is a category
-    rows.forEach((row) => {
-      const cell = row.firstElementChild;
-      if (cell) {
-        const li = createCategoryCard(cell);
-        if (li) ul.appendChild(li);
-      }
-    });
-  }
-
-  block.textContent = '';
-  block.appendChild(ul);
-}
-
 /**
  * Creates a category card element from a cell's content
  * @param {Element} cell - The cell containing category content
@@ -103,4 +73,34 @@ function createCategoryCard(cell) {
 
   li.appendChild(link);
   return li;
+}
+
+export default function decorate(block) {
+  const ul = document.createElement('ul');
+  const rows = [...block.children];
+
+  // Check if this is multi-column (all content in one row) or multi-row format
+  const firstRow = rows[0];
+  const isMultiColumn = firstRow && [...firstRow.children].length > 1;
+
+  if (isMultiColumn) {
+    // Multi-column format: each column is a category
+    const cells = [...firstRow.children];
+    cells.forEach((cell) => {
+      const li = createCategoryCard(cell);
+      if (li) ul.appendChild(li);
+    });
+  } else {
+    // Multi-row format: each row is a category
+    rows.forEach((row) => {
+      const cell = row.firstElementChild;
+      if (cell) {
+        const li = createCategoryCard(cell);
+        if (li) ul.appendChild(li);
+      }
+    });
+  }
+
+  block.textContent = '';
+  block.appendChild(ul);
 }

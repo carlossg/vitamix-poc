@@ -87,19 +87,19 @@ export default function decorate(block) {
       details.className = 'best-pick-details';
 
       // Parse price and warranty
-      const parts = text.split('|').map((p) => p.trim());
+      const [pricePart, warrantyPart] = text.split('|').map((p) => p.trim());
 
-      if (parts[0]) {
+      if (pricePart) {
         const price = document.createElement('span');
         price.className = 'best-pick-price';
-        price.textContent = parts[0];
+        price.textContent = pricePart;
         details.appendChild(price);
       }
 
-      if (parts[1]) {
+      if (warrantyPart) {
         const warranty = document.createElement('span');
         warranty.className = 'best-pick-warranty';
-        warranty.textContent = parts[1];
+        warranty.textContent = warrantyPart;
         details.appendChild(warranty);
       }
 

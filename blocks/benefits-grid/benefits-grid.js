@@ -70,9 +70,10 @@ export default function decorate(block) {
         if (text) {
           const lines = text.split('\n').filter((l) => l.trim());
           if (lines.length > 0) {
+            const [firstLine] = lines;
             const headline = document.createElement('h3');
             headline.className = 'benefits-grid-headline';
-            headline.textContent = lines[0];
+            headline.textContent = firstLine;
             item.appendChild(headline);
 
             if (lines.length > 1) {

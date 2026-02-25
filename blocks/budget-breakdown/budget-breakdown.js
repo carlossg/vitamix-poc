@@ -4,6 +4,31 @@
  * Card-based tier layout with color-coded accents.
  */
 
+function createProductCard(text) {
+  if (!text || !text.trim()) return null;
+
+  const card = document.createElement('div');
+  card.className = 'product-item';
+
+  // Try to parse "Product Name: $XXX" or "Product Name $XXX" format
+  const priceMatch = text.match(/(.+?)[:–-]?\s*\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
+
+  if (priceMatch) {
+    const name = priceMatch[1].trim().replace(/^[•-]\s*/, '');
+    const price = priceMatch[2];
+
+    card.innerHTML = `
+      <span class="product-name">${name}</span>
+      <span class="product-price">$${price}</span>
+    `;
+  } else {
+    // Just show the text as-is
+    card.innerHTML = `<span class="product-name">${text.trim().replace(/^[•-]\s*/, '')}</span>`;
+  }
+
+  return card;
+}
+
 export default function decorate(block) {
   // Expected structure from AI:
   // Row 1: Title
@@ -41,58 +66,58 @@ export default function decorate(block) {
   tiersGrid.className = 'budget-tiers-grid';
 
   // Process each tier row
-  for (let i = 1; i < rows.length; i++) {
+  for (let i = 1; i < rows.length; i += 1) {
     const row = rows[i];
     const cells = [...row.children];
 
-    if (cells.length < 2) continue;
+    if (cells.length >= 2) {
+      const tierName = cells[0]?.textContent?.trim() || 'Price Tier';
+      const tierContentEl = cells[1];
 
-    const tierName = cells[0]?.textContent?.trim() || 'Price Tier';
-    const tierContentEl = cells[1];
+      // Determine tier type for styling
+      let tierType = 'standard';
+      if (/under|budget|entry|\$[0-3]/i.test(tierName)) tierType = 'budget';
+      else if (/premium|pro|high|\$[5-9]/i.test(tierName)) tierType = 'premium';
+      else if (/refurb|certified|reconditioned/i.test(tierName)) tierType = 'refurbished';
 
-    // Determine tier type for styling
-    let tierType = 'standard';
-    if (/under|budget|entry|\$[0-3]/i.test(tierName)) tierType = 'budget';
-    else if (/premium|pro|high|\$[5-9]/i.test(tierName)) tierType = 'premium';
-    else if (/refurb|certified|reconditioned/i.test(tierName)) tierType = 'refurbished';
+      const tier = document.createElement('div');
+      tier.className = `budget-tier tier-${tierType}`;
 
-    const tier = document.createElement('div');
-    tier.className = `budget-tier tier-${tierType}`;
+      // Tier header with name
+      const tierHeader = document.createElement('div');
+      tierHeader.className = 'tier-header';
 
-    // Tier header with name
-    const tierHeader = document.createElement('div');
-    tierHeader.className = 'tier-header';
+      const tierLabel = document.createElement('span');
+      tierLabel.className = 'tier-label';
+      tierLabel.textContent = tierName;
+      tierHeader.appendChild(tierLabel);
 
-    const tierLabel = document.createElement('span');
-    tierLabel.className = 'tier-label';
-    tierLabel.textContent = tierName;
-    tierHeader.appendChild(tierLabel);
+      tier.appendChild(tierHeader);
 
-    tier.appendChild(tierHeader);
+      // Parse products from content
+      const tierBody = document.createElement('div');
+      tierBody.className = 'tier-body';
 
-    // Parse products from content
-    const tierBody = document.createElement('div');
-    tierBody.className = 'tier-body';
+      // Get list items or parse text
+      const listItems = tierContentEl.querySelectorAll('li');
+      if (listItems.length > 0) {
+        listItems.forEach((li) => {
+          const productCard = createProductCard(li.textContent);
+          if (productCard) tierBody.appendChild(productCard);
+        });
+      } else {
+        // Parse text content for products
+        const text = tierContentEl.textContent;
+        const lines = text.split(/[•\n]/).filter((l) => l.trim());
+        lines.forEach((line) => {
+          const productCard = createProductCard(line);
+          if (productCard) tierBody.appendChild(productCard);
+        });
+      }
 
-    // Get list items or parse text
-    const listItems = tierContentEl.querySelectorAll('li');
-    if (listItems.length > 0) {
-      listItems.forEach((li) => {
-        const productCard = createProductCard(li.textContent);
-        if (productCard) tierBody.appendChild(productCard);
-      });
-    } else {
-      // Parse text content for products
-      const text = tierContentEl.textContent;
-      const lines = text.split(/[•\n]/).filter((l) => l.trim());
-      lines.forEach((line) => {
-        const productCard = createProductCard(line);
-        if (productCard) tierBody.appendChild(productCard);
-      });
+      tier.appendChild(tierBody);
+      tiersGrid.appendChild(tier);
     }
-
-    tier.appendChild(tierBody);
-    tiersGrid.appendChild(tier);
   }
 
   block.appendChild(tiersGrid);
@@ -121,29 +146,4 @@ export default function decorate(block) {
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
   `;
   block.appendChild(refurbCta);
-}
-
-function createProductCard(text) {
-  if (!text || !text.trim()) return null;
-
-  const card = document.createElement('div');
-  card.className = 'product-item';
-
-  // Try to parse "Product Name: $XXX" or "Product Name $XXX" format
-  const priceMatch = text.match(/(.+?)[:–-]?\s*\$(\d+(?:,\d{3})*(?:\.\d{2})?)/);
-
-  if (priceMatch) {
-    const name = priceMatch[1].trim().replace(/^[•\-]\s*/, '');
-    const price = priceMatch[2];
-
-    card.innerHTML = `
-      <span class="product-name">${name}</span>
-      <span class="product-price">$${price}</span>
-    `;
-  } else {
-    // Just show the text as-is
-    card.innerHTML = `<span class="product-name">${text.trim().replace(/^[•\-]\s*/, '')}</span>`;
-  }
-
-  return card;
 }
