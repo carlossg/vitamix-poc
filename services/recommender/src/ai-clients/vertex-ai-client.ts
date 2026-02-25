@@ -176,6 +176,70 @@ export class VertexAIClient {
 	}
 
 	/**
+	 * Call a Vertex AI Endpoint (dedicated GPU deployment, e.g. Gemma via vLLM).
+	 * vLLM exposes an OpenAI-compatible /v1/chat/completions route, but when
+	 * accessed through the Vertex AI Endpoint proxy we use the :rawPredict RPC
+	 * which forwards the request body directly to the container.
+	 */
+	async callEndpoint(
+		endpointId: string,
+		model: string,
+		messages: Message[],
+		options: {
+			temperature?: number;
+			maxTokens?: number;
+		} = {}
+	): Promise<VertexAIResponse> {
+		const { GoogleAuth } = await import('google-auth-library');
+		const auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] });
+		const client = await auth.getClient();
+		const token = await client.getAccessToken();
+
+		const url = `https://${this.location}-aiplatform.googleapis.com/v1/projects/${this.projectId}/locations/${this.location}/endpoints/${endpointId}:rawPredict`;
+
+		// vLLM serves OpenAI-compatible chat completions format
+		const body = {
+			model,
+			messages: messages.map((m) => ({ role: m.role, content: m.content })),
+			temperature: options.temperature ?? 0.7,
+			max_tokens: options.maxTokens ?? 4096,
+			stream: false,
+		};
+
+		try {
+			const res = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${token.token}`,
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(body),
+			});
+
+			if (!res.ok) {
+				const text = await res.text();
+				throw new Error(`Vertex AI Endpoint ${endpointId} returned ${res.status}: ${text}`);
+			}
+
+			const data = await res.json() as any;
+			const content = data.choices?.[0]?.message?.content || '';
+			const usage = data.usage || {};
+
+			return {
+				content,
+				model,
+				usage: {
+					inputTokens: usage.prompt_tokens || 0,
+					outputTokens: usage.completion_tokens || 0,
+				},
+			};
+		} catch (error) {
+			console.error('[VertexAI] Endpoint call error:', error);
+			throw new Error(`Vertex AI Endpoint call failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		}
+	}
+
+	/**
 	 * Generate embeddings using Vertex AI Text Embeddings API
 	 * Used for recipe semantic search with Firebase Vector Search
 	 */

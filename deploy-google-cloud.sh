@@ -205,6 +205,31 @@ else
 fi
 
 # ============================================
+# Step 7b (Optional): Deploy Gemma Endpoint
+# ============================================
+
+echo ""
+echo "Step 7b/11: Gemma Vertex AI Endpoint (optional)..."
+echo "  Gemma 3 models require a dedicated GPU endpoint (~\$0.84/hr)."
+
+read -p "  Deploy a Gemma endpoint? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  read -p "  Which model size? (4b/12b) " GEMMA_SIZE
+  if [[ "$GEMMA_SIZE" =~ ^(4b|12b)$ ]]; then
+    cd infrastructure/vertex-ai
+    chmod +x deploy-gemma.sh
+    ./deploy-gemma.sh "$GEMMA_SIZE"
+    cd ../..
+  else
+    echo "  Skipping - invalid size (must be 4b or 12b)."
+  fi
+else
+  echo "  Skipping Gemma deployment."
+  echo "  You can deploy later: ./infrastructure/vertex-ai/deploy-gemma.sh 4b|12b"
+fi
+
+# ============================================
 # Step 8: Deploy Cloud Functions
 # ============================================
 

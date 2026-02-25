@@ -337,6 +337,61 @@ hey -n 100 -c 10 "${CLOUD_RUN_URL}/health"
 
 ---
 
+## Gemma Endpoint Lifecycle
+
+Gemma 3 models (4B, 12B) are not available as serverless API on Vertex AI. They require a dedicated GPU endpoint running a vLLM container on a `g2-standard-8` machine with 1x NVIDIA L4.
+
+**Cost: ~$0.84/hr (~$20/day).** Vertex AI endpoints do **not** scale to zero.
+
+### Deploy a Gemma Endpoint
+
+```bash
+# Deploy Gemma 3 12B (or 4b for smaller/faster)
+./infrastructure/vertex-ai/deploy-gemma.sh 12b
+
+# Note the endpoint ID from the output, then set it on Cloud Run:
+gcloud run services update vitamix-recommender \
+  --region=$GCP_LOCATION \
+  --project=$GCP_PROJECT_ID \
+  --set-env-vars=GEMMA_ENDPOINT_ID=<endpoint-id>
+```
+
+### Use Gemma Presets
+
+Once deployed, use `preset=gemma-3-4b` or `preset=gemma-3-12b`:
+
+```bash
+curl -N "${CLOUD_RUN_URL}/generate?query=best+blender&preset=gemma-3-12b"
+```
+
+These presets use Gemini 2.0 Flash for reasoning/classification and the Gemma endpoint for content generation.
+
+### Delete When Done
+
+```bash
+# Delete the endpoint (stops billing immediately)
+./infrastructure/vertex-ai/delete-gemma.sh <endpoint-id>
+
+# Remove the env var from Cloud Run
+gcloud run services update vitamix-recommender \
+  --region=$GCP_LOCATION \
+  --project=$GCP_PROJECT_ID \
+  --remove-env-vars=GEMMA_ENDPOINT_ID
+```
+
+Without a running endpoint, gemma presets will return a clear error message.
+
+### Check Active Endpoints
+
+```bash
+gcloud ai endpoints list \
+  --region=$GCP_LOCATION \
+  --project=$GCP_PROJECT_ID \
+  --filter="labels.app=vitamix AND labels.component=gemma"
+```
+
+---
+
 ## Troubleshooting
 
 ### Cloud Run Issues

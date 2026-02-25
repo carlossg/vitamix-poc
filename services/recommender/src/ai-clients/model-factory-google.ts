@@ -6,7 +6,7 @@
  * Passwordless authentication via Application Default Credentials.
  */
 
-import type { Env, ModelRole, ModelConfig, ModelPreset } from '../types';
+import type { Env, ModelRole, ModelConfig, ModelPreset, ModelProvider } from '../types';
 import { VertexAIClient, createVertexAIClient } from './vertex-ai-client';
 import { ModelGardenClient } from './model-garden-client';
 
@@ -15,7 +15,7 @@ import { ModelGardenClient } from './model-garden-client';
 // ============================================
 
 // Helper to build a preset where one model fills all 4 roles
-function purePreset(provider: 'google' | 'model-garden', model: string): ModelPreset {
+function purePreset(provider: ModelProvider, model: string): ModelPreset {
 	return {
 		reasoning:       { provider, model, maxTokens: 2048, temperature: 0.7 },
 		content:         { provider, model, maxTokens: 1536, temperature: 0.8 },
@@ -26,14 +26,24 @@ function purePreset(provider: 'google' | 'model-garden', model: string): ModelPr
 
 // Helper to build a mixed preset: heavier model for reasoning, lighter for the rest
 function mixedPreset(
-	reasoningProvider: 'google' | 'model-garden', reasoningModel: string,
-	restProvider: 'google' | 'model-garden', restModel: string,
+	reasoningProvider: ModelProvider, reasoningModel: string,
+	restProvider: ModelProvider, restModel: string,
 ): ModelPreset {
 	return {
 		reasoning:       { provider: reasoningProvider, model: reasoningModel, maxTokens: 2048, temperature: 0.7 },
 		content:         { provider: restProvider,      model: restModel,      maxTokens: 1536, temperature: 0.8 },
 		classification:  { provider: restProvider,      model: restModel,      maxTokens: 512,  temperature: 0.3 },
 		validation:      { provider: restProvider,      model: restModel,      maxTokens: 256,  temperature: 0.2 },
+	};
+}
+
+// Helper to build a Gemma preset: Gemini reasoning + Vertex endpoint content + Flash lite classification/validation
+function gemmaPreset(gemmaModel: string): ModelPreset {
+	return {
+		reasoning:       { provider: 'google',          model: 'gemini-2.0-flash',      maxTokens: 2048, temperature: 0.7 },
+		content:         { provider: 'vertex-endpoint',  model: gemmaModel,              maxTokens: 1536, temperature: 0.8 },
+		classification:  { provider: 'google',          model: 'gemini-2.0-flash-lite', maxTokens: 512,  temperature: 0.3 },
+		validation:      { provider: 'google',          model: 'gemini-2.0-flash-lite', maxTokens: 256,  temperature: 0.2 },
 	};
 }
 
@@ -56,9 +66,12 @@ const MODEL_PRESETS: Record<string, ModelPreset> = {
 	'production':          mixedPreset('google', 'gemini-3-pro-preview',  'google', 'gemini-2.0-flash-lite'),
 
 	// ── Model Garden MaaS presets (serverless open models) ──────────────
-	// Note: Gemma models are NOT available as serverless API on Vertex AI (require GPU endpoint deployment)
 	'llama-3.2-3b':    mixedPreset('google', 'gemini-2.0-flash', 'model-garden', 'llama-3.2-3b-instruct-maas'),
 	'mistral-small':   mixedPreset('google', 'gemini-2.0-flash', 'model-garden', 'mistral-small-2503'),
+
+	// ── Gemma presets (require running Vertex AI endpoint — see deploy-gemma.sh) ─
+	'gemma-3-4b':      gemmaPreset('gemma-3-4b-it'),
+	'gemma-3-12b':     gemmaPreset('gemma-3-12b-it'),
 };
 
 // ============================================
@@ -125,6 +138,9 @@ export class GoogleModelFactory {
 			case 'model-garden':
 				response = await this.callModelGarden(config, messages);
 				break;
+			case 'vertex-endpoint':
+				response = await this.callVertexEndpoint(config, messages);
+				break;
 			default:
 				throw new Error(`Unknown provider: ${config.provider}`);
 		}
@@ -190,6 +206,45 @@ export class GoogleModelFactory {
 		} catch (error) {
 			console.error('[GoogleModelFactory] Model Garden error:', error);
 			throw new Error(`Model Garden generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		}
+	}
+
+	/**
+	 * Call a Gemma model on a dedicated Vertex AI Endpoint (GPU).
+	 * Requires GEMMA_ENDPOINT_ID env var pointing to an active endpoint
+	 * deployed via infrastructure/vertex-ai/deploy-gemma.sh.
+	 */
+	private async callVertexEndpoint(
+		config: ModelConfig,
+		messages: Message[]
+	): Promise<ModelResponse> {
+		const endpointId = process.env.GEMMA_ENDPOINT_ID;
+		if (!endpointId) {
+			throw new Error(
+				'GEMMA_ENDPOINT_ID environment variable is not set. '
+				+ 'Deploy a Gemma endpoint first: ./infrastructure/vertex-ai/deploy-gemma.sh 4b|12b'
+			);
+		}
+
+		try {
+			const response = await this.vertexAIClient.callEndpoint(
+				endpointId,
+				config.model,
+				messages,
+				{
+					temperature: config.temperature,
+					maxTokens: config.maxTokens,
+				}
+			);
+
+			return {
+				content: response.content,
+				model: response.model,
+				usage: response.usage,
+			};
+		} catch (error) {
+			console.error('[GoogleModelFactory] Vertex Endpoint error:', error);
+			throw new Error(`Vertex AI Endpoint generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
 	}
 

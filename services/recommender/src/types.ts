@@ -443,7 +443,7 @@ export interface GenerationCompleteData {
 
 export type ModelRole = 'reasoning' | 'content' | 'classification' | 'validation';
 
-export type ModelProvider = 'google' | 'model-garden';
+export type ModelProvider = 'google' | 'model-garden' | 'vertex-endpoint';
 
 export interface ModelConfig {
   provider: ModelProvider;
@@ -477,6 +477,9 @@ export interface Env {
 	DA_SERVICE_TOKEN?: string;
 	// Legacy static token (fallback)
 	DA_TOKEN?: string;
+
+	// Vertex AI Endpoint (Gemma dedicated GPU)
+	GEMMA_ENDPOINT_ID?: string;
 
 	// Configuration
 	MODEL_PRESET?: string;

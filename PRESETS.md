@@ -32,6 +32,16 @@ Live demo: [main--vitamix-poc--carlossg.aem.page](https://main--vitamix-poc--car
 | llama-3.2-3b | [best blender for veggies](https://main--vitamix-poc--carlossg.aem.page/?q=best+blender+for+veggies&preset=llama-3.2-3b) |
 | mistral-small | [best blender for veggies](https://main--vitamix-poc--carlossg.aem.page/?q=best+blender+for+veggies&preset=mistral-small) |
 
+### Gemma (dedicated GPU endpoint)
+
+Requires a running Vertex AI endpoint. See `infrastructure/vertex-ai/deploy-gemma.sh`.
+Cost: ~$0.84/hr while the endpoint is active.
+
+| Preset | Link |
+|--------|------|
+| gemma-3-4b | [best blender for veggies](https://main--vitamix-poc--carlossg.aem.page/?q=best+blender+for+veggies&preset=gemma-3-4b) |
+| gemma-3-12b | [best blender for veggies](https://main--vitamix-poc--carlossg.aem.page/?q=best+blender+for+veggies&preset=gemma-3-12b) |
+
 ## Model Assignments
 
 ### Pure presets
@@ -62,6 +72,15 @@ Live demo: [main--vitamix-poc--carlossg.aem.page](https://main--vitamix-poc--car
 | **llama-3.2-3b** | gemini-2.0-flash | llama-3.2-3b (MaaS) | llama-3.2-3b (MaaS) | llama-3.2-3b (MaaS) |
 | **mistral-small** | gemini-2.0-flash | mistral-small-2503 (MaaS) | mistral-small-2503 (MaaS) | mistral-small-2503 (MaaS) |
 
+### Gemma presets (dedicated GPU endpoint)
+
+Requires a running Vertex AI endpoint (`deploy-gemma.sh`). Cost: ~$0.84/hr.
+
+| Preset | Reasoning | Content | Classification | Validation |
+|--------|-----------|---------|----------------|------------|
+| **gemma-3-4b** | gemini-2.0-flash | gemma-3-4b-it (endpoint) | gemini-2.0-flash-lite | gemini-2.0-flash-lite |
+| **gemma-3-12b** | gemini-2.0-flash | gemma-3-12b-it (endpoint) | gemini-2.0-flash-lite | gemini-2.0-flash-lite |
+
 ## Recommendations
 
 - **Best quality:** `gemini-3-pro` -- deepest reasoning, highest fidelity content
@@ -69,3 +88,4 @@ Live demo: [main--vitamix-poc--carlossg.aem.page](https://main--vitamix-poc--car
 - **Best balance:** `production` -- Gemini 3 Pro reasoning + 2.0 Flash Lite speed
 - **Within-family mixed:** `gemini-3-mixed`, `gemini-2.5-mixed`, `gemini-2.0-mixed`
 - **Open models:** `llama` (70B, fast), `llama-3.2-3b` (tiny), `mistral-small` (24B)
+- **Gemma (GPU endpoint):** `gemma-3-4b` (fast, light), `gemma-3-12b` (better quality) -- requires running endpoint
