@@ -15,9 +15,6 @@ import {
   loadCSS,
 } from './aem.js';
 
-// Experiment mode (progressive rendering)
-import { isExperimentRequest, initExperiment } from './experiment.js';
-
 // Session context for query history
 import { SessionContextManager } from './session-context.js';
 
@@ -26,9 +23,6 @@ import { getAnalyticsTracker } from './analytics-tracker.js';
 
 // API endpoints (Google Cloud Run / Cloud Functions or override via window.VITAMIX_CONFIG)
 import { getAPIEndpoint, VITAMIX_RECOMMENDER_URL, VITAMIX_ANALYTICS_URL } from './api-config.js';
-
-const GENERATIVE_WORKER_URL = VITAMIX_RECOMMENDER_URL;
-const FAST_WORKER_URL = VITAMIX_RECOMMENDER_URL;
 
 // Initialize analytics tracker globally for conversion tracking in cta-utils.js
 const analyticsTracker = getAnalyticsTracker({ endpoint: VITAMIX_ANALYTICS_URL });
@@ -135,17 +129,7 @@ function isFastRequest() {
 }
 
 /**
- * Check if this is a Cerebras generation request (has ?cerebras= param)
- * DEPRECATED: Now using ?q=...&preset=all-cerebras instead
- * Keeping for backwards compatibility with old URLs
- */
-function isCerebrasRequest() {
-  return new URLSearchParams(window.location.search).has('cerebras');
-}
-
-/**
  * Check if this is a Vitamix Recommender request (has ?q= or ?query= param)
- * Uses the new vitamix-recommender worker with Claude Opus reasoning
  */
 function isVitamixRecommenderRequest() {
   const params = new URLSearchParams(window.location.search);
@@ -213,7 +197,7 @@ async function renderGenerativePage() {
   const content = main.querySelector('#generation-content');
 
   // Connect to SSE stream
-  const streamUrl = `${GENERATIVE_WORKER_URL}/api/stream?slug=${encodeURIComponent(slug)}&query=${encodeURIComponent(query)}`;
+  const streamUrl = `${VITAMIX_RECOMMENDER_URL}/api/stream?slug=${encodeURIComponent(slug)}&query=${encodeURIComponent(query)}`;
   const eventSource = new EventSource(streamUrl);
   let blockCount = 0;
   let generatedBlocks = []; // Array of { html, sectionStyle }
@@ -302,7 +286,7 @@ async function renderGenerativePage() {
     // Resolve relative URLs to absolute worker URLs
     let resolvedUrl = url;
     if (url && url.startsWith('/')) {
-      resolvedUrl = `${GENERATIVE_WORKER_URL}${url}`;
+      resolvedUrl = `${VITAMIX_RECOMMENDER_URL}${url}`;
     }
 
     // eslint-disable-next-line no-console
@@ -401,7 +385,7 @@ async function renderGenerativePage() {
           return sectionHtml;
         });
 
-        const response = await fetch(`${GENERATIVE_WORKER_URL}/api/persist`, {
+        const response = await fetch(`${VITAMIX_RECOMMENDER_URL}/api/persist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -494,7 +478,7 @@ async function renderFastGenerativePage() {
   const content = main.querySelector('#generation-content');
 
   // Connect to FAST worker SSE stream
-  const streamUrl = `${FAST_WORKER_URL}/api/stream?slug=${encodeURIComponent(slug)}&query=${encodeURIComponent(query)}`;
+  const streamUrl = `${VITAMIX_RECOMMENDER_URL}/api/stream?slug=${encodeURIComponent(slug)}&query=${encodeURIComponent(query)}`;
   const eventSource = new EventSource(streamUrl);
   let blockCount = 0;
   const generatedBlocks = []; // Array of { html, sectionStyle }
@@ -584,7 +568,7 @@ async function renderFastGenerativePage() {
 
     let resolvedUrl = url;
     if (url && url.startsWith('/')) {
-      resolvedUrl = `${FAST_WORKER_URL}${url}`;
+      resolvedUrl = `${VITAMIX_RECOMMENDER_URL}${url}`;
     }
 
     const img = content.querySelector(`img[data-gen-image="${imageId}"]`);
@@ -661,7 +645,7 @@ async function renderFastGenerativePage() {
           return sectionHtml;
         });
 
-        const response = await fetch(`${FAST_WORKER_URL}/api/persist`, {
+        const response = await fetch(`${VITAMIX_RECOMMENDER_URL}/api/persist`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -720,7 +704,7 @@ async function renderFastGenerativePage() {
 
 /**
  * Render a Vitamix Recommender page from ?q= or ?query= parameter
- * Uses the vitamix-recommender worker with Claude Opus reasoning
+ * Uses the recommender service with Gemini reasoning
  */
 async function renderVitamixRecommenderPage() {
 	// Load skeleton/vitamix styles
@@ -891,7 +875,7 @@ async function renderVitamixRecommenderPage() {
     // Track query in analytics
     try {
       const tracker = getAnalyticsTracker({
-        endpoint: 'https://vitamix-analytics.paolo-moz.workers.dev',
+        endpoint: VITAMIX_ANALYTICS_URL,
       });
       if (!tracker.initialized) tracker.init();
       tracker.trackQuery({
@@ -1108,7 +1092,7 @@ function decorateHeroVideoSections(main) {
       }
 
       // Insert features container after the form
-      const form = contentWrapper.querySelector('.query-form-cerebras-wrapper');
+      const form = contentWrapper.querySelector('.query-form-wrapper');
       if (form) {
         form.after(featuresContainer);
       } else {
@@ -1202,20 +1186,7 @@ async function loadPage() {
     await loadCSS(`${window.hlx.codeBasePath}/styles/tv-mode.css`);
   }
 
-  // Check if this is a Cerebras request (?cerebras=query) - handled by cerebras-scripts.js
-  if (isCerebrasRequest()) {
-    // Dynamically import and run cerebras-scripts.js
-    document.documentElement.lang = 'en';
-    decorateTemplateAndTheme();
-    if (!isTVRequest()) {
-      loadHeader(document.querySelector('header'));
-      loadFooter(document.querySelector('footer'));
-    }
-    await import('./cerebras-scripts.js');
-    return;
-  }
-
-  // Check if this is a Vitamix Recommender request (?q= or ?query=) - Claude Opus reasoning
+  // Check if this is a Vitamix Recommender request (?q= or ?query=)
   if (isVitamixRecommenderRequest()) {
     document.documentElement.lang = 'en';
     decorateTemplateAndTheme();
@@ -1226,12 +1197,6 @@ async function loadPage() {
     }
     await renderVitamixRecommenderPage();
     return;
-  }
-
-  // Check if this is an experiment request (?experiment=query) - progressive rendering
-  if (isExperimentRequest()) {
-    const handled = await initExperiment();
-    if (handled) return;
   }
 
   // Check if this is a fast request (?fast=query) - two-phase generation

@@ -5,9 +5,9 @@
  */
 
 import { AnalyticsTracker } from './analytics-tracker.js';
+import { VITAMIX_ANALYTICS_URL } from './api-config.js';
 
-// Analytics worker URL
-const ANALYTICS_ENDPOINT = 'https://vitamix-analytics.paolo-moz.workers.dev';
+const ANALYTICS_ENDPOINT = VITAMIX_ANALYTICS_URL;
 
 /**
  * Initialize analytics tracking

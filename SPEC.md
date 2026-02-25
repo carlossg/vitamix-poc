@@ -230,7 +230,7 @@ Override at runtime via `window.VITAMIX_CONFIG` before scripts load.
 ## 7. Block Inventory (72 blocks)
 
 ### AI / Search
-`query-form`, `cerebras-generated`, `ingredient-search`, `quick-answer`, `reasoning`, `support-triage`
+`query-form`, `ingredient-search`, `quick-answer`, `reasoning`, `support-triage`
 
 ### Products
 `product-cards`, `product-recommendation`, `product-hero`, `product-compare`, `product-cta`, `product-info`
@@ -346,13 +346,13 @@ gcloud builds submit --config=cloudbuild.yaml \
 | `scripts/session-context.js` | Query history (sessionStorage, max 10) |
 | `scripts/analytics-tracker.js` | Client-side event tracking |
 | `scripts/cta-utils.js` | Link classification, CTA sanitization |
-| `workers/vitamix-recommender/src/index-express.ts` | Cloud Run Express server |
-| `workers/vitamix-recommender/src/lib/orchestrator.ts` | AI pipeline: intent → reasoning → block generation |
-| `workers/vitamix-recommender/src/ai-clients/model-factory-google.ts` | Model presets and routing |
-| `workers/vitamix-recommender/src/ai-clients/vertex-ai-client.ts` | Gemini API calls (global endpoint for Gemini 3) |
-| `workers/vitamix-recommender/src/lib/da-client.ts` | AEM DA create/preview/publish |
-| `workers/vitamix-recommender/src/lib/da-token-service.ts` | IMS token management |
-| `workers/vitamix-recommender/src/lib/category-classifier.ts` | URL path categorization |
+| `services/recommender/src/index-express.ts` | Cloud Run Express server |
+| `services/recommender/src/lib/orchestrator.ts` | AI pipeline: intent → reasoning → block generation |
+| `services/recommender/src/ai-clients/model-factory-google.ts` | Model presets and routing |
+| `services/recommender/src/ai-clients/vertex-ai-client.ts` | Gemini API calls (global endpoint for Gemini 3) |
+| `services/recommender/src/lib/da-client.ts` | AEM DA create/preview/publish |
+| `services/recommender/src/lib/da-token-service.ts` | IMS token management |
+| `services/recommender/src/lib/category-classifier.ts` | URL path categorization |
 | `functions/analytics/index.ts` | Analytics Cloud Function |
 | `functions/embeddings/index.ts` | Embeddings Cloud Function |
 | `Dockerfile` | Cloud Run container definition |

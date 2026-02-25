@@ -41,9 +41,9 @@ function handleSubmit(event, form) {
   const aiMode = sessionStorage.getItem('ai-mode') || 'speed';
 
   // Determine preset based on AI mode:
-  // - quality: preset=production (Claude for reasoning, Cerebras for content)
-  // - speed: preset=all-cerebras (Cerebras for everything, faster)
-  const preset = aiMode === 'speed' ? 'all-cerebras' : 'production';
+  // - quality: preset=production (Gemini Pro)
+  // - speed: preset=fast (Gemini Flash)
+  const preset = aiMode === 'speed' ? 'fast' : 'production';
 
   // Navigate with q parameter and preset
   const url = `/?q=${encodeURIComponent(query)}&preset=${preset}`;

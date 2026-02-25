@@ -4,7 +4,9 @@
  * AI-powered content analysis with scores and suggestions.
  */
 
-const ANALYTICS_ENDPOINT = 'https://vitamix-analytics.paolo-moz.workers.dev';
+import { VITAMIX_ANALYTICS_URL } from '../../scripts/api-config.js';
+
+const ANALYTICS_ENDPOINT = VITAMIX_ANALYTICS_URL;
 
 /**
  * Show a toast notification

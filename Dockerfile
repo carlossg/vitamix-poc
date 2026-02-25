@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Copy package files
-COPY workers/vitamix-recommender/package*.json ./
-COPY workers/vitamix-recommender/tsconfig.json ./
+COPY services/recommender/package*.json ./
+COPY services/recommender/tsconfig.json ./
 
 # Install production dependencies
 RUN npm ci --only=production
@@ -24,7 +24,7 @@ RUN npm ci --only=production
 COPY content ./content
 
 # Copy source code
-COPY workers/vitamix-recommender/src ./src
+COPY services/recommender/src ./src
 
 # Build TypeScript
 RUN npm install -D typescript @types/node @types/express @types/cors && \

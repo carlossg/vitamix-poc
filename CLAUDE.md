@@ -11,22 +11,22 @@ An AI-powered content generation platform built on AEM Edge Delivery Services (a
 
 ### Core Flow
 ```
-User Query → Worker API (SSE) → Block Streaming → Page Decoration → DA Persistence
+User Query → Recommender API (SSE) → Block Streaming → Page Decoration → DA Persistence
 ```
 
 ### Key Directories
 - `/blocks/` - 72 custom blocks (see Block Categories below)
 - `/scripts/` - Core decoration, utilities, analytics
 - `/styles/` - Global CSS
-- `/workers/` - Cloudflare Workers (recommender, analytics, embeddings)
+- `/services/recommender/` - Recommender service (Cloud Run, Gemini 3)
 - `/.claude/skills/` - Claude Code skills for development workflows
 
-### Cloudflare Workers
-| Worker | URL | Purpose |
-|--------|-----|---------|
-| vitamix-recommender | `vitamix-recommender.paolo-moz.workers.dev` | Main AI generation (Claude + Cerebras) |
-| vitamix-analytics | `vitamix-analytics.paolo-moz.workers.dev` | Tracking & multi-agent analysis |
-| embed-recipes | (internal) | Recipe vector embeddings |
+### Google Cloud Services
+| Service | Type | Purpose |
+|---------|------|---------|
+| Recommender | Cloud Run | Main AI generation (Gemini 3) |
+| Analytics | Cloud Function Gen2 | Tracking & multi-agent analysis |
+| Recipe Search | Cloud Function Gen2 | Recipe vector embeddings |
 
 ## Key Files
 
@@ -36,14 +36,15 @@ User Query → Worker API (SSE) → Block Streaming → Page Decoration → DA P
 - `scripts/delayed.js` - Analytics setup (loads after page)
 
 ### Utilities
+- `scripts/api-config.js` - Central API endpoint configuration (Google Cloud)
 - `scripts/session-context.js` - Query history in sessionStorage (max 10)
 - `scripts/analytics-tracker.js` - Event tracking (respects DNT)
 - `scripts/cta-utils.js` - Link classification, purchase-intent sanitization
 
-## Block Categories (72 total)
+## Block Categories
 
 ### AI/Search (Core)
-`query-form`, `cerebras-generated`, `ingredient-search`, `quick-answer`, `reasoning`, `support-triage`
+`query-form`, `ingredient-search`, `quick-answer`, `reasoning`, `support-triage`
 
 ### Products
 `product-cards`, `product-recommendation`, `product-hero`, `product-compare`, `product-cta`, `product-info`
@@ -62,32 +63,26 @@ User Query → Worker API (SSE) → Block Streaming → Page Decoration → DA P
 
 ## Generation Modes
 
-| Mode | URL Param | Worker | Features |
-|------|-----------|--------|----------|
-| Recommender | `?q=` or `?query=` | vitamix-recommender | Session context, auto-persist, journey tracking |
-| Fast | `?fast=` | vitamix-generative-fast | Two-phase (hero first), manual save |
-| Standard | `?generate=` | vitamix-generative | Full streaming, progress indicators |
-| Experiment | `?experiment=` | N/A | Fade-in animations, POC |
+| Mode | URL Param | Service | Features |
+|------|-----------|---------|----------|
+| Recommender | `?q=` or `?query=` | recommender (Cloud Run) | Session context, auto-persist, journey tracking |
+| Fast | `?fast=` | recommender (Cloud Run) | Two-phase (hero first), manual save |
+| Standard | `?generate=` | recommender (Cloud Run) | Full streaming, progress indicators |
 
 ## AI Model Configuration
 
-### Presets (in vitamix-recommender)
-- **production**: Claude Opus (reasoning) + Cerebras (content)
-- **fast**: Claude Sonnet (reasoning) + Cerebras (content)
-- **all-cerebras**: Pure Cerebras stack (cost-optimized)
+### Presets (in services/recommender)
+- **production**: Gemini 3 Pro (reasoning + content)
+- **fast**: Gemini 3 Flash (classification) + Gemini 3 Pro (content)
 
 ### Services Used
-- **Anthropic**: Intent analysis, block selection reasoning
-- **Cerebras**: Content generation, classification
-- **OpenAI/Gemini**: Multi-agent analysis consensus (analytics)
-- **Cloudflare Vectorize**: Recipe semantic search
+- **Google Vertex AI (Gemini 3)**: Intent analysis, reasoning, content generation
+- **Firestore Vector Search**: Recipe semantic search
 
 ## Environment Variables (.env)
 ```
-ANTHROPIC_API_KEY=sk-ant-...
-CEREBRAS_API_KEY=csk-...
-OPENAI_API_KEY=sk-proj-...
 GOOGLE_API_KEY=AIza...
+OPENAI_API_KEY=sk-proj-...
 DA_IMS_TOKEN=eyJ... (Adobe IMS JWT)
 FAL_API_KEY=... (optional, video generation)
 ```
@@ -168,7 +163,7 @@ eventSource.addEventListener('image-ready', (e) => {
 ```javascript
 import { SessionContextManager } from './session-context.js';
 const ctx = SessionContextManager.buildEncodedContextParam();
-// Sends previous queries to worker for conversational flow
+// Sends previous queries to recommender for conversational flow
 ```
 
 ### Analytics Events

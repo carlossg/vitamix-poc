@@ -75,10 +75,10 @@ function handleCardClick(event, useCaseTitle) {
   const query = buildUseCaseQuery(useCaseTitle, context);
 
   // Determine preset based on AI mode from sessionStorage
-  // - quality: preset=production (Claude for reasoning, Cerebras for content)
-  // - speed: preset=all-cerebras (Cerebras for everything, faster)
+  // - quality: preset=production (Gemini Pro)
+  // - speed: preset=fast (Gemini Flash)
   const aiMode = sessionStorage.getItem('ai-mode') || 'speed';
-  const preset = aiMode === 'speed' ? 'all-cerebras' : 'production';
+  const preset = aiMode === 'speed' ? 'fast' : 'production';
 
   // Navigate with q parameter and preset
   window.location.href = `/?q=${encodeURIComponent(query)}&preset=${preset}`;

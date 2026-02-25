@@ -5,6 +5,8 @@
  * Tracks sessions, queries, page publications, and CTA conversions.
  */
 
+import { VITAMIX_ANALYTICS_URL } from './api-config.js';
+
 const ANALYTICS_SESSION_KEY = 'vitamix-analytics-session';
 
 /**
@@ -30,7 +32,7 @@ export class AnalyticsTracker {
    * @param {string} options.endpoint - Analytics worker URL
    */
   constructor(options = {}) {
-    this.endpoint = options.endpoint || 'https://vitamix-analytics.paolo-moz.workers.dev';
+    this.endpoint = options.endpoint || VITAMIX_ANALYTICS_URL;
     this.session = null;
     this.eventQueue = [];
     this.flushTimeout = null;

@@ -13,7 +13,9 @@
  * | /api/ingredient-match                      |
  */
 
-const WORKER_URL = 'https://vitamix-generative.paolo-moz.workers.dev';
+import { VITAMIX_RECOMMENDER_URL } from '../../scripts/api-config.js';
+
+const WORKER_URL = VITAMIX_RECOMMENDER_URL;
 
 export default function decorate(block) {
   const rows = [...block.children];

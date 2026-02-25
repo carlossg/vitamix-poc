@@ -4,7 +4,9 @@
  * Displays the top queries from analytics data.
  */
 
-const ANALYTICS_ENDPOINT = 'https://vitamix-analytics.paolo-moz.workers.dev';
+import { VITAMIX_ANALYTICS_URL } from '../../scripts/api-config.js';
+
+const ANALYTICS_ENDPOINT = VITAMIX_ANALYTICS_URL;
 
 /**
  * Load and display top queries

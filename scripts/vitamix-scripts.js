@@ -16,9 +16,9 @@ import {
   loadCSS,
 } from './aem.js';
 import { SessionContextManager } from './session-context.js';
+import { VITAMIX_RECOMMENDER_URL } from './api-config.js';
 
-// Vitamix recommender worker URL
-const VITAMIX_WORKER_URL = 'https://vitamix-recommender.paolo-moz.workers.dev';
+const VITAMIX_WORKER_URL = VITAMIX_RECOMMENDER_URL;
 
 // Store original block data for publishing
 let originalBlocksData = [];
@@ -384,7 +384,7 @@ function startGeneration(query) {
 }
 
 function setupQueryForm() {
-  const form = document.getElementById('vitamix-form') || document.getElementById('cerebras-form');
+  const form = document.getElementById('vitamix-form');
   if (!form) return;
   const input = form.querySelector('input');
 

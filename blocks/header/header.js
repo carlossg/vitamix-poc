@@ -195,13 +195,13 @@ export default async function decorate(block) {
     </div>
   `;
 
-  // Add AI mode toggle (Speed = Cerebras, Quality = Claude)
+  // Add AI mode toggle (Speed = Gemini Flash, Quality = Gemini Pro)
   const aiModeToggle = document.createElement('div');
   aiModeToggle.className = 'nav-ai-toggle';
   const savedMode = sessionStorage.getItem('ai-mode') || 'speed';
   aiModeToggle.innerHTML = `
-    <button type="button" class="ai-toggle-option${savedMode === 'speed' ? ' active' : ''}" data-value="speed" title="Fast generation with Cerebras">Speed</button>
-    <button type="button" class="ai-toggle-option${savedMode === 'quality' ? ' active' : ''}" data-value="quality" title="Quality generation with Claude">Quality</button>
+    <button type="button" class="ai-toggle-option${savedMode === 'speed' ? ' active' : ''}" data-value="speed" title="Fast generation with Gemini Flash">Speed</button>
+    <button type="button" class="ai-toggle-option${savedMode === 'quality' ? ' active' : ''}" data-value="quality" title="Quality generation with Gemini Pro">Quality</button>
   `;
 
   // Add image quality toggle to the right of the header
@@ -316,13 +316,13 @@ export default async function decorate(block) {
     searchInput.disabled = true;
     searchButton.innerHTML = '<div class="header-search-spinner"></div>';
 
-    // Get selected AI mode (default to quality/Claude)
+    // Get selected AI mode
     const aiMode = sessionStorage.getItem('ai-mode') || 'quality';
 
-    // Navigate based on AI mode - both use same worker with different presets:
-    // - speed: preset=all-cerebras (Cerebras for everything)
-    // - quality: preset=production (Claude for reasoning, Cerebras for content)
-    const preset = aiMode === 'quality' ? 'production' : 'all-cerebras';
+    // Navigate based on AI mode - both use same service with different presets:
+    // - speed: preset=fast (Gemini Flash)
+    // - quality: preset=production (Gemini Pro)
+    const preset = aiMode === 'quality' ? 'production' : 'fast';
     window.location.href = `/?q=${encodeURIComponent(query)}&preset=${preset}`;
   };
 
@@ -330,7 +330,7 @@ export default async function decorate(block) {
 
   // Update AI toggle to reflect current page mode based on preset parameter
   const currentPreset = urlParams.get('preset');
-  if (currentPreset === 'all-cerebras') {
+  if (currentPreset === 'fast') {
     aiToggleOptions.forEach((opt) => opt.classList.remove('active'));
     aiModeToggle.querySelector('[data-value="speed"]').classList.add('active');
     sessionStorage.setItem('ai-mode', 'speed');

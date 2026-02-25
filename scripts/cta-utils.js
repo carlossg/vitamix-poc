@@ -5,6 +5,8 @@
  * - AI-generated links (?q= parameter) - show AI sparkle icon
  */
 
+import { VITAMIX_ANALYTICS_URL } from './api-config.js';
+
 /**
  * Purchase-related terms to replace (ONLY when used alone, not in value-driven context)
  */
@@ -200,7 +202,7 @@ export function decorateCTA(link) {
         // Dynamic import as fallback
         import('./analytics-tracker.js').then(({ getAnalyticsTracker }) => {
           const tracker = getAnalyticsTracker({
-            endpoint: 'https://vitamix-analytics.paolo-moz.workers.dev',
+            endpoint: VITAMIX_ANALYTICS_URL,
           });
           if (!tracker.initialized) tracker.init();
           tracker.trackConversion(link.href, link.textContent?.trim());

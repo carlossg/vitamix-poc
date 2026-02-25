@@ -4,7 +4,9 @@
  * Displays key analytics metrics in a card grid.
  */
 
-const ANALYTICS_ENDPOINT = 'https://vitamix-analytics.paolo-moz.workers.dev';
+import { VITAMIX_ANALYTICS_URL } from '../../scripts/api-config.js';
+
+const ANALYTICS_ENDPOINT = VITAMIX_ANALYTICS_URL;
 
 /**
  * Format a number with commas
