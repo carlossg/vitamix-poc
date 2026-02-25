@@ -14,315 +14,51 @@ import { ModelGardenClient } from './model-garden-client';
 // Google-Only Model Presets
 // ============================================
 
+// Helper to build a preset where one model fills all 4 roles
+function purePreset(provider: 'google' | 'model-garden', model: string): ModelPreset {
+	return {
+		reasoning:       { provider, model, maxTokens: 2048, temperature: 0.7 },
+		content:         { provider, model, maxTokens: 1536, temperature: 0.8 },
+		classification:  { provider, model, maxTokens: 512,  temperature: 0.3 },
+		validation:      { provider, model, maxTokens: 256,  temperature: 0.2 },
+	};
+}
+
+// Helper to build a mixed preset: heavier model for reasoning, lighter for the rest
+function mixedPreset(
+	reasoningProvider: 'google' | 'model-garden', reasoningModel: string,
+	restProvider: 'google' | 'model-garden', restModel: string,
+): ModelPreset {
+	return {
+		reasoning:       { provider: reasoningProvider, model: reasoningModel, maxTokens: 2048, temperature: 0.7 },
+		content:         { provider: restProvider,      model: restModel,      maxTokens: 1536, temperature: 0.8 },
+		classification:  { provider: restProvider,      model: restModel,      maxTokens: 512,  temperature: 0.3 },
+		validation:      { provider: restProvider,      model: restModel,      maxTokens: 256,  temperature: 0.2 },
+	};
+}
+
 const MODEL_PRESETS: Record<string, ModelPreset> = {
-	// Production: Gemini 3 Pro reasoning, Flash-Lite for content/classification (fast + quality)
-	production: {
-		reasoning: {
-			provider: 'google',
-			model: 'gemini-3-pro-preview',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
+	// ── Pure presets (single model for all roles) ────────────────────────
+	'gemini-3-pro':        purePreset('google', 'gemini-3-pro-preview'),
+	'gemini-3-flash':      purePreset('google', 'gemini-3-flash-preview'),
+	'gemini-2.5-pro':      purePreset('google', 'gemini-2.5-pro'),
+	'gemini-2.5-flash':    purePreset('google', 'gemini-2.5-flash'),
+	'gemini-2.0-flash':    purePreset('google', 'gemini-2.0-flash'),
+	'gemini-2.0-flash-lite': purePreset('google', 'gemini-2.0-flash-lite'),
+	'llama':               purePreset('model-garden', 'llama-3.3-70b-instruct-maas'),
 
-	// Gemini 3 Flash: Gemini 3 Flash reasoning, Flash-Lite for content
-	'gemini-3-flash': {
-		reasoning: {
-			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
+	// ── Mixed presets (Pro/heavier reasoning + Flash/lighter rest) ───────
+	'gemini-3-mixed':      mixedPreset('google', 'gemini-3-pro-preview',  'google', 'gemini-3-flash-preview'),
+	'gemini-2.5-mixed':    mixedPreset('google', 'gemini-2.5-pro',        'google', 'gemini-2.5-flash'),
+	'gemini-2.0-mixed':    mixedPreset('google', 'gemini-2.0-flash',      'google', 'gemini-2.0-flash-lite'),
 
-	// Gemini 2.5: Stable GA models -- Pro for reasoning, Flash-Lite for content
-	'gemini-2.5': {
-		reasoning: {
-			provider: 'google',
-			model: 'gemini-2.5-pro',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
+	// ── Production alias (Gemini 3 Pro reasoning + 2.0 Flash Lite rest) ─
+	'production':          mixedPreset('google', 'gemini-3-pro-preview',  'google', 'gemini-2.0-flash-lite'),
 
-	// Gemini 2.0: Fastest stable models -- Flash for reasoning, Flash-Lite for content
-	'gemini-2.0': {
-		reasoning: {
-			provider: 'google',
-			model: 'gemini-2.0-flash',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
-
-	// Llama 3.3 70B via Vertex AI Model Garden (all roles)
-	llama: {
-		reasoning: {
-			provider: 'model-garden',
-			model: 'llama-3.3-70b-instruct-maas',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'model-garden',
-			model: 'llama-3.3-70b-instruct-maas',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'model-garden',
-			model: 'llama-3.3-70b-instruct-maas',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'model-garden',
-			model: 'llama-3.3-70b-instruct-maas',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
-
-	// Development: Gemini 3 Flash reasoning, Flash-Lite for content
-	development: {
-		reasoning: {
-			provider: 'google',
-			model: 'gemini-3-flash-preview',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
-
-	// Model Garden: Llama 3.3 for all tasks
-	'model-garden-llama': {
-		reasoning: {
-			provider: 'model-garden',
-			model: 'llama-3.3-70b-instruct-maas',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'model-garden',
-			model: 'llama-3.3-70b-instruct-maas',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'model-garden',
-			model: 'llama-3.3-70b-instruct-maas',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'model-garden',
-			model: 'llama-3.3-70b-instruct-maas',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
-
-	// Gemma 3 4B: Smallest/fastest Google open model for all roles
-	'gemma-3-4b': {
-		reasoning: {
-			provider: 'google',
-			model: 'gemma-3-4b-it',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'google',
-			model: 'gemma-3-4b-it',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'google',
-			model: 'gemma-3-4b-it',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'google',
-			model: 'gemma-3-4b-it',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
-
-	// Gemma 3 12B: Balanced Google open model -- 12B reasoning, 4B content
-	'gemma-3-12b': {
-		reasoning: {
-			provider: 'google',
-			model: 'gemma-3-12b-it',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'google',
-			model: 'gemma-3-4b-it',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'google',
-			model: 'gemma-3-4b-it',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'google',
-			model: 'gemma-3-4b-it',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
-
-	// Llama 3.2 3B: Smallest Llama via Model Garden MaaS
-	'llama-3.2-3b': {
-		reasoning: {
-			provider: 'google',
-			model: 'gemini-2.0-flash',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'model-garden',
-			model: 'llama-3.2-3b-instruct-maas',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
-
-	// Mistral Small 3.1 24B: Fast Mistral via Model Garden MaaS
-	'mistral-small': {
-		reasoning: {
-			provider: 'google',
-			model: 'gemini-2.0-flash',
-			maxTokens: 2048,
-			temperature: 0.7,
-		},
-		content: {
-			provider: 'model-garden',
-			model: 'mistral-small-2503',
-			maxTokens: 1536,
-			temperature: 0.8,
-		},
-		classification: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 512,
-			temperature: 0.3,
-		},
-		validation: {
-			provider: 'google',
-			model: 'gemini-2.0-flash-lite',
-			maxTokens: 256,
-			temperature: 0.2,
-		},
-	},
-
+	// ── Model Garden MaaS presets (serverless open models) ──────────────
+	// Note: Gemma models are NOT available as serverless API on Vertex AI (require GPU endpoint deployment)
+	'llama-3.2-3b':    mixedPreset('google', 'gemini-2.0-flash', 'model-garden', 'llama-3.2-3b-instruct-maas'),
+	'mistral-small':   mixedPreset('google', 'gemini-2.0-flash', 'model-garden', 'mistral-small-2503'),
 };
 
 // ============================================
