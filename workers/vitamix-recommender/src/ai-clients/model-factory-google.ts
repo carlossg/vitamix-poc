@@ -15,7 +15,7 @@ import { ModelGardenClient } from './model-garden-client';
 // ============================================
 
 const MODEL_PRESETS: Record<string, ModelPreset> = {
-	// Production: Gemini 3 Pro for reasoning + content, Gemini 3 Flash for classification
+	// Production: Gemini 3 Pro for reasoning, Gemini 3 Flash for content/classification
 	production: {
 		reasoning: {
 			provider: 'google',
@@ -25,7 +25,7 @@ const MODEL_PRESETS: Record<string, ModelPreset> = {
 		},
 		content: {
 			provider: 'google',
-			model: 'gemini-3-pro-preview',
+			model: 'gemini-3-flash-preview',
 			maxTokens: 8192,
 			temperature: 0.8,
 		},
@@ -43,7 +43,7 @@ const MODEL_PRESETS: Record<string, ModelPreset> = {
 		},
 	},
 
-	// Gemini-only: All Gemini 3
+	// Gemini-only: Pro for reasoning, Flash for content
 	'gemini-only': {
 		reasoning: {
 			provider: 'google',
@@ -53,7 +53,7 @@ const MODEL_PRESETS: Record<string, ModelPreset> = {
 		},
 		content: {
 			provider: 'google',
-			model: 'gemini-3-pro-preview',
+			model: 'gemini-3-flash-preview',
 			maxTokens: 8192,
 			temperature: 0.8,
 		},
