@@ -134,7 +134,7 @@ echo "Step 3/3: Cleaning up model registry..."
 if [ -n "$MODEL_NAMES" ]; then
   for MODEL_NAME in $MODEL_NAMES; do
     # Extract just the model ID from the full resource path
-    MODEL_ID=$(echo "$MODEL_NAME" | grep -oP '\d+$' || echo "")
+    MODEL_ID=$(echo "$MODEL_NAME" | grep -oE '[0-9]+$' || echo "")
     if [ -n "$MODEL_ID" ]; then
       echo "  Deleting model: $MODEL_ID"
       gcloud ai models delete "$MODEL_ID" \

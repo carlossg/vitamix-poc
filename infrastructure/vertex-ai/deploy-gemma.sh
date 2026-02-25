@@ -2,13 +2,14 @@
 # Deploy Gemma 3 model to a Vertex AI Endpoint with L4 GPU
 #
 # Usage:
-#   ./deploy-gemma.sh 4b     # Deploy Gemma 3 4B IT
-#   ./deploy-gemma.sh 12b    # Deploy Gemma 3 12B IT
+#   HF_TOKEN=hf_xxx ./deploy-gemma.sh 4b     # Deploy Gemma 3 4B IT
+#   HF_TOKEN=hf_xxx ./deploy-gemma.sh 12b    # Deploy Gemma 3 12B IT
 #
 # Prerequisites:
 #   - gcloud CLI authenticated with sufficient permissions
 #   - Vertex AI API enabled
 #   - Sufficient L4 GPU quota in the target region
+#   - HuggingFace token with Gemma access (accept license at huggingface.co/google/gemma-3-4b-it)
 #
 # Cost: ~$0.84/hr (~$20/day) while the endpoint is running.
 #        Vertex AI endpoints do NOT scale to zero.
@@ -25,16 +26,28 @@ PROJECT_ID="${GCP_PROJECT_ID:-$(gcloud config get-value project 2>/dev/null)}"
 LOCATION="${GCP_LOCATION:-us-central1}"
 
 if [ -z "$MODEL_SIZE" ] || [[ ! "$MODEL_SIZE" =~ ^(4b|12b)$ ]]; then
-  echo "Usage: $0 <4b|12b>"
+  echo "Usage: HF_TOKEN=hf_xxx $0 <4b|12b>"
   echo ""
   echo "  4b  - Gemma 3 4B IT  (lighter, faster)"
   echo "  12b - Gemma 3 12B IT (heavier, better quality)"
+  echo ""
+  echo "Requires a HuggingFace token with Gemma access."
+  echo "Accept the license at: https://huggingface.co/google/gemma-3-4b-it"
   exit 1
 fi
 
 if [ -z "$PROJECT_ID" ]; then
   echo "Error: GCP_PROJECT_ID not set and no default project configured."
   echo "  Run: export GCP_PROJECT_ID='your-project-id'"
+  exit 1
+fi
+
+if [ -z "${HF_TOKEN:-}" ]; then
+  echo "Error: HF_TOKEN not set. Gemma 3 is a gated model on HuggingFace."
+  echo ""
+  echo "  1. Accept the license: https://huggingface.co/google/gemma-3-${MODEL_SIZE}-it"
+  echo "  2. Create a token: https://huggingface.co/settings/tokens"
+  echo "  3. Run: HF_TOKEN=hf_xxx $0 ${MODEL_SIZE}"
   exit 1
 fi
 
@@ -52,9 +65,9 @@ esac
 
 ENDPOINT_DISPLAY_NAME="vitamix-gemma-3-${MODEL_SIZE}"
 MACHINE_TYPE="g2-standard-8"
-ACCELERATOR_TYPE="NVIDIA_L4"
+ACCELERATOR_TYPE="nvidia-l4"
 ACCELERATOR_COUNT=1
-VLLM_IMAGE="us-docker.pkg.dev/vertex-ai/vertex-vision-model-garden-dockers/pytorch-vllm-serve:20241015_0916_RC00"
+VLLM_IMAGE="us-docker.pkg.dev/vertex-ai/vertex-vision-model-garden-dockers/pytorch-vllm-serve:v0.12.0"
 
 echo "Deploying Gemma 3 ${MODEL_SIZE} to Vertex AI Endpoint"
 echo "======================================================="
@@ -63,7 +76,8 @@ echo "  Project:      $PROJECT_ID"
 echo "  Location:     $LOCATION"
 echo "  Model:        $DISPLAY_NAME"
 echo "  Machine:      $MACHINE_TYPE + ${ACCELERATOR_COUNT}x $ACCELERATOR_TYPE"
-echo "  Container:    vLLM (pytorch-vllm-serve)"
+echo "  Container:    vLLM v0.12.0 (pytorch-vllm-serve)"
+echo "  HF Token:     ${HF_TOKEN:0:8}..."
 echo ""
 echo "  WARNING: This endpoint costs ~\$0.84/hr (~\$20/day)."
 echo "  It does NOT scale to zero. Run delete-gemma.sh when done."
@@ -88,7 +102,9 @@ MODEL_RESOURCE=$(gcloud ai models upload \
   --project="$PROJECT_ID" \
   --display-name="$DISPLAY_NAME" \
   --container-image-uri="$VLLM_IMAGE" \
-  --container-args="--model=$MODEL_ID,--tensor-parallel-size=$ACCELERATOR_COUNT,--swap-space=16,--gpu-memory-utilization=0.95,--max-model-len=8192,--disable-log-stats" \
+  --container-command="python3,-m,vllm.entrypoints.openai.api_server" \
+  --container-args="--model=${MODEL_ID},--tensor-parallel-size=${ACCELERATOR_COUNT},--gpu-memory-utilization=0.95,--max-model-len=8192,--port=8000,--disable-log-stats" \
+  --container-env-vars="HF_TOKEN=${HF_TOKEN}" \
   --container-ports=8000 \
   --container-health-route="/health" \
   --container-predict-route="/v1/chat/completions" \
@@ -97,7 +113,7 @@ MODEL_RESOURCE=$(gcloud ai models upload \
   2>&1)
 
 # Extract model resource name (projects/.../models/...)
-MODEL_NAME=$(echo "$MODEL_RESOURCE" | grep -oP 'projects/[^ ]+' | head -1)
+MODEL_NAME=$(echo "$MODEL_RESOURCE" | grep -oE 'projects/[^ ]+' | head -1)
 
 if [ -z "$MODEL_NAME" ]; then
   echo "Error: Failed to upload model."
@@ -123,7 +139,7 @@ ENDPOINT_RESOURCE=$(gcloud ai endpoints create \
   2>&1)
 
 # Extract endpoint ID from the resource name
-ENDPOINT_ID=$(echo "$ENDPOINT_RESOURCE" | grep -oP '\d+$' | head -1)
+ENDPOINT_ID=$(echo "$ENDPOINT_RESOURCE" | grep -oE '[0-9]+$' | head -1)
 
 if [ -z "$ENDPOINT_ID" ]; then
   echo "Error: Failed to create endpoint."
@@ -138,7 +154,8 @@ echo "  Endpoint created: $ENDPOINT_ID"
 # ============================================
 
 echo ""
-echo "Step 3/3: Deploying model to endpoint (this may take 10-15 minutes)..."
+echo "Step 3/3: Deploying model to endpoint (this may take 15-25 minutes)..."
+echo "  Monitor at: https://console.cloud.google.com/vertex-ai/online-prediction/endpoints?project=$PROJECT_ID"
 
 gcloud ai endpoints deploy-model "$ENDPOINT_ID" \
   --region="$LOCATION" \
