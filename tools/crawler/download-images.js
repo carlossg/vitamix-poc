@@ -72,11 +72,11 @@ async function downloadProductImages() {
 
       try {
         await fs.access(destPath);
-        console.log(`  primary: skipped (exists)`);
+        console.log('  primary: skipped (exists)');
         manifest.products[product.id].primary = `/content/images/products/${product.id}/${filename}`;
         totalSkipped++;
       } catch {
-        console.log(`  primary: downloading...`);
+        console.log('  primary: downloading...');
         const success = await downloadImage(product.images.primary, destPath);
         if (success) {
           manifest.products[product.id].primary = `/content/images/products/${product.id}/${filename}`;
@@ -125,7 +125,7 @@ async function downloadProductImages() {
   const manifestPath = path.join(CONTENT_DIR, 'manifests/images-manifest.json');
   await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
 
-  console.log(`\n\nSummary:`);
+  console.log('\n\nSummary:');
   console.log(`  Downloaded: ${totalDownloaded}`);
   console.log(`  Skipped: ${totalSkipped}`);
   console.log(`  Failed: ${totalFailed}`);

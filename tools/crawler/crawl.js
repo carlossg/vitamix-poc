@@ -132,13 +132,13 @@ async function crawlProductDetail(url) {
     $('.price-sales, .product-price')
       .first()
       .text()
-      .replace(/[^0-9.]/g, '')
+      .replace(/[^0-9.]/g, ''),
   );
   const originalPrice = parseFloat(
     $('.price-standard, .was-price')
       .first()
       .text()
-      .replace(/[^0-9.]/g, '')
+      .replace(/[^0-9.]/g, ''),
   );
 
   // Extract description
@@ -153,14 +153,15 @@ async function crawlProductDetail(url) {
     (i, el) => {
       const text = $(el).text().trim();
       if (text) features.push(text);
-    }
+    },
   );
 
   // Extract specs from table
   const specs = {};
   $('table.specs-table tr, .specifications tr, .product-specs tr').each(
     (i, el) => {
-      const label = $(el).find('th, td:first-child').text().trim().toLowerCase();
+      const label = $(el).find('th, td:first-child').text().trim()
+        .toLowerCase();
       const value = $(el).find('td:last-child, td:nth-child(2)').text().trim();
       if (label && value) {
         if (label.includes('watt') || label.includes('power')) {
@@ -177,7 +178,7 @@ async function crawlProductDetail(url) {
           specs.weight = value;
         }
       }
-    }
+    },
   );
 
   // Extract images
@@ -322,7 +323,7 @@ async function crawlAllProducts() {
 
   await fs.writeFile(
     path.join(CONTENT_DIR, 'products/products.json'),
-    JSON.stringify(productsFile, null, 2)
+    JSON.stringify(productsFile, null, 2),
   );
 
   console.log(`\n✅ Saved ${detailedProducts.length} products\n`);
@@ -378,20 +379,16 @@ async function crawlRecipeDetail(url) {
   const description = $('.recipe-description, .description').first().text().trim();
 
   // Extract category from breadcrumb or page
-  const category =
-    $('.breadcrumb a')
-      .filter((i, el) => $(el).attr('href')?.includes('/recipes/'))
-      .last()
-      .text()
-      .trim() || 'general';
+  const category = $('.breadcrumb a')
+    .filter((i, el) => $(el).attr('href')?.includes('/recipes/'))
+    .last()
+    .text()
+    .trim() || 'general';
 
   // Extract times
-  const prepTime =
-    $('[class*="prep-time"], .prep-time').first().text().trim() || '';
-  const blendTime =
-    $('[class*="blend-time"], .blend-time').first().text().trim() || '';
-  const totalTime =
-    $('[class*="total-time"], .total-time').first().text().trim() || prepTime;
+  const prepTime = $('[class*="prep-time"], .prep-time').first().text().trim() || '';
+  const blendTime = $('[class*="blend-time"], .blend-time').first().text().trim() || '';
+  const totalTime = $('[class*="total-time"], .total-time').first().text().trim() || prepTime;
 
   // Extract servings
   const servingsText = $('[class*="servings"], .servings').first().text();
@@ -409,7 +406,7 @@ async function crawlRecipeDetail(url) {
           unit: '',
         });
       }
-    }
+    },
   );
 
   // Extract instructions
@@ -418,7 +415,7 @@ async function crawlRecipeDetail(url) {
     (i, el) => {
       const text = $(el).text().trim();
       if (text) instructions.push(text);
-    }
+    },
   );
 
   // Extract tips
@@ -479,8 +476,8 @@ async function crawlRecipeDetail(url) {
       primary: primaryImage.startsWith('http')
         ? primaryImage
         : primaryImage
-        ? `${BASE_URL}${primaryImage}`
-        : '',
+          ? `${BASE_URL}${primaryImage}`
+          : '',
       steps: [],
       remoteUrl: primaryImage,
     },
@@ -516,7 +513,7 @@ async function crawlAllRecipes() {
       try {
         const { recipes, hasNextPage } = await crawlRecipeListPage(
           category,
-          page
+          page,
         );
 
         for (const r of recipes) {
@@ -567,7 +564,7 @@ async function crawlAllRecipes() {
 
   await fs.writeFile(
     path.join(CONTENT_DIR, 'recipes/recipes.json'),
-    JSON.stringify(recipesFile, null, 2)
+    JSON.stringify(recipesFile, null, 2),
   );
 
   console.log(`\n✅ Saved ${detailedRecipes.length} recipes\n`);
@@ -597,7 +594,7 @@ async function downloadAllImages(products, recipes) {
       const ext = path.extname(new URL(imageUrl).pathname) || '.jpg';
       const destPath = path.join(
         CONTENT_DIR,
-        `images/products/${product.id}/primary${ext}`
+        `images/products/${product.id}/primary${ext}`,
       );
 
       manifest.totalCount++;
@@ -632,7 +629,7 @@ async function downloadAllImages(products, recipes) {
       const ext = path.extname(new URL(imageUrl).pathname) || '.jpg';
       const destPath = path.join(
         CONTENT_DIR,
-        `images/recipes/${recipe.id}/primary${ext}`
+        `images/recipes/${recipe.id}/primary${ext}`,
       );
 
       manifest.totalCount++;
@@ -662,11 +659,11 @@ async function downloadAllImages(products, recipes) {
   // Save manifest
   await fs.writeFile(
     path.join(CONTENT_DIR, 'manifests/images-manifest.json'),
-    JSON.stringify(manifest, null, 2)
+    JSON.stringify(manifest, null, 2),
   );
 
   console.log(
-    `\n✅ Downloaded ${manifest.downloadedCount}/${manifest.totalCount} images\n`
+    `\n✅ Downloaded ${manifest.downloadedCount}/${manifest.totalCount} images\n`,
   );
   return manifest;
 }
@@ -702,7 +699,7 @@ async function main() {
     try {
       const productsData = await fs.readFile(
         path.join(CONTENT_DIR, 'products/products.json'),
-        'utf-8'
+        'utf-8',
       );
       products = JSON.parse(productsData).products || [];
     } catch (e) {
@@ -712,7 +709,7 @@ async function main() {
     try {
       const recipesData = await fs.readFile(
         path.join(CONTENT_DIR, 'recipes/recipes.json'),
-        'utf-8'
+        'utf-8',
       );
       recipes = JSON.parse(recipesData).recipes || [];
     } catch (e) {
