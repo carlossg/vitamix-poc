@@ -9,8 +9,8 @@
  */
 
 import { Firestore } from '@google-cloud/firestore';
-import { VertexAI } from '@google-cloud/vertexai';
 import { Storage } from '@google-cloud/storage';
+import { GoogleAuth } from 'google-auth-library';
 
 // ============================================
 // Configuration
@@ -25,19 +25,15 @@ const EMBEDDING_DIMENSION = 768;
 
 // Lazy-init clients so the module loads without project set
 let _firestore: Firestore | null = null;
-let _vertexAI: VertexAI | null = null;
 let _storage: Storage | null = null;
+let _auth: GoogleAuth | null = null;
 function getFirestore(): Firestore {
 	if (!_firestore) _firestore = new Firestore(getProjectId() ? { projectId: getProjectId() } : undefined);
 	return _firestore;
 }
-function getVertexAI(): VertexAI {
-	if (!_vertexAI) {
-		const projectId = getProjectId();
-		if (!projectId) throw new Error('GCP_PROJECT_ID or GOOGLE_CLOUD_PROJECT must be set');
-		_vertexAI = new VertexAI({ project: projectId, location: LOCATION });
-	}
-	return _vertexAI;
+function getAuth(): GoogleAuth {
+	if (!_auth) _auth = new GoogleAuth({ scopes: ['https://www.googleapis.com/auth/cloud-platform'] });
+	return _auth;
 }
 function getStorage(): Storage {
 	if (!_storage) _storage = new Storage();
@@ -107,10 +103,32 @@ export async function onRecipeUpload(cloudEvent: any): Promise<void> {
 }
 
 // ============================================
+// CORS Helper
+// ============================================
+
+function setCors(res: any): void {
+	res.set('Access-Control-Allow-Origin', '*');
+	res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+	res.set('Access-Control-Allow-Headers', 'Content-Type');
+}
+
+function handleCorsPreflightIfNeeded(req: any, res: any): boolean {
+	if (req.method === 'OPTIONS') {
+		setCors(res);
+		res.status(204).send('');
+		return true;
+	}
+	return false;
+}
+
+// ============================================
 // Manual Embedding Generation Endpoint
 // ============================================
 
 export async function generateRecipeEmbeddings(req: any, res: any): Promise<void> {
+	if (handleCorsPreflightIfNeeded(req, res)) return;
+	setCors(res);
+
 	try {
 		// Get all recipes from Firestore
 		const recipesSnapshot = await getFirestore().collection('recipes').get();
@@ -166,6 +184,9 @@ export async function generateRecipeEmbeddings(req: any, res: any): Promise<void
 // ============================================
 
 export async function searchRecipes(req: any, res: any): Promise<void> {
+	if (handleCorsPreflightIfNeeded(req, res)) return;
+	setCors(res);
+
 	try {
 		const query = req.query.q as string;
 		const limit = parseInt((req.query.limit as string) || '10', 10);
@@ -234,30 +255,36 @@ async function generateEmbedding(recipe: Recipe): Promise<number[]> {
 }
 
 /**
- * Generate embedding for text using Vertex AI
+ * Generate embedding for text using Vertex AI Prediction API (REST)
+ *
+ * Uses the text-embedding-005 model via the Vertex AI predict endpoint
+ * with Application Default Credentials.
  */
 async function generateTextEmbedding(text: string): Promise<number[]> {
-	try {
-		const model = getVertexAI().preview.getGenerativeModel({
-			model: EMBEDDING_MODEL,
-		});
+	const projectId = getProjectId();
+	if (!projectId) throw new Error('GCP_PROJECT_ID or GOOGLE_CLOUD_PROJECT must be set');
 
-		// Call the embedding API
-		// Note: The actual implementation may vary based on SDK version
-		const result = await model.generateContent({
-			contents: [{ role: 'user', parts: [{ text }] }],
-		});
+	const url = `https://${LOCATION}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${LOCATION}/publishers/google/models/${EMBEDDING_MODEL}:predict`;
 
-		// Extract embedding from response
-		const embedding = (result.response as any).embedding?.values || [];
+	const client = await getAuth().getClient();
+	const response = await client.request({
+		url,
+		method: 'POST',
+		data: {
+			instances: [{ content: text, taskType: 'RETRIEVAL_DOCUMENT' }],
+		},
+	});
 
-		if (!Array.isArray(embedding) || embedding.length !== EMBEDDING_DIMENSION) {
-			throw new Error(`Expected ${EMBEDDING_DIMENSION}-dim embedding, got ${embedding.length}`);
-		}
-
-		return embedding;
-	} catch (error) {
-		console.error('Error generating text embedding:', error);
-		throw error;
+	const predictions = (response.data as any).predictions;
+	if (!predictions || predictions.length === 0) {
+		throw new Error('No predictions returned from embedding model');
 	}
+
+	const embedding: number[] = predictions[0].embeddings.values;
+
+	if (!Array.isArray(embedding) || embedding.length !== EMBEDDING_DIMENSION) {
+		throw new Error(`Expected ${EMBEDDING_DIMENSION}-dim embedding, got ${embedding.length}`);
+	}
+
+	return embedding;
 }

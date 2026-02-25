@@ -2,9 +2,9 @@
  * Orchestrator - Coordinates the AI-driven recommendation pipeline
  *
  * Pipeline stages:
- * 1. Fast Classification (Cerebras 8B) - Classify user intent
- * 2. Deep Reasoning (Claude Opus) - Select blocks and explain thinking
- * 3. Content Generation (Cerebras 70B) - Generate block content in parallel
+ * 1. Fast Classification (Gemini 3 Flash) - Classify user intent
+ * 2. Deep Reasoning (Gemini 3 Pro) - Select blocks and explain thinking
+ * 3. Content Generation (Gemini 3 Pro) - Generate block content in parallel
  * 4. HTML Assembly - Build DA-compliant HTML
  * 5. SSE Streaming - Stream blocks to client
  */

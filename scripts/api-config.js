@@ -87,9 +87,10 @@ if (IS_LOCAL) {
 }
 
 /**
- * Configuration instructions for deployment
+ * Configuration instructions for deployment (local dev only)
  */
-window.VITAMIX_CONFIG_HELP = `
+if (IS_LOCAL) {
+	window.VITAMIX_CONFIG_HELP = `
 To configure API endpoints for your deployment:
 
 1. Defaults use project api-project-642841493686. Override URLs or project:
@@ -105,3 +106,4 @@ To configure API endpoints for your deployment:
 3. For local development with Cloud Run:
    window.VITAMIX_CONFIG = { RECOMMENDER_URL: 'http://localhost:8080' };
 `;
+}

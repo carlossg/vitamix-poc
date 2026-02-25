@@ -443,7 +443,7 @@ export interface GenerationCompleteData {
 
 export type ModelRole = 'reasoning' | 'content' | 'classification' | 'validation';
 
-export type ModelProvider = 'anthropic' | 'cerebras' | 'google' | 'lmstudio' | 'model-garden';
+export type ModelProvider = 'google' | 'model-garden';
 
 export interface ModelConfig {
   provider: ModelProvider;

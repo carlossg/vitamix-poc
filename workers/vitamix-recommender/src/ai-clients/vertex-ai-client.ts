@@ -164,7 +164,7 @@ export class VertexAIClient {
 			apiEndpoint: `${this.location}-aiplatform.googleapis.com`,
 		});
 
-		const endpoint = `projects/${this.projectId}/locations/${this.location}/publishers/google/models/text-embedding-004`;
+		const endpoint = `projects/${this.projectId}/locations/${this.location}/publishers/google/models/text-embedding-005`;
 
 		try {
 			const instances = texts.map((text) => ({

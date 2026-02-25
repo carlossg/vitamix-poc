@@ -115,6 +115,18 @@ echo ""
 echo "Step 4/11: Setting up secrets..."
 
 # Create placeholder secrets if they don't exist (required for Cloud Run deployment)
+if ! gcloud secrets describe DA_TOKEN --project=$PROJECT_ID &>/dev/null; then
+  echo "Creating DA_TOKEN secret with placeholder..."
+  echo -n 'placeholder_da_token' | gcloud secrets create DA_TOKEN \
+    --data-file=- \
+    --labels=app=vitamix \
+    --project=$PROJECT_ID \
+    --quiet
+  echo "⚠️  Replace placeholder: echo -n 'YOUR_TOKEN' | gcloud secrets versions add DA_TOKEN --data-file=- --project=$PROJECT_ID"
+else
+  echo "✓ DA_TOKEN secret exists"
+fi
+
 if ! gcloud secrets describe DA_CLIENT_ID --project=$PROJECT_ID &>/dev/null; then
   echo "Creating DA_CLIENT_ID secret with placeholder..."
   echo -n 'placeholder_client_id' | gcloud secrets create DA_CLIENT_ID \
@@ -122,7 +134,7 @@ if ! gcloud secrets describe DA_CLIENT_ID --project=$PROJECT_ID &>/dev/null; the
     --labels=app=vitamix \
     --project=$PROJECT_ID \
     --quiet
-  echo "⚠️  Replace placeholder: gcloud secrets versions add DA_CLIENT_ID --data-file=- --project=$PROJECT_ID"
+  echo "⚠️  Replace placeholder: echo -n 'YOUR_CLIENT_ID' | gcloud secrets versions add DA_CLIENT_ID --data-file=- --project=$PROJECT_ID"
 else
   echo "✓ DA_CLIENT_ID secret exists"
 fi
@@ -134,7 +146,7 @@ if ! gcloud secrets describe DA_CLIENT_SECRET --project=$PROJECT_ID &>/dev/null;
     --labels=app=vitamix \
     --project=$PROJECT_ID \
     --quiet
-  echo "⚠️  Replace placeholder: gcloud secrets versions add DA_CLIENT_SECRET --data-file=- --project=$PROJECT_ID"
+  echo "⚠️  Replace placeholder: echo -n 'YOUR_SECRET' | gcloud secrets versions add DA_CLIENT_SECRET --data-file=- --project=$PROJECT_ID"
 else
   echo "✓ DA_CLIENT_SECRET secret exists"
 fi
