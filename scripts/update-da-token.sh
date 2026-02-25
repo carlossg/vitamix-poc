@@ -246,6 +246,69 @@ resolve_token() {
 
 resolve_token
 
+# --- Show token expiration ---
+show_token_expiry() {
+	local token="$1"
+	# JWT is three base64url-encoded parts separated by dots; decode the payload (part 2)
+	local payload
+	payload=$(echo "$token" | cut -d. -f2 | tr '_-' '/+' | python3 -c "
+import sys, base64, json
+raw = sys.stdin.read().strip()
+# base64url needs padding
+raw += '=' * (4 - len(raw) % 4)
+try:
+    data = json.loads(base64.b64decode(raw))
+    created = int(data.get('created_at', 0))
+    expires_in = int(data.get('expires_in', 0))
+    exp = data.get('exp', 0)
+    if created and expires_in:
+        # IMS tokens: created_at and expires_in are in milliseconds
+        exp_ts = (created + expires_in) / 1000
+    elif exp:
+        # Standard JWT: exp is in seconds
+        exp_ts = exp
+    else:
+        print('UNKNOWN')
+        sys.exit(0)
+    import datetime
+    exp_dt = datetime.datetime.fromtimestamp(exp_ts, tz=datetime.timezone.utc)
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    remaining = exp_dt - now
+    hours = remaining.total_seconds() / 3600
+    if remaining.total_seconds() <= 0:
+        print(f'EXPIRED|{exp_dt.strftime(\"%Y-%m-%d %H:%M:%S UTC\")}|{abs(hours):.1f}h ago')
+    else:
+        print(f'VALID|{exp_dt.strftime(\"%Y-%m-%d %H:%M:%S UTC\")}|{hours:.1f}h remaining')
+except Exception as e:
+    print(f'ERROR|{e}')
+" 2>/dev/null)
+
+	if [[ -z "$payload" || "$payload" == "UNKNOWN" ]]; then
+		info "Token expiration: could not determine (not a standard JWT)"
+		return
+	fi
+
+	local status expiry detail
+	IFS='|' read -r status expiry detail <<< "$payload"
+
+	case "$status" in
+		VALID)
+			ok "Token expires: $expiry ($detail)"
+			;;
+		EXPIRED)
+			fail "Token EXPIRED: $expiry ($detail)"
+			warn "Get a fresh token from https://da.live (DevTools → Application → Local Storage)"
+			exit 1
+			;;
+		ERROR*)
+			info "Token expiration: could not decode ($expiry)"
+			;;
+	esac
+}
+
+step "Token info"
+show_token_expiry "$ACCESS_TOKEN"
+
 # =============================================
 # PHASE 1: Test credentials
 # =============================================
